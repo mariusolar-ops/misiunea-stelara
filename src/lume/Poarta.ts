@@ -1,0 +1,37 @@
+// Poarta de final: un arc turcoaz din cuburi, cu „energie” în mijloc.
+// Treci prin ea și nivelul e gata!
+import * as THREE from 'three';
+
+const CUB = new THREE.BoxGeometry(1, 1, 1);
+
+export class Poarta {
+  obiect = new THREE.Group();
+  private energie: THREE.Mesh;
+
+  constructor(public poz: THREE.Vector3, directie: number) {
+    const mat = new THREE.MeshLambertMaterial({ color: 0x2ee6d6, emissive: 0x0a5a54 });
+    const matAur = new THREE.MeshLambertMaterial({ color: 0xffd23f, emissive: 0x6a4a00 });
+    const stalpSt = new THREE.Mesh(CUB, mat); stalpSt.scale.set(0.6, 4, 0.6); stalpSt.position.set(-2, 2, 0);
+    const stalpDr = new THREE.Mesh(CUB, mat); stalpDr.scale.set(0.6, 4, 0.6); stalpDr.position.set(2, 2, 0);
+    const sus = new THREE.Mesh(CUB, mat); sus.scale.set(4.6, 0.6, 0.6); sus.position.set(0, 4.2, 0);
+    const stea = new THREE.Mesh(CUB, matAur); stea.scale.set(0.7, 0.7, 0.7); stea.position.set(0, 5, 0);
+    stea.rotation.z = Math.PI / 4;
+    this.energie = new THREE.Mesh(
+      new THREE.PlaneGeometry(3.4, 3.9),
+      new THREE.MeshBasicMaterial({ color: 0x9ffcf3, transparent: true, opacity: 0.35, side: THREE.DoubleSide, depthWrite: false }),
+    );
+    this.energie.position.y = 1.95;
+    this.obiect.add(stalpSt, stalpDr, sus, stea, this.energie);
+    this.obiect.position.copy(poz);
+    this.obiect.rotation.y = directie;
+  }
+
+  atinsa(pozJucator: THREE.Vector3) {
+    const dx = pozJucator.x - this.poz.x, dz = pozJucator.z - this.poz.z;
+    return dx * dx + dz * dz < 1.6 * 1.6 && Math.abs(pozJucator.y - this.poz.y) < 2;
+  }
+
+  actualizeaza(timp: number) {
+    (this.energie.material as THREE.MeshBasicMaterial).opacity = 0.25 + Math.sin(timp * 4) * 0.12;
+  }
+}

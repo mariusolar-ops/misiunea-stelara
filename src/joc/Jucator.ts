@@ -25,7 +25,7 @@ export class Jucator {
   private timpDeLaSari = 99;
   private umbra: THREE.Mesh;
   /** Unghiul spre care privește personajul */
-  private directie = 0;
+  directie = 0;
 
   constructor(scena: THREE.Scene) {
     scena.add(this.personaj.obiect);

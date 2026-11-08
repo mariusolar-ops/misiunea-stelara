@@ -17,7 +17,9 @@ export function creeazaScena(canvas: HTMLCanvasElement) {
   const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
 
   // Lumini: una „de cer” care colorează blând totul și un „soare” care dă volum
-  scena.add(new THREE.HemisphereLight(0xbfd8ff, 0x2a1f4d, 1.4));
+  scena.add(new THREE.HemisphereLight(0xbfd8ff, 0x2a1f4d, 1.3));
+  // puțină lumină din toate părțile, ca fața personajului să nu fie în umbră
+  scena.add(new THREE.AmbientLight(0xffffff, 0.55));
   const soare = new THREE.DirectionalLight(0xffffff, 1.6);
   soare.position.set(30, 50, 20);
   scena.add(soare);

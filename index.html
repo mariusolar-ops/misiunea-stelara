@@ -15,6 +15,11 @@
     <div id="interfata">
       <div id="joystick"><div id="joystick-buton"></div></div>
       <button id="buton-sari" aria-label="Sari">SARI</button>
+      <!-- Sus: monede și cronometru -->
+      <div id="hud">
+        <div id="hud-monede"><span class="moneda-mica"></span><span id="nr-monede">0/0</span></div>
+        <div id="hud-timp">0:00</div>
+      </div>
       <div id="mesaj"></div>
       <div id="fps"></div>
     </div>
@@ -23,7 +28,21 @@
     <div id="ecran-start">
       <h1>Mihai:<br /><span>Misiunea Stelară</span></h1>
       <button id="buton-start">ÎNCEPE</button>
-      <p class="mic">Etapa 1 – platforma de test</p>
+      <p class="mic">Nivelul 1 – Baza de pe Lună</p>
+    </div>
+
+    <!-- Ecranul de final al nivelului -->
+    <div id="ecran-final">
+      <div class="cutie">
+        <h2>Felicitări, Mihai!</h2>
+        <p id="final-nivel"></p>
+        <div id="final-stele"></div>
+        <div class="rand-rezultate">
+          <div><span class="eticheta">Timp</span><span id="final-timp"></span></div>
+          <div><span class="eticheta">Monede</span><span id="final-monede"></span></div>
+        </div>
+        <button id="buton-din-nou" class="mare">Joacă din nou</button>
+      </div>
     </div>
 
     <!-- Apare când telefonul e ținut vertical -->

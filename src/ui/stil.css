@@ -89,3 +89,44 @@ button.mare, #buton-start {
 @media (orientation: portrait) and (max-width: 900px) {
   #roteste { display: flex; }
 }
+
+/* Bara de sus: monede și timp */
+#hud {
+  position: absolute; top: 10px; left: 0; right: 0;
+  display: flex; justify-content: center; gap: 18px; padding: 0 70px;
+}
+#hud > div {
+  background: rgba(11, 15, 46, 0.65); border: 2px solid rgba(46, 230, 214, 0.4);
+  border-radius: 14px; padding: 6px 16px; font-size: 22px; font-weight: 800;
+  display: flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums;
+}
+.moneda-mica {
+  display: inline-block; width: 20px; height: 20px; border-radius: 50%;
+  background: #ffd23f; box-shadow: inset -3px -3px 0 #d9a400;
+}
+#hud-monede.puls { animation: puls 0.25s; }
+@keyframes puls { 50% { transform: scale(1.18); } }
+
+/* Ecranul „Felicitări!” */
+#ecran-final {
+  position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+  background: rgba(5, 8, 30, 0.75); z-index: 5;
+}
+#ecran-final.vizibil { display: flex; }
+#ecran-final .cutie {
+  background: linear-gradient(#1d2466, #121845); border: 3px solid var(--turcoaz);
+  border-radius: 24px; padding: 18px 36px 22px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  animation: apare 0.4s ease-out;
+}
+@keyframes apare { from { transform: scale(0.6); opacity: 0; } }
+#ecran-final h2 { font-size: 34px; color: var(--turcoaz); text-shadow: 0 0 16px rgba(46,230,214,.5); }
+#ecran-final p { font-size: 18px; opacity: 0.85; }
+#final-stele { font-size: 44px; letter-spacing: 6px; }
+#final-stele .stea { color: #3a3f6b; }
+#final-stele .stea.plina { color: #ffd23f; text-shadow: 0 0 12px rgba(255, 210, 63, 0.7); }
+.rand-rezultate { display: flex; gap: 30px; margin: 4px 0 10px; }
+.rand-rezultate > div { display: flex; flex-direction: column; font-size: 26px; font-weight: 900; }
+.rand-rezultate .eticheta { font-size: 14px; font-weight: 600; opacity: 0.7; }
+#ecran-final button { pointer-events: auto; }
+button.mare:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--turcoaz-inchis); }
