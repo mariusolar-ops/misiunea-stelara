@@ -1,7 +1,7 @@
 // Meniurile jocului: principal, alegerea nivelului și pauza.
 // Sunt construite din cod, în elementul #meniu.
 import { areToateSecretele, NR_STELE_SECRETE, type Progres } from '../joc/Salvare';
-import { NR_NIVELE_NORMALE, INDEX_SECRET } from '../nivele';
+import { NR_NIVELE_NORMALE, INDEX_SECRET, ORDINE_NORMALA, numarAfisat } from '../nivele';
 import type { DefinitieNivel } from '../nivele/tipuri';
 import { formatTimp } from './Hud';
 import { sunete } from '../audio/Sunete';
@@ -48,7 +48,7 @@ export class Meniu {
     const coloana = document.createElement('div');
     coloana.className = 'coloana-butoane';
     // „Joacă” pornește primul nivel neterminat (sau ultimul, dacă le-ai terminat pe toate)
-    const urmator = Math.min(p.deblocate, NR_NIVELE_NORMALE) - 1;
+    const urmator = ORDINE_NORMALA[Math.min(p.deblocate, NR_NIVELE_NORMALE) - 1];
     coloana.append(
       buton('JOACĂ', 'mare', () => this.actiuni.joacaNivel(urmator)),
     );
@@ -81,15 +81,17 @@ export class Meniu {
     container.append(buton('‹ Înapoi', 'mic-buton inapoi', () => this.arataPrincipal(p)));
     const rand = document.createElement('div');
     rand.className = 'rand-nivele';
-    this.nivele.forEach((n, i) => {
+    // întâi nivelurile normale, în ordinea de joc, apoi cel secret
+    [...ORDINE_NORMALA, INDEX_SECRET].forEach((i, loc) => {
+      const n = this.nivele[i];
       const esteSecret = i === INDEX_SECRET;
-      const deschis = esteSecret ? areToateSecretele(p) : i < p.deblocate;
+      const deschis = esteSecret ? areToateSecretele(p) : loc < p.deblocate;
       const rez = p.nivele[i];
       const card = document.createElement('button');
       card.className = 'card-nivel' + (deschis ? '' : ' blocat') + (esteSecret ? ' secret' : '');
       card.disabled = !deschis;
       if (deschis) {
-        card.innerHTML = `<span class="nr">${esteSecret ? '✨' : i + 1}</span><span class="nume">${n.nume}</span>
+        card.innerHTML = `<span class="nr">${numarAfisat(i)}</span><span class="nume">${n.nume}</span>
            <span class="stele">${stele(rez?.stele ?? 0)}</span>
            <span class="timp">${rez ? 'Record: ' + formatTimp(rez.timp) : ''}</span>`;
         card.addEventListener('click', () => this.actiuni.joacaNivel(i));
@@ -99,7 +101,7 @@ export class Meniu {
            <span class="stele-secrete">${'★'.repeat(p.secrete.length)}<span class="goale">${'★'.repeat(NR_STELE_SECRETE - p.secrete.length)}</span></span>
            <span class="timp">Găsește stelele mov!</span>`;
       } else {
-        card.innerHTML = `<span class="nr">${i + 1}</span><span class="nume">${n.nume}</span><span class="lacat">🔒</span><span class="timp"></span>`;
+        card.innerHTML = `<span class="nr">${numarAfisat(i)}</span><span class="nume">${n.nume}</span><span class="lacat">🔒</span><span class="timp"></span>`;
       }
       rand.append(card);
     });

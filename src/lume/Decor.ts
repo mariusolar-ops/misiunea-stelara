@@ -2,7 +2,7 @@
 // Fiecare decor e făcut din puține obiecte, ca să nu încetinească telefonul.
 import * as THREE from 'three';
 
-export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa';
+export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -20,6 +20,9 @@ export function creeazaDecor(tema: Tema): Decor {
     case 'vulcan': return decorVulcan();
     case 'gaura': return decorGauraNeagra();
     case 'nebuloasa': return decorNebuloasa();
+    case 'laborator': return decorLaborator();
+    case 'gheata': return decorGheata();
+    case 'fortareata': return decorFortareata();
   }
 }
 
@@ -191,4 +194,105 @@ function decorNebuloasa(): Decor {
     grup.add(miez);
   }
   return { obiect: grup, fundal: 0x1a0b33, anima: (timp) => { grup.rotation.y = Math.sin(timp * 0.05) * 0.1; } };
+}
+
+function decorLaborator(): Decor {
+  // Un laborator plutitor: o grilă uriașă de lumini dedesubt și stâlpi cu dungi de neon
+  const grup = new THREE.Group();
+  const grila = new THREE.GridHelper(400, 60, 0x2ee6d6, 0x1a3a6a);
+  grila.position.y = -30;
+  grup.add(grila);
+  const stalp = new THREE.MeshLambertMaterial({ color: 0x2a3150 });
+  const neon = new THREE.MeshBasicMaterial({ color: 0xff2a4a });
+  for (const [x, z] of [[-30, -20], [30, -40], [-35, -70], [40, -90], [-25, -110], [15, 25]]) {
+    const s = new THREE.Mesh(new THREE.BoxGeometry(4, 60, 4), stalp);
+    s.position.set(x, 0, z);
+    grup.add(s);
+    for (const y of [-10, 5, 20]) {
+      const d = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.4, 4.2), neon);
+      d.position.set(x, y, z);
+      grup.add(d);
+    }
+  }
+  return { obiect: grup, fundal: 0x050a1a };
+}
+
+function decorGheata(): Decor {
+  // O planetă înghețată dedesubt, cristale de gheață care plutesc și fulgi care cad încet
+  const grup = planetaCuPete(0xcfe8ff, 0x9fc8ee);
+  const n = 40;
+  const cristale = new THREE.InstancedMesh(
+    new THREE.OctahedronGeometry(1, 0),
+    new THREE.MeshLambertMaterial({ color: 0xbff4ff, emissive: 0x205a70, flatShading: true }),
+    n,
+  );
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), p = new THREE.Vector3();
+  for (let i = 0; i < n; i++) {
+    const u = Math.random() * Math.PI * 2, r = 50 + Math.random() * 90;
+    p.set(Math.cos(u) * r, -15 + Math.random() * 50, Math.sin(u) * r - 50);
+    q.setFromEuler(new THREE.Euler(Math.random(), Math.random() * 3, Math.random()));
+    sc.set(1.5, 3 + Math.random() * 5, 1.5);
+    cristale.setMatrixAt(i, m.compose(p, q, sc));
+  }
+  grup.add(cristale);
+  // fulgi de zăpadă: 400 de puncte care cad (o singură bucată – foarte ieftin)
+  const nr = 400;
+  const poz = new Float32Array(nr * 3);
+  for (let i = 0; i < nr; i++) {
+    poz[i * 3] = (Math.random() - 0.5) * 80;
+    poz[i * 3 + 1] = Math.random() * 40 - 10;
+    poz[i * 3 + 2] = -Math.random() * 100 + 10;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(poz, 3));
+  const fulgi = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffffff, size: 3, sizeAttenuation: false }));
+  grup.add(fulgi);
+  return {
+    obiect: grup,
+    fundal: 0x0a1630,
+    anima: (timp) => { fulgi.position.y = -((timp * 1.5) % 40); fulgi.position.x = Math.sin(timp * 0.3) * 2; },
+  };
+}
+
+function decorFortareata(): Decor {
+  // Turnurile fortăreței, cu ferestre roșii, și capul uriaș al robotului în depărtare
+  const grup = new THREE.Group();
+  const zid = new THREE.MeshLambertMaterial({ color: 0x2e2838 });
+  const fereastra = new THREE.MeshBasicMaterial({ color: 0xff4a3a });
+  for (const [x, z, h] of [[-25, -20, 50], [25, -35, 70], [-30, -65, 60], [45, -80, 55], [-20, -100, 80]]) {
+    const turn = new THREE.Mesh(new THREE.BoxGeometry(8, h, 8), zid);
+    turn.position.set(x, h / 2 - 30, z);
+    grup.add(turn);
+    for (let y = -20; y < h - 30; y += 9) {
+      const f = new THREE.Mesh(new THREE.BoxGeometry(8.2, 1.2, 2), fereastra);
+      f.position.set(x, y, z);
+      grup.add(f);
+    }
+  }
+  // capul robotului (prietenos) – departe, în spatele porții
+  const cap = new THREE.Group();
+  const metal = new THREE.MeshLambertMaterial({ color: 0x6a6f8a });
+  cap.add(new THREE.Mesh(new THREE.BoxGeometry(40, 32, 30), metal));
+  const ochi = new THREE.MeshBasicMaterial({ color: 0x2ee6d6 });
+  for (const x of [-9, 9]) {
+    const o = new THREE.Mesh(new THREE.BoxGeometry(8, 8, 1), ochi);
+    o.position.set(x, 4, 15.2);
+    cap.add(o);
+  }
+  const gura = new THREE.Mesh(new THREE.BoxGeometry(20, 3, 1), ochi);
+  gura.position.set(0, -8, 15.2);
+  cap.add(gura);
+  const antena = new THREE.Mesh(new THREE.BoxGeometry(2, 12, 2), metal);
+  antena.position.y = 22;
+  cap.add(antena);
+  const bec = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 4), fereastra);
+  bec.position.y = 30;
+  cap.add(bec);
+  cap.position.set(30, 20, -200);
+  grup.add(cap);
+  return {
+    obiect: grup,
+    fundal: 0x14080e,
+    anima: (timp) => { bec.visible = Math.floor(timp * 2) % 2 === 0; },
+  };
 }

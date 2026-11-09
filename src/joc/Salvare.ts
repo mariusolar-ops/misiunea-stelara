@@ -14,7 +14,7 @@ export interface RezultatNivel {
 }
 
 export interface Progres {
-  /** Câte niveluri sunt deschise (1 = doar primul) */
+  /** Câte niveluri normale sunt deschise, în ordinea de joc (1 = doar primul) */
   deblocate: number;
   /** Rezultatele pe fiecare nivel (după număr: 0, 1, 2...) */
   nivele: Record<number, RezultatNivel>;
@@ -77,6 +77,8 @@ export function incarca(): Progres {
     const p: Progres = { ...nou, ...citit, culori: { ...nou.culori, ...citit.culori }, aspect: { ...nou.aspect, ...citit.aspect } };
     // din versiunea veche: culoarea cățelului se numea altfel
     if (typeof citit.culoareCatel === 'number' && citit.culoareAnimal === undefined) p.culoareAnimal = citit.culoareCatel;
+    // înainte erau doar 5 niveluri: cine l-a terminat pe al 5-lea are acum deschis nivelul 6 (cel nou)
+    if (p.nivele[4] && p.deblocate < 6) p.deblocate = 6;
     return p;
   } catch {
     return progresNou();
@@ -97,7 +99,8 @@ export function calculeazaStele(monede: number, total: number) {
  * deschide nivelul următor și adaugă monedele în portofel (dublu în timpul evenimentului x2).
  * Întoarce true dacă e un timp record.
  */
-export function inregistreazaFinal(p: Progres, index: number, timp: number, monede: number, total: number, nrNivele: number, multiplicator = 1) {
+export function inregistreazaFinal(p: Progres, index: number, timp: number, monede: number, total: number,
+  /** Locul nivelului în ordinea de joc (-1 pentru nivelul secret) */ loc: number, nrNivele: number, multiplicator = 1) {
   const vechi = p.nivele[index];
   const stele = calculeazaStele(monede, total);
   const record = !vechi || timp < vechi.timp;
@@ -106,7 +109,7 @@ export function inregistreazaFinal(p: Progres, index: number, timp: number, mone
     timp: Math.min(timp, vechi?.timp ?? Infinity),
     monede: Math.max(monede, vechi?.monede ?? 0),
   };
-  p.deblocate = Math.min(nrNivele, Math.max(p.deblocate, index + 2));
+  if (loc >= 0) p.deblocate = Math.min(nrNivele, Math.max(p.deblocate, loc + 2));
   const castig = monede * multiplicator;
   p.portofel += castig;
   salveaza(p);

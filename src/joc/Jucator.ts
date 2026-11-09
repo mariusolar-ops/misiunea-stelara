@@ -10,6 +10,7 @@ import type { PuteriActive } from './Puteri';
 const VITEZA_MERS = 7.5;       // unități pe secundă
 const ACCELERATIE = 40;        // cât de repede pornește / se oprește
 const ACCELERATIE_AER = 22;    // în aer controlezi puțin mai greu
+const ACCELERATIE_GHEATA = 5;  // pe gheață aluneci: pornești și te oprești greu
 const GRAVITATIE = 34;
 const VITEZA_SARITURA = 12.5;  // => sare cam 2,3 unități în sus
 const VITEZA_MAX_CADERE = 40;
@@ -37,6 +38,8 @@ export class Jucator {
   /** True cât timp zboară acum */
   zboara = false;
   private dublaFolosita = false;
+  /** Stă pe gheață? (atunci alunecă) */
+  private peGheata = false;
   private platformaSub: Platforma | null = null;
   private timpInAer = 0;
   private timpDeLaSari = 99;
@@ -82,7 +85,7 @@ export class Jucator {
     const dz = -ix * sin - iy * cos;
     const putere = Math.min(1, Math.hypot(ix, iy));
 
-    const acc = (this.peSol ? ACCELERATIE : ACCELERATIE_AER) * dt;
+    const acc = (this.peSol ? (this.peGheata ? ACCELERATIE_GHEATA : ACCELERATIE) : ACCELERATIE_AER) * dt;
     const vMers = VITEZA_MERS * (this.puteri.viteza ? FACTOR_VITEZA : 1);
     const tintaX = dx * vMers, tintaZ = dz * vMers;
     this.viteza.x += THREE.MathUtils.clamp(tintaX - this.viteza.x, -acc, acc);
@@ -131,6 +134,7 @@ export class Jucator {
     let efect: EfectCalcare = null;
     if (rez.platformaSub) {
       efect = rez.platformaSub.laCalcare(this, timp);
+      this.peGheata = efect === 'gheata';
       if (efect === 'trambulina') { this.peSol = false; this.platformaSub = null; this.timpInAer = TIMP_COYOTE; }
     }
 

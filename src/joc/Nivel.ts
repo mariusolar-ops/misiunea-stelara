@@ -7,6 +7,8 @@ import { Steag } from '../lume/Steag';
 import { Moneda } from '../lume/Moneda';
 import { Poarta } from '../lume/Poarta';
 import { SteaSecreta } from '../lume/SteaSecreta';
+import { creeazaObstacol, type Obstacol, type EfectObstacol } from '../lume/obstacole';
+import type { CorpObstacol } from '../lume/obstacole/Obstacol';
 import { creeazaDecor, type Decor } from '../lume/Decor';
 import type { DefinitieNivel } from '../nivele/tipuri';
 
@@ -24,6 +26,7 @@ export class Nivel {
   monede: Moneda[];
   poarta: Poarta;
   steaSecreta: SteaSecreta | null = null;
+  obstacole: Obstacol[];
   decor: Decor;
   /** Locul unde revii când cazi (start sau ultimul steag) */
   punctReintoarcere: THREE.Vector3;
@@ -38,6 +41,8 @@ export class Nivel {
     this.poarta = new Poarta(new THREE.Vector3(...def.final.poz), def.final.directie);
 
     for (const p of this.platforme) this.grup.add(p.obiect);
+    this.obstacole = (def.obstacole ?? []).map((o) => creeazaObstacol(o));
+    for (const o of this.obstacole) this.grup.add(o.obiect);
     for (const s of this.steaguri) this.grup.add(s.obiect);
     for (const m of this.monede) this.grup.add(m.obiect);
     if (def.secret) {
@@ -74,6 +79,20 @@ export class Nivel {
 
   actualizeaza(dt: number, timp: number) {
     for (const p of this.platforme) p.actualizeaza(dt, timp);
+  }
+
+  /**
+   * Mișcă obstacolele și verifică dacă l-au atins pe personaj.
+   * Întoarce cel mai important efect (laserul și cristalele contează mai mult decât un pendul).
+   */
+  actualizeazaObstacole(j: CorpObstacol, timp: number, dt: number): EfectObstacol {
+    let rez: EfectObstacol = null;
+    for (const o of this.obstacole) {
+      const e = o.actualizeaza(j, timp, dt);
+      if (e === 'laser' || e === 'cristal') rez = e;
+      else if (e && !rez) rez = e;
+    }
+    return rez;
   }
 
   /** Animațiile decorative (o dată pe cadru, nu în pașii de fizică) */

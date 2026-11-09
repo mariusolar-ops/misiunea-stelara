@@ -1,6 +1,7 @@
 // Mici unelte ca nivelurile să se scrie ușor.
 import type { DefinitiePlatforma } from '../lume/Platforma';
 import type { Punct } from './tipuri';
+import type { DefLaser } from '../lume/obstacole/Laser';
 
 // Paleta de culori a jocului
 export const CULORI = {
@@ -64,4 +65,22 @@ export function trambulina(x: number, sus: number, z: number, l: number, a: numb
 /** Bandă rulantă: te împinge cu viteza [vx, vz] */
 export function banda(x: number, sus: number, z: number, l: number, a: number, vx: number, vz: number): DefinitiePlatforma {
   return { ...bloc(x, sus, z, l, a, 0xffd23f), tip: 'banda', viteza: [vx, vz] };
+}
+
+/** Gheață: aluneci pe ea */
+export function gheata(x: number, sus: number, z: number, l: number, a: number): DefinitiePlatforma {
+  return { ...bloc(x, sus, z, l, a, 0x9fdcff), tip: 'gheata' };
+}
+
+// --- Lasere (raze drepte) ---
+type ExtraLaser = Pick<DefLaser, 'clipeste' | 'miscare'>;
+
+/** Laser de-a curmezișul drumului, pe direcția x (de la x1 la x2), la adâncimea z și înălțimea y */
+export function laserX(z: number, y: number, x1: number, x2: number, extra: ExtraLaser = {}): DefLaser {
+  return { tip: 'laser', a: [x1, y, z], b: [x2, y, z], ...extra };
+}
+
+/** Laser de-a curmezișul drumului, pe direcția z (de la z1 la z2), la x și înălțimea y */
+export function laserZ(x: number, y: number, z1: number, z2: number, extra: ExtraLaser = {}): DefLaser {
+  return { tip: 'laser', a: [x, y, z1], b: [x, y, z2], ...extra };
 }

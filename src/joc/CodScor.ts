@@ -7,7 +7,10 @@
 //   <control> = 2 caractere care prind greșelile de copiere
 import type { Prieten, Progres } from './Salvare';
 
-const NR_NIVELE = 6;
+import { NIVELE } from '../nivele';
+
+// câte niveluri sunt în cod (codurile vechi, cu mai puține, merg în continuare)
+const NR_NIVELE = NIVELE.length;
 const LUNGIME_NUME = 14;
 
 /** Păstrează doar litere (și cu diacritice), cifre și spații; maxim 14 caractere */

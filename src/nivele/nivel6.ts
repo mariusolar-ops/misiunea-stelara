@@ -1,63 +1,80 @@
-// NIVELUL 6 (SECRET) – Nebuloasa secretă
-// Se deschide doar după ce găsești toate cele 5 stele secrete.
-// Un nivel-recompensă: plin de monede, cu trambuline, platforme care se încrucișează,
-// o bandă care te duce înainte și o scară curcubeu până la poartă.
+// NIVELUL 6 – Laboratorul cu lasere
+// Nou: lasere! Cele joase le sari, cele care clipesc le treci când sunt stinse,
+// cele care urcă și coboară le treci pe dedesubt sau pe deasupra, iar laserul rotativ îl sari când vine.
+// Dacă atingi un laser, te întorci la ultimul steag.
 import type { DefinitieNivel } from './tipuri';
-import { bloc, mobila, dispare, trambulina, banda, linieMonede, monedaPe, CULORI as C } from './ajutoare';
+import { bloc, laserX, laserZ, linieMonede, monedaPe, CULORI as C } from './ajutoare';
 
 const ÎNAINTE = Math.PI;
-const CURCUBEU = [0xff5f5f, 0xff9a3c, 0xffd23f, 0xa6f04a, 0x2ee6d6, 0x8a6cff];
-const PASTEL = 0xc9b8ff;
+const DREAPTA = Math.PI / 2;
+const OTEL = 0x5a6799;
+const PANOU = 0x3a4366;
 
 export const nivel6: DefinitieNivel = {
-  nume: 'Nebuloasa secretă',
-  tema: 'nebuloasa',
-  esteSecret: true,
+  nume: 'Laboratorul cu lasere',
+  tema: 'laborator',
   start: [0, 0, 1],
   directieStart: ÎNAINTE,
 
   platforme: [
-    // --- Partea 1: trambuline în sus ---
-    bloc(0, 0, 0, 8, 8, PASTEL),
-    trambulina(0, 0, -6.5, 3, 3),
-    bloc(0, 5, -12.5, 3, 3, C.roz),
-    trambulina(0, 3, -18, 3, 3),
-    bloc(0, 8, -24, 3, 3, C.roz),
-    bloc(0, 8, -31, 7, 7, C.turcoaz),                    // steagul 1
+    // --- Partea 1: coridorul cu lasere ---
+    bloc(0, 0, 0, 8, 8, OTEL),
+    bloc(0, 0, -13, 5, 18, PANOU),
+    bloc(0, 0, -27.5, 7, 7, C.turcoaz),               // steagul 1
 
-    // --- Partea 2: două platforme care se încrucișează, banda și blocuri care dispar ---
-    mobila(bloc(-4, 8, -38, 2.5, 2.5, C.portocaliu), [8, 0, 0], 4),
-    mobila(bloc(4, 8, -43, 2.5, 2.5, C.portocaliu), [-8, 0, 0], 4),
-    banda(0, 8, -50, 3, 8, 0, -3),                       // te duce înainte!
-    dispare(bloc(0, 8, -56.5, 2.5, 2.5, C.roz)),
-    dispare(bloc(0, 8.6, -60.5, 2.5, 2.5, C.roz)),
-    bloc(0, 8.6, -67, 7, 7, C.turcoaz),                  // steagul 2
+    // --- Partea 2: sărituri printre lasere și camera cu laserul rotativ ---
+    bloc(0, 0, -35.5, 3, 3, OTEL),
+    bloc(0, 0.6, -40.5, 3, 3, OTEL),
+    bloc(0, 1.2, -45.5, 3, 3, OTEL),
+    bloc(0, 1.2, -54, 9, 9, PANOU),                  // camera rotativă
+    bloc(0, 2.7, -54, 1, 1, OTEL, 1.5),              // stâlpul din mijloc (ocolește-l!)
+    bloc(0, 1.2, -63, 6, 6, C.turcoaz),               // steagul 2
 
-    // --- Partea 3: scara curcubeu ---
-    ...CURCUBEU.slice(0, 5).map((c, i) => bloc(0, 9.4 + i * 0.8, -73 - i * 3.5, 3, 2, c)),
-    bloc(0, 12.6, -94, 8, 8, CURCUBEU[5]),               // finalul
+    // --- Partea 3: spre dreapta – „valul” de lasere și gardul care urcă ---
+    bloc(10, 1.2, -63, 12, 4, PANOU),
+    bloc(20, 1.8, -63, 2.5, 2.5, OTEL),
+    bloc(24, 2.4, -63, 2.5, 2.5, OTEL),
+    bloc(31, 2.4, -63, 8, 8, C.turcoaz),              // finalul
+  ],
+
+  obstacole: [
+    // coridor: două lasere joase (sari peste), unul care clipește, unul care urcă și coboară
+    laserX(-8, 0.5, -2.5, 2.5),
+    laserX(-12, 0.5, -2.5, 2.5),
+    laserX(-16, 1.0, -2.5, 2.5, { clipeste: { perioada: 2.4 } }),
+    laserX(-20, 0.4, -2.5, 2.5, { miscare: { cat: [0, 2.2, 0], perioada: 3 } }),
+    // peste golul de după steagul 1: sari când e stins
+    laserX(-32.5, 1.6, -2, 2, { clipeste: { perioada: 2 } }),
+    // o rază verticală care măturã platforma
+    { tip: 'laser', a: [-1.5, 0.6, -40.5], b: [-1.5, 3.2, -40.5], miscare: { cat: [3, 0, 0], perioada: 2.6 } },
+    // laserul rotativ din cameră
+    { tip: 'laserRotativ', centru: [0, 1.65, -54], raza: 4.3, viteza: 1.6 },
+    // „valul”: trei lasere care clipesc pe rând
+    laserZ(7, 2.2, -65, -61, { clipeste: { perioada: 2, faza: 0 } }),
+    laserZ(10, 2.2, -65, -61, { clipeste: { perioada: 2, faza: 0.33 } }),
+    laserZ(13, 2.2, -65, -61, { clipeste: { perioada: 2, faza: 0.66 } }),
+    laserZ(15, 1.7, -65, -61),
+    // gardul de la final: urcă și coboară – treci pe dedesubt când e sus
+    laserZ(29.5, 2.8, -67, -59, { miscare: { cat: [0, 2.4, 0], perioada: 2.5 } }),
   ],
 
   steaguri: [
-    { poz: [-2.2, 8, -31], directie: ÎNAINTE },
-    { poz: [-2.2, 8.6, -67], directie: ÎNAINTE },
+    { poz: [-2.2, 0, -27.5], directie: ÎNAINTE },
+    { poz: [-2, 1.2, -63], directie: DREAPTA },
   ],
 
   monede: [
-    ...linieMonede([-2, 1, -1], [2, 1, -1], 3),
-    ...linieMonede([0, 2.5, -6.5], [0, 5.5, -6.5], 3),   // un turn de monede deasupra trambulinei
-    monedaPe(0, 5, -12.5),
-    ...linieMonede([0, 5.5, -18], [0, 8.5, -18], 3),
-    monedaPe(0, 8, -24),
-    ...linieMonede([-2, 9, -29], [2, 9, -33], 4),
-    [0, 9.2, -38],
-    [0, 9.2, -43],
-    ...linieMonede([0, 9, -47], [0, 9, -53], 4),
-    monedaPe(0, 8, -56.5),
-    monedaPe(0, 8.6, -60.5),
-    ...CURCUBEU.slice(0, 5).map((_, i) => monedaPe(0, 9.4 + i * 0.8, -73 - i * 3.5)),
-    ...linieMonede([-2.5, 13.6, -91], [2.5, 13.6, -91], 4),
+    ...linieMonede([0, 1, -6], [0, 1, -22], 6),
+    monedaPe(0, 0, -35.5),
+    monedaPe(0, 0.6, -40.5),
+    monedaPe(0, 1.2, -45.5),
+    ...linieMonede([-3.5, 2.2, -51], [-3.5, 2.2, -57], 3),
+    ...linieMonede([3.5, 2.2, -51], [3.5, 2.2, -57], 3),
+    ...linieMonede([5.5, 2.2, -63], [14, 2.2, -63], 4),
+    monedaPe(20, 1.8, -63),
+    monedaPe(24, 2.4, -63),
+    ...linieMonede([28, 3.4, -65], [28, 3.4, -61], 3),
   ],
 
-  final: { poz: [0, 12.6, -95], directie: ÎNAINTE },
+  final: { poz: [33, 2.4, -63], directie: DREAPTA },
 };

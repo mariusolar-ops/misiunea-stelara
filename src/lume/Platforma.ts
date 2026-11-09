@@ -3,7 +3,7 @@
 // Platformele speciale (care se mișcă, dispar, lavă, trambulină, bandă) sunt în folderul „platforme”.
 import * as THREE from 'three';
 
-export type TipPlatforma = 'normal' | 'miscare' | 'dispare' | 'lava' | 'trambulina' | 'banda';
+export type TipPlatforma = 'normal' | 'miscare' | 'dispare' | 'lava' | 'trambulina' | 'banda' | 'gheata';
 
 export interface DefinitiePlatforma {
   /** Centrul platformei [x, y, z] */
@@ -29,7 +29,7 @@ export interface CorpJucator {
 }
 
 /** Ce se poate întâmpla când calci pe o platformă */
-export type EfectCalcare = 'lava' | 'trambulina' | null;
+export type EfectCalcare = 'lava' | 'trambulina' | 'gheata' | null;
 
 // Geometria unui cub e refolosită de toate platformele (economie de memorie)
 export const CUB = new THREE.BoxGeometry(1, 1, 1);

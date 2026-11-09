@@ -5,6 +5,7 @@ import { codulMeu, citesteCod, curataNume } from '../joc/CodScor';
 import { formatTimp } from './Hud';
 import { sunete } from '../audio/Sunete';
 import type { DefinitieNivel } from '../nivele/tipuri';
+import { ORDINE_NORMALA, INDEX_SECRET, numarAfisat } from '../nivele';
 
 const container = document.getElementById('meniu')!;
 
@@ -32,10 +33,10 @@ export class Clasament {
   arata() {
     const p = this.progres;
     // nivelul secret apare în clasament doar dacă l-ai deschis
-    const nrTaburi = this.esteDeschisSecret() ? this.nivele.length : this.nivele.length - 1;
-    const taburi = [`<button data-tab="-1" class="${this.tab === -1 ? 'activ' : ''}">⭐ Total</button>`]
-      .concat(Array.from({ length: nrTaburi }, (_, i) =>
-        `<button data-tab="${i}" class="${this.tab === i ? 'activ' : ''}">${this.nivele[i].esteSecret ? '✨' : i + 1}</button>`))
+    const indici = this.esteDeschisSecret() ? [...ORDINE_NORMALA, INDEX_SECRET] : ORDINE_NORMALA;
+    const taburi = [`<button data-tab="-1" class="${this.tab === -1 ? 'activ' : ''}">⭐</button>`]
+      .concat(indici.map((i) =>
+        `<button data-tab="${i}" class="${this.tab === i ? 'activ' : ''}">${numarAfisat(i)}</button>`))
       .join('');
 
     container.innerHTML = `
@@ -43,7 +44,7 @@ export class Clasament {
         <div class="coloana-lista">
           <h2>🏆 Clasament</h2>
           <div class="taburi taburi-mici">${taburi}</div>
-          <div class="subtitlu">${this.tab === -1 ? 'Cine are cele mai multe stele' : 'Cel mai bun timp: ' + text(this.nivele[this.tab].nume)}</div>
+          <div class="subtitlu">${this.tab === -1 ? '⭐ Total: cine are cele mai multe stele' : 'Cel mai bun timp: ' + text(this.nivele[this.tab].nume)}</div>
           <ol class="lista">${this.randuri()}</ol>
         </div>
         <div class="coloana-coduri">

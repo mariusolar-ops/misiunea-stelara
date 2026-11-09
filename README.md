@@ -27,11 +27,13 @@ Actualizările vin singure: când telefonul are internet și deschizi jocul, ia 
 
 ## Ce conține
 
-- 5 niveluri: Baza de pe Lună, Inelul de asteroizi, Stația spațială, Luna vulcanică, Lângă gaura neagră
+- 8 niveluri: Baza de pe Lună, Inelul de asteroizi, Stația spațială, Luna vulcanică, Lângă gaura neagră,
+  Laboratorul cu lasere, Planeta de gheață, Fortăreața robotului (+ nivelul secret)
 - 5 stele secrete mov (câte una ascunsă în fiecare nivel). Toate 5 deblochează accesoriul secret
   „Aripi de stea” și nivelul secret „Nebuloasa secretă”
 - Clasament (total stele + cel mai bun timp pe fiecare nivel) cu prietenii adăugați prin cod
-- Platforme care se mișcă, blocuri care dispar, lavă, trambuline, benzi rulante
+- Platforme care se mișcă, blocuri care dispar, lavă, trambuline, benzi rulante, gheață
+- Obstacole: lasere (fixe, care clipesc, care se mișcă, rotative), pendule, curenți de aer, cristale
 - Steaguri de checkpoint, monede, cronometru, stele (1–3) și recorduri
 - Personalizare: băiat sau fată, 5 coafuri, 6 modele de tricou, pantaloni lungi/scurți sau fustă, 18 culori
 - 8 accesorii din cuburi + un animal de companie la alegere: câine, pisică, iepuraș, capră sau zebră
@@ -43,8 +45,10 @@ Actualizările vin singure: când telefonul are internet și deschizi jocul, ia 
 
 ## Pentru cine modifică jocul
 
-- `src/nivele/` – fiecare nivel e în fișierul lui (`nivel1.ts` … `nivel5.ts`).
-  Pentru un nivel nou: copiază un fișier, schimbă platformele și adaugă-l în `src/nivele/index.ts`.
+- `src/nivele/` – fiecare nivel e în fișierul lui (`nivel1.ts` … `nivel8.ts`, `nivelSecret.ts`).
+  Pentru un nivel nou: copiază un fișier, schimbă platformele și adaugă-l în `src/nivele/index.ts`
+  (la SFÂRȘITUL listei NIVELE, apoi în ORDINE_NORMALA – așa progresul salvat rămâne corect).
+- `src/lume/obstacole/` – lasere, pendule, curenți de aer, cristale
 - `src/lume/` – platforme, steaguri, monede, decor
 - `src/joc/` – personajul, fizica, camera, salvarea, accesoriile
 - `src/ui/` – meniuri, ecrane, interfața

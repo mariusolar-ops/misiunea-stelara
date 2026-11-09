@@ -5,6 +5,7 @@ import { PlatformaCareDispare } from './PlatformaCareDispare';
 import { Lava } from './Lava';
 import { Trambulina } from './Trambulina';
 import { BandaRulanta } from './BandaRulanta';
+import { Gheata } from './Gheata';
 
 export function creeazaPlatforma(def: DefinitiePlatforma): Platforma {
   switch (def.tip) {
@@ -13,6 +14,7 @@ export function creeazaPlatforma(def: DefinitiePlatforma): Platforma {
     case 'lava': return new Lava(def);
     case 'trambulina': return new Trambulina(def);
     case 'banda': return new BandaRulanta(def);
+    case 'gheata': return new Gheata(def);
     default: return new Platforma(def);
   }
 }

@@ -333,3 +333,10 @@ button.scoate { background: #3b4380; color: #fff; }
   border-radius: 6px; background: rgba(11, 15, 46, 0.7); border: 2px solid rgba(255,255,255,0.4); overflow: hidden;
 }
 #energie-plin { height: 100%; width: 100%; background: linear-gradient(90deg, #2ee6d6, #9ffcf3); }
+
+/* Alegerea nivelului: un rând care se derulează stânga-dreapta (sunt multe niveluri acum) */
+.rand-nivele {
+  flex-wrap: nowrap !important; justify-content: flex-start !important; overflow-x: auto; touch-action: pan-x;
+  max-width: 100%; padding: 4px 8px 10px; scroll-snap-type: x proximity;
+}
+.card-nivel { flex-shrink: 0; scroll-snap-align: start; }

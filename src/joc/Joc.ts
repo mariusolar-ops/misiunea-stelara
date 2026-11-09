@@ -18,7 +18,7 @@ import { Intrari } from '../control/Intrari';
 import { pornesteAtingere } from '../control/Atingere';
 import { Hud } from '../ui/Hud';
 import { Meniu } from '../ui/Meniu';
-import { NIVELE, NR_NIVELE_NORMALE, INDEX_SECRET } from '../nivele';
+import { NIVELE, NR_NIVELE_NORMALE, INDEX_SECRET, ORDINE_NORMALA, numarAfisat, urmatorulNormal } from '../nivele';
 
 const PAS_FIZICA = 1 / 120;   // fizica rulează în pași mici, ca să nu treacă prin platforme
 const INALTIME_CADERE = -25;  // sub înălțimea asta personajul „cade” și revine la steag
@@ -103,7 +103,7 @@ export class Joc {
   }
 
   joacaNivel(index: number) {
-    if (index >= NIVELE.length) return;
+    if (index < 0 || index >= NIVELE.length) return;
     this.incarcaNivel(index);
     this.meniu.ascunde();
     this.hud.ascundeFinal();
@@ -111,7 +111,7 @@ export class Joc {
     this.stare = 'joaca';
     this.eraEveniment = esteEveniment();
     this.hud.seteazaEveniment(this.eraEveniment);
-    this.hud.arataMesaj(this.eraEveniment ? '🔥 Eveniment: monede x2!' : `Nivelul ${index + 1}: ${NIVELE[index].nume}`, 2.5);
+    this.hud.arataMesaj(this.eraEveniment ? '🔥 Eveniment: monede x2!' : `Nivelul ${numarAfisat(index)}: ${NIVELE[index].nume}`, 2.5);
   }
 
   /** Pune pe personaj culorile și accesoriile salvate */
@@ -207,17 +207,19 @@ export class Joc {
     this.stare = 'final';
     const dublu = this.eraEveniment || esteEveniment();
     const { stele, record, castig } = inregistreazaFinal(
-      this.progres, this.indexNivel, this.cronometru, nivel.monedeLuate, nivel.totalMonede, NR_NIVELE_NORMALE, dublu ? 2 : 1);
-    // după nivelul 5 urmează nivelul secret doar dacă a găsit toate stelele secrete
-    const dupa5 = this.indexNivel === NR_NIVELE_NORMALE - 1;
+      this.progres, this.indexNivel, this.cronometru, nivel.monedeLuate, nivel.totalMonede,
+      ORDINE_NORMALA.indexOf(this.indexNivel), NR_NIVELE_NORMALE, dublu ? 2 : 1);
+    // ce urmează: nivelul normal următor; după ultimul, nivelul secret (dacă e deschis)
     const secretDeschis = areToateSecretele(this.progres);
-    this.urmatorul = dupa5 && secretDeschis ? INDEX_SECRET : this.indexNivel + 1;
+    const urm = urmatorulNormal(this.indexNivel);
+    const ultimulNormal = this.indexNivel === ORDINE_NORMALA[ORDINE_NORMALA.length - 1];
+    this.urmatorul = urm ?? (ultimulNormal && secretDeschis ? INDEX_SECRET : -1);
     this.hud.arataFinal({
       nume: nivel.def.nume, timp: this.cronometru, monede: nivel.monedeLuate, total: nivel.totalMonede,
       stele, record, castig, dublu, numeJucator: this.progres.nume,
-      ultimul: this.indexNivel === INDEX_SECRET || (dupa5 && !secretDeschis),
+      ultimul: this.urmatorul < 0,
       textUrmator: this.urmatorul === INDEX_SECRET ? 'Nivelul secret ✨' : 'Nivelul următor',
-      nota: dupa5 && !secretDeschis
+      nota: ultimulNormal && !secretDeschis
         ? `Ai terminat toate nivelurile! Dar ai găsit toate stelele secrete? (${this.progres.secrete.length}/${NR_STELE_SECRETE})`
         : this.indexNivel === INDEX_SECRET ? 'Ai terminat nivelul secret! Ești un adevărat explorator! ✨' : undefined,
     });
@@ -273,10 +275,16 @@ export class Joc {
       // fizica în pași mici și egali
       this.rezervaFizica += dt;
       let peLava = false;
+      let atinsDe: 'laser' | 'cristal' | null = null;
       while (this.rezervaFizica >= PAS_FIZICA) {
         nivel.actualizeaza(PAS_FIZICA, this.timp);
         const efect = this.jucator.actualizeaza(PAS_FIZICA, this.intrari, this.camera.unghi, nivel.platforme, sari, this.timp);
         if (efect === 'lava') peLava = true;
+        // obstacolele (lasere, pendule, curenți, cristale)
+        const ob = nivel.actualizeazaObstacole(this.jucator, this.timp, PAS_FIZICA);
+        if (ob === 'laser' || ob === 'cristal') atinsDe = ob;
+        else if (ob === 'lovitura') sunete.lovitura();
+        else if (ob === 'vant') sunete.vant();
         if (efect === 'trambulina') sunete.trambulina();
         if (this.jucator.aSarit) { sunete.saritura(); this.jucator.aSarit = false; }
         sari = false;
@@ -308,14 +316,23 @@ export class Joc {
         this.hud.arataMesaj(`Au, lavă fierbinte! Înapoi ${unde}.`);
         sunete.lava();
         this.revino();
+      } else if (atinsDe === 'laser') {
+        this.hud.arataMesaj(`Zap! Laserul te-a trimis înapoi ${unde}.`);
+        sunete.laser();
+        this.revino();
+      } else if (atinsDe === 'cristal') {
+        this.hud.arataMesaj(`Au, cristale ascuțite! Înapoi ${unde}.`);
+        sunete.lava();
+        this.revino();
       } else if (this.jucator.poz.y < INALTIME_CADERE) {
         this.hud.arataMesaj(`Ai căzut! Înapoi ${unde}.`);
         sunete.cadere();
         this.revino();
       }
     } else if (this.stare === 'meniu') {
-      // platformele se mișcă și în spatele meniului
+      // platformele și obstacolele se mișcă și în spatele meniului
       nivel.actualizeaza(dt, this.timp);
+      nivel.actualizeazaObstacole({ poz: new THREE.Vector3(0, -999, 0), viteza: new THREE.Vector3() }, this.timp, dt);
     }
 
     nivel.anima(this.timp);
