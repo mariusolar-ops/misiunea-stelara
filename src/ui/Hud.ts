@@ -38,14 +38,18 @@ export class Hud {
     this.timerMesaj = window.setTimeout(() => this.mesaj.classList.remove('vizibil'), secunde * 1000);
   }
 
-  /** Ecranul „Felicitări!”. Stelele: 1 = ai terminat, 2 = jumătate din monede, 3 = toate */
-  arataFinal(numeNivel: string, secunde: number, monede: number, total: number) {
-    const stele = monede === total ? 3 : monede >= total / 2 ? 2 : 1;
-    el('final-nivel').textContent = `Ai terminat „${numeNivel}”`;
+  /** Ecranul „Felicitări!”, cu stele (1–3), timp, monede și butoanele potrivite */
+  arataFinal(o: { nume: string; timp: number; monede: number; total: number; stele: number; record: boolean; ultimul: boolean }) {
+    el('final-titlu').textContent = o.ultimul ? 'Bravo, cosmonaut Mihai!' : 'Felicitări, Mihai!';
+    el('final-nivel').textContent = o.ultimul
+      ? 'Ai terminat toate nivelurile! 🚀'
+      : `Ai terminat „${o.nume}”`;
     el('final-stele').innerHTML = [1, 2, 3]
-      .map((i) => `<span class="stea${i <= stele ? ' plina' : ''}">★</span>`).join('');
-    el('final-timp').textContent = formatTimp(secunde);
-    el('final-monede').textContent = `${monede}/${total}`;
+      .map((i) => `<span class="stea${i <= o.stele ? ' plina' : ''}">★</span>`).join('');
+    el('final-timp').textContent = formatTimp(o.timp);
+    el('final-monede').textContent = `${o.monede}/${o.total}`;
+    el('final-record').textContent = o.record ? 'Record nou de timp!' : '';
+    el('buton-urmator').classList.toggle('ascuns', o.ultimul);
     this.ecranFinal.classList.add('vizibil');
   }
 

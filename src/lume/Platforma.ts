@@ -1,6 +1,9 @@
 // O platformă = o cutie pe care poți sta.
 // Ține minte și „cutia de coliziune” (Box3), folosită de fizică.
+// Platformele speciale (care se mișcă, dispar, lavă, trambulină, bandă) sunt în folderul „platforme”.
 import * as THREE from 'three';
+
+export type TipPlatforma = 'normal' | 'miscare' | 'dispare' | 'lava' | 'trambulina' | 'banda';
 
 export interface DefinitiePlatforma {
   /** Centrul platformei [x, y, z] */
@@ -9,22 +12,39 @@ export interface DefinitiePlatforma {
   dim: [number, number, number];
   /** Culoarea (opțional) */
   culoare?: number;
+  tip?: TipPlatforma;
+  /** Doar pentru „miscare”: cât se deplasează, în câte secunde face drumul dus-întors, și decalajul */
+  miscare?: { cat: [number, number, number]; perioada: number; faza?: number };
+  /** Doar pentru „trambulina”: cât de tare aruncă în sus */
+  forta?: number;
+  /** Doar pentru „banda”: viteza benzii pe x și pe z */
+  viteza?: [number, number];
 }
 
+/** Ce are nevoie o platformă să „știe” despre jucător când acesta stă pe ea */
+export interface CorpJucator {
+  viteza: THREE.Vector3;
+  /** Împingere în plus (de la bandă), în unități pe secundă */
+  impingere: THREE.Vector3;
+}
+
+/** Ce se poate întâmpla când calci pe o platformă */
+export type EfectCalcare = 'lava' | 'trambulina' | null;
+
 // Geometria unui cub e refolosită de toate platformele (economie de memorie)
-const CUB = new THREE.BoxGeometry(1, 1, 1);
+export const CUB = new THREE.BoxGeometry(1, 1, 1);
 const MARGINI = new THREE.EdgesGeometry(CUB);
 
 // Materialele se refolosesc pe culori
 const materiale = new Map<number, THREE.MeshLambertMaterial>();
 const materialeMargini = new Map<number, THREE.LineBasicMaterial>();
 
-function material(culoare: number) {
+export function materialCuloare(culoare: number) {
   let m = materiale.get(culoare);
   if (!m) { m = new THREE.MeshLambertMaterial({ color: culoare }); materiale.set(culoare, m); }
   return m;
 }
-function materialMargine(culoare: number) {
+export function materialMargine(culoare: number) {
   let m = materialeMargini.get(culoare);
   if (!m) {
     // marginile sunt o variantă mai deschisă a culorii – efect „neon”
@@ -37,16 +57,19 @@ function materialMargine(culoare: number) {
 
 export class Platforma {
   obiect: THREE.Object3D;
+  corp: THREE.Mesh;
   cutie = new THREE.Box3();
-  /** Cât s-a mișcat platforma în ultimul cadru – ca să-l ducă pe personaj cu ea */
+  /** Dacă e false, personajul trece prin ea (ex. un bloc care a dispărut) */
+  solid = true;
+  /** Cât s-a mișcat platforma în ultimul pas – ca să-l ducă pe personaj cu ea */
   deplasare = new THREE.Vector3();
 
-  constructor(def: DefinitiePlatforma) {
+  constructor(def: DefinitiePlatforma, material?: THREE.Material) {
     const culoare = def.culoare ?? 0x2ee6d6;
     const grup = new THREE.Group();
-    const corp = new THREE.Mesh(CUB, material(culoare));
+    this.corp = new THREE.Mesh(CUB, material ?? materialCuloare(culoare));
     const margini = new THREE.LineSegments(MARGINI, materialMargine(culoare));
-    grup.add(corp, margini);
+    grup.add(this.corp, margini);
     grup.scale.set(...def.dim);
     grup.position.set(...def.poz);
     this.obiect = grup;
@@ -59,6 +82,15 @@ export class Platforma {
     this.cutie.max.set(p.x + s.x / 2, p.y + s.y / 2, p.z + s.z / 2);
   }
 
-  /** Se apelează în fiecare cadru (platformele speciale vor face mai mult aici) */
+  /** Se apelează la fiecare pas de fizică (platformele speciale fac mai mult aici) */
   actualizeaza(_dt: number, _timp: number) {}
+
+  /** Se apelează cât timp personajul stă pe platformă */
+  laCalcare(_j: CorpJucator, _timp: number): EfectCalcare { return null; }
+
+  /** Animații doar de privit (o dată pe cadru) */
+  anima(_timp: number) {}
+
+  /** Readuce platforma la starea de început (când reîncepi nivelul) */
+  reseteaza() {}
 }

@@ -38,3 +38,30 @@ export function linieMonede(a: Punct, b: Punct, n: number): Punct[] {
 export function monedaPe(x: number, sus: number, z: number): Punct {
   return [x, sus + 1, z];
 }
+
+// --- Platforme speciale (primesc un „bloc” și îi schimbă tipul) ---
+
+/** Platformă care se mișcă: „cat” = cât se deplasează [x, y, z], „perioada” = secunde dus-întors */
+export function mobila(b: DefinitiePlatforma, cat: Punct, perioada: number, faza = 0): DefinitiePlatforma {
+  return { ...b, tip: 'miscare', miscare: { cat, perioada, faza } };
+}
+
+/** Bloc care dispare după ce calci pe el */
+export function dispare(b: DefinitiePlatforma): DefinitiePlatforma {
+  return { ...b, tip: 'dispare' };
+}
+
+/** Lavă: te trimite înapoi la steag */
+export function lava(x: number, sus: number, z: number, l: number, a: number): DefinitiePlatforma {
+  return { ...bloc(x, sus, z, l, a, 0xff7a2f), tip: 'lava' };
+}
+
+/** Trambulină: te aruncă în sus (forța 20 = cam 6 unități înălțime) */
+export function trambulina(x: number, sus: number, z: number, l: number, a: number, forta = 20): DefinitiePlatforma {
+  return { ...bloc(x, sus, z, l, a, CULORI.lime, 0.6), tip: 'trambulina', forta };
+}
+
+/** Bandă rulantă: te împinge cu viteza [vx, vz] */
+export function banda(x: number, sus: number, z: number, l: number, a: number, vx: number, vz: number): DefinitiePlatforma {
+  return { ...bloc(x, sus, z, l, a, 0xffd23f), tip: 'banda', viteza: [vx, vz] };
+}

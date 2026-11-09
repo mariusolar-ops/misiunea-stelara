@@ -130,3 +130,67 @@ button.mare, #buton-start {
 .rand-rezultate .eticheta { font-size: 14px; font-weight: 600; opacity: 0.7; }
 #ecran-final button { pointer-events: auto; }
 button.mare:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--turcoaz-inchis); }
+
+.ascuns { display: none !important; }
+
+/* Butonul de pauză (stânga-sus) */
+#buton-pauza {
+  position: absolute; top: 10px; left: max(12px, env(safe-area-inset-left));
+  width: 52px; height: 52px; border-radius: 14px; pointer-events: auto;
+  background: rgba(11, 15, 46, 0.65); border: 2px solid rgba(46, 230, 214, 0.4);
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+#buton-pauza span { width: 7px; height: 22px; background: #fff; border-radius: 2px; }
+
+/* Meniurile */
+#meniu {
+  position: fixed; inset: 0; z-index: 4; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 14px; text-align: center; padding: 16px;
+  background: radial-gradient(circle at 50% 40%, rgba(29, 36, 102, 0.92) 0%, rgba(11, 15, 46, 0.96) 70%);
+}
+#meniu:empty { display: none; }
+#meniu h1 { font-size: 26px; font-weight: 900; line-height: 1.1; }
+#meniu h1 span { display: block; font-size: 46px; color: var(--turcoaz); text-shadow: 0 0 20px rgba(46,230,214,.6); }
+#meniu h2 { font-size: 32px; color: var(--turcoaz); }
+.portofel {
+  display: inline-flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 800;
+  background: rgba(0,0,0,.25); border-radius: 12px; padding: 4px 14px;
+}
+.coloana-butoane { display: flex; flex-direction: column; gap: 12px; min-width: 280px; }
+.coloana-butoane button { width: 100%; }
+button.mare, button.mic-buton {
+  font-size: 24px; font-weight: 900; color: var(--fundal); pointer-events: auto;
+  background: var(--turcoaz); border: none; border-radius: 16px;
+  padding: 12px 34px; box-shadow: 0 6px 0 var(--turcoaz-inchis);
+}
+button.mic-buton {
+  font-size: 20px; padding: 10px 22px; color: #fff;
+  background: #3b4380; box-shadow: 0 5px 0 #262c5a;
+}
+button.mic-buton:active { transform: translateY(4px); box-shadow: 0 1px 0 #262c5a; }
+button:disabled { opacity: 0.45; }
+.inapoi { position: absolute; top: 14px; left: max(16px, env(safe-area-inset-left)); }
+.eticheta-curand { display: block; font-size: 12px; font-weight: 700; opacity: 0.8; }
+
+/* Cartonașele pentru alegerea nivelului */
+.rand-nivele { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.card-nivel {
+  width: 128px; min-height: 150px; border-radius: 18px; padding: 10px 8px; pointer-events: auto;
+  background: linear-gradient(#2a3290, #1a2060); border: 3px solid var(--turcoaz); color: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 4px;
+  font-family: inherit;
+}
+.card-nivel:active { transform: scale(0.96); }
+.card-nivel .nr { font-size: 38px; font-weight: 900; color: var(--turcoaz); line-height: 1; }
+.card-nivel .nume { font-size: 15px; font-weight: 700; line-height: 1.15; }
+.card-nivel .stele { font-size: 22px; letter-spacing: 2px; color: #3a3f6b; }
+.card-nivel .stele .plina { color: #ffd23f; }
+.card-nivel .timp { font-size: 13px; opacity: 0.75; min-height: 16px; }
+.card-nivel.blocat { border-color: #3a3f6b; background: #161a45; }
+.card-nivel.blocat .nr { color: #5a5f8b; }
+.lacat { font-size: 30px; }
+
+/* Ecranul de final – butoane și record */
+.rand-butoane { display: flex; gap: 12px; align-items: center; }
+#final-record { color: #ffd23f; font-weight: 800; min-height: 0; }
+#final-record:empty { display: none; }

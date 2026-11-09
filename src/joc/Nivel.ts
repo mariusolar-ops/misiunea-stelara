@@ -1,11 +1,12 @@
 // Un nivel „construit”: platformele, steagurile, monedele și poarta, puse în scenă.
 // Tot aici verificăm ce atinge personajul.
 import * as THREE from 'three';
-import { Platforma } from '../lume/Platforma';
+import type { Platforma } from '../lume/Platforma';
+import { creeazaPlatforma } from '../lume/platforme';
 import { Steag } from '../lume/Steag';
 import { Moneda } from '../lume/Moneda';
 import { Poarta } from '../lume/Poarta';
-import { creeazaDecor } from '../lume/Decor';
+import { creeazaDecor, type Decor } from '../lume/Decor';
 import type { DefinitieNivel } from '../nivele/tipuri';
 
 export interface Evenimente {
@@ -20,13 +21,14 @@ export class Nivel {
   steaguri: Steag[];
   monede: Moneda[];
   poarta: Poarta;
+  decor: Decor;
   /** Locul unde revii când cazi (start sau ultimul steag) */
   punctReintoarcere: THREE.Vector3;
   directieReintoarcere: number;
   monedeLuate = 0;
 
   constructor(public def: DefinitieNivel) {
-    this.platforme = def.platforme.map((d) => new Platforma(d));
+    this.platforme = def.platforme.map((d) => creeazaPlatforma(d));
     this.steaguri = def.steaguri.map((s) => new Steag(new THREE.Vector3(...s.poz), s.directie));
     this.monede = def.monede.map((m) => new Moneda(new THREE.Vector3(...m)));
     this.poarta = new Poarta(new THREE.Vector3(...def.final.poz), def.final.directie);
@@ -34,7 +36,8 @@ export class Nivel {
     for (const p of this.platforme) this.grup.add(p.obiect);
     for (const s of this.steaguri) this.grup.add(s.obiect);
     for (const m of this.monede) this.grup.add(m.obiect);
-    this.grup.add(this.poarta.obiect, creeazaDecor(def.tema));
+    this.decor = creeazaDecor(def.tema);
+    this.grup.add(this.poarta.obiect, this.decor.obiect);
 
     this.punctReintoarcere = new THREE.Vector3(...def.start);
     this.directieReintoarcere = def.directieStart;
@@ -68,6 +71,8 @@ export class Nivel {
   anima(timp: number) {
     for (const s of this.steaguri) s.actualizeaza(timp);
     for (const m of this.monede) if (m.obiect.visible) m.actualizeaza(timp);
+    for (const p of this.platforme) p.anima(timp);
     this.poarta.actualizeaza(timp);
+    this.decor.anima?.(timp);
   }
 }

@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import { Personaj } from './Personaj';
 import { misca, solulDeSub } from './Fizica';
-import type { Platforma } from '../lume/Platforma';
+import type { Platforma, EfectCalcare } from '../lume/Platforma';
 import type { Intrari } from '../control/Intrari';
 
 // Reglaje de „senzație” – le putem ajusta ușor
@@ -19,6 +19,8 @@ export class Jucator {
   personaj = new Personaj();
   poz = new THREE.Vector3();
   viteza = new THREE.Vector3();
+  /** Împingerea de la banda rulantă (se pune la fiecare pas cât stai pe bandă) */
+  impingere = new THREE.Vector3();
   peSol = false;
   private platformaSub: Platforma | null = null;
   private timpInAer = 0;
@@ -44,12 +46,13 @@ export class Jucator {
     this.viteza.set(0, 0, 0);
     this.directie = directie;
     this.platformaSub = null;
+    this.impingere.set(0, 0, 0);
   }
 
   /**
    * @param unghiCamera spre ce parte privește camera (ca „înainte” să fie mereu de la cameră încolo)
    */
-  actualizeaza(dt: number, intrari: Intrari, unghiCamera: number, platforme: Platforma[], sariAcum: boolean) {
+  actualizeaza(dt: number, intrari: Intrari, unghiCamera: number, platforme: Platforma[], sariAcum: boolean, timp: number): EfectCalcare {
     // 1) Dacă platforma de sub noi s-a mișcat, ne mișcăm și noi cu ea
     if (this.platformaSub && this.peSol) {
       this.poz.add(this.platformaSub.deplasare);
@@ -82,10 +85,18 @@ export class Jucator {
     this.viteza.y = Math.max(this.viteza.y - GRAVITATIE * dt, -VITEZA_MAX_CADERE);
 
     // 5) Mișcarea, cu coliziuni
-    const pas = this.viteza.clone().multiplyScalar(dt);
+    const pas = this.viteza.clone().add(this.impingere).multiplyScalar(dt);
+    this.impingere.set(0, 0, 0);
     const rez = misca(this.poz, this.viteza, pas, platforme);
     this.peSol = rez.peSol;
     this.platformaSub = rez.platformaSub;
+
+    // 5b) Efectul platformei pe care am aterizat (lavă, trambulină, bandă...)
+    let efect: EfectCalcare = null;
+    if (rez.platformaSub) {
+      efect = rez.platformaSub.laCalcare(this, timp);
+      if (efect === 'trambulina') { this.peSol = false; this.platformaSub = null; this.timpInAer = TIMP_COYOTE; }
+    }
 
     // 6) Întoarcem personajul spre direcția de mers
     const vOriz = Math.hypot(this.viteza.x, this.viteza.z);
@@ -95,6 +106,7 @@ export class Jucator {
       dif = Math.atan2(Math.sin(dif), Math.cos(dif)); // cel mai scurt drum
       this.directie += dif * Math.min(1, 14 * dt);
     }
+    return efect;
   }
 
   /** Actualizează ce se vede (o dată pe cadru) */

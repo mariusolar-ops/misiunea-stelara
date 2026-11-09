@@ -46,7 +46,7 @@ export function misca(
   poz.x += pas.x;
   puneCutia(poz);
   for (const p of platforme) {
-    if (!seSuprapun(cutieJucator, p.cutie)) continue;
+    if (!p.solid || !seSuprapun(cutieJucator, p.cutie)) continue;
     if (pas.x > 0) poz.x = p.cutie.min.x - j - 0.001;
     else if (pas.x < 0) poz.x = p.cutie.max.x + j + 0.001;
     puneCutia(poz);
@@ -56,7 +56,7 @@ export function misca(
   poz.z += pas.z;
   puneCutia(poz);
   for (const p of platforme) {
-    if (!seSuprapun(cutieJucator, p.cutie)) continue;
+    if (!p.solid || !seSuprapun(cutieJucator, p.cutie)) continue;
     if (pas.z > 0) poz.z = p.cutie.min.z - j - 0.001;
     else if (pas.z < 0) poz.z = p.cutie.max.z + j + 0.001;
     puneCutia(poz);
@@ -66,7 +66,7 @@ export function misca(
   poz.y += pas.y;
   puneCutia(poz);
   for (const p of platforme) {
-    if (!seSuprapun(cutieJucator, p.cutie)) continue;
+    if (!p.solid || !seSuprapun(cutieJucator, p.cutie)) continue;
     if (pas.y <= 0) {
       // cădem pe platformă
       poz.y = p.cutie.max.y;
@@ -89,6 +89,7 @@ export function misca(
 export function solulDeSub(poz: THREE.Vector3, platforme: Platforma[]): number | null {
   let cel = -Infinity;
   for (const p of platforme) {
+    if (!p.solid) continue;
     const c = p.cutie;
     if (poz.x >= c.min.x && poz.x <= c.max.x && poz.z >= c.min.z && poz.z <= c.max.z &&
         c.max.y <= poz.y + 0.05 && c.max.y > cel) {

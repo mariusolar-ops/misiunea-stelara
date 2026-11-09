@@ -1,11 +1,9 @@
 // Punctul de pornire al jocului „Mihai: Misiunea Stelară”
 import './ui/stil.css';
 import { Joc } from './joc/Joc';
-import { nivel1 } from './nivele/nivel1';
 
 const canvas = document.getElementById('scena') as HTMLCanvasElement;
 const joc = new Joc(canvas);
-joc.incarcaNivel(nivel1);
 joc.porneste();
 
 // Doar în timpul dezvoltării: acces la joc din consolă, pentru teste
@@ -24,10 +22,7 @@ async function ecranComplet() {
   }
 }
 
-const ecranStart = document.getElementById('ecran-start')!;
-document.getElementById('buton-start')!.addEventListener('click', () => {
-  ecranComplet();
-  ecranStart.style.display = 'none';
-  joc.reincepe(); // cronometrul pornește de abia acum
-  joc.arataMesaj('Ajunge la poarta turcoaz!', 2.5);
+// La prima atingere a unui buton din meniu trecem pe tot ecranul
+document.addEventListener('click', (e) => {
+  if ((e.target as HTMLElement).closest('#meniu button, #ecran-final button')) ecranComplet();
 });
