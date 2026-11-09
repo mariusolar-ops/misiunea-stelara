@@ -6,16 +6,17 @@ import { Jucator } from './Jucator';
 import { Catel } from './Catel';
 import { CameraUrmarire } from './CameraUrmarire';
 import { Nivel } from './Nivel';
-import { incarca, inregistreazaFinal, salveaza, type Progres } from './Salvare';
+import { incarca, inregistreazaFinal, salveaza, areToateSecretele, NR_STELE_SECRETE, type Progres } from './Salvare';
 import { vopsesteCatel } from './Catel';
 import { cautaAccesoriu, type Slot } from './Accesorii';
 import { Personalizare } from '../ui/Personalizare';
+import { Clasament } from '../ui/Clasament';
 import { sunete, seteazaSunet } from '../audio/Sunete';
 import { Intrari } from '../control/Intrari';
 import { pornesteAtingere } from '../control/Atingere';
 import { Hud } from '../ui/Hud';
 import { Meniu } from '../ui/Meniu';
-import { NIVELE } from '../nivele';
+import { NIVELE, NR_NIVELE_NORMALE, INDEX_SECRET } from '../nivele';
 
 const PAS_FIZICA = 1 / 120;   // fizica rulează în pași mici, ca să nu treacă prin platforme
 const INALTIME_CADERE = -25;  // sub înălțimea asta personajul „cade” și revine la steag
@@ -31,6 +32,8 @@ export class Joc {
   camera: CameraUrmarire;
   nivel: Nivel | null = null;
   private indexNivel = 0;
+  /** Ce nivel pornește butonul „Nivelul următor” */
+  private urmatorul = 1;
   private hud = new Hud();
   private meniu: Meniu;
   progres: Progres = incarca();
@@ -60,6 +63,7 @@ export class Joc {
       reincepe: () => this.joacaNivel(this.indexNivel),
       personalizeaza: () => this.personalizeaza(),
       comutaSunet: () => this.comutaSunet(),
+      clasament: () => new Clasament(this.progres, NIVELE, () => areToateSecretele(this.progres), () => this.arataMeniu()).arata(),
     });
 
     // Aspectul salvat (culori, accesorii, cățel) și sunetul
@@ -71,7 +75,7 @@ export class Joc {
     // Butoanele din joc și de pe ecranul de final
     document.getElementById('buton-pauza')!.addEventListener('click', () => this.pauza());
     document.getElementById('buton-din-nou')!.addEventListener('click', () => this.joacaNivel(this.indexNivel));
-    document.getElementById('buton-urmator')!.addEventListener('click', () => this.joacaNivel(this.indexNivel + 1));
+    document.getElementById('buton-urmator')!.addEventListener('click', () => this.joacaNivel(this.urmatorul));
     document.getElementById('buton-meniu-final')!.addEventListener('click', () => this.arataMeniu());
     // Dacă ieși din aplicație în timpul jocului, punem pauză singuri
     document.addEventListener('visibilitychange', () => { if (document.hidden) this.pauza(); });
@@ -154,7 +158,7 @@ export class Joc {
   private incarcaNivel(index: number) {
     if (this.nivel) this.grafica.scena.remove(this.nivel.grup);
     this.indexNivel = index;
-    this.nivel = new Nivel(NIVELE[index]);
+    this.nivel = new Nivel(NIVELE[index], this.progres.secrete.includes(index));
     this.grafica.scena.add(this.nivel.grup);
     (this.grafica.scena.background as THREE.Color).set(this.nivel.decor.fundal);
     this.cronometru = 0;
@@ -174,14 +178,38 @@ export class Joc {
     this.camera.sari(this.jucator.poz);
   }
 
+  /** Mihai a găsit steaua secretă din nivelul ăsta */
+  private gasesteSecret() {
+    const p = this.progres;
+    if (!p.secrete.includes(this.indexNivel)) p.secrete.push(this.indexNivel);
+    sunete.secret();
+    if (areToateSecretele(p)) {
+      // surpriza: accesoriul secret + nivelul secret
+      if (!p.cumparate.includes('aripi')) p.cumparate.push('aripi');
+      this.hud.arataMesaj('Toate stelele secrete! Ai deblocat o surpriză! ✨', 4);
+    } else {
+      this.hud.arataMesaj(`Stea secretă găsită! (${p.secrete.length}/${NR_STELE_SECRETE})`, 2.5);
+    }
+    salveaza(p); // o salvăm imediat, chiar dacă nu termini nivelul
+  }
+
   private terminaNivel() {
     const nivel = this.nivel!;
     this.stare = 'final';
     const { stele, record } = inregistreazaFinal(
-      this.progres, this.indexNivel, this.cronometru, nivel.monedeLuate, nivel.totalMonede, NIVELE.length);
+      this.progres, this.indexNivel, this.cronometru, nivel.monedeLuate, nivel.totalMonede, NR_NIVELE_NORMALE);
+    // după nivelul 5 urmează nivelul secret doar dacă a găsit toate stelele secrete
+    const dupa5 = this.indexNivel === NR_NIVELE_NORMALE - 1;
+    const secretDeschis = areToateSecretele(this.progres);
+    this.urmatorul = dupa5 && secretDeschis ? INDEX_SECRET : this.indexNivel + 1;
     this.hud.arataFinal({
       nume: nivel.def.nume, timp: this.cronometru, monede: nivel.monedeLuate, total: nivel.totalMonede,
-      stele, record, ultimul: this.indexNivel === NIVELE.length - 1,
+      stele, record,
+      ultimul: this.indexNivel === INDEX_SECRET || (dupa5 && !secretDeschis),
+      textUrmator: this.urmatorul === INDEX_SECRET ? 'Nivelul secret ✨' : 'Nivelul următor',
+      nota: dupa5 && !secretDeschis
+        ? `Ai terminat toate nivelurile! Dar ai găsit toate stelele secrete? (${this.progres.secrete.length}/${NR_STELE_SECRETE})`
+        : this.indexNivel === INDEX_SECRET ? 'Ai terminat nivelul secret! Ești un adevărat explorator! ✨' : undefined,
     });
   }
 
@@ -247,6 +275,7 @@ export class Joc {
       const ev = nivel.verifica(this.jucator.poz, this.timp);
       if (ev.monedeNoi) { this.hud.seteazaMonede(nivel.monedeLuate, nivel.totalMonede, true); sunete.moneda(); }
       if (ev.steagNou) { this.hud.arataMesaj('Steag atins!'); sunete.steag(); }
+      if (ev.secretNou) this.gasesteSecret();
       if (ev.final) { this.terminaNivel(); sunete.final(); }
 
       const unde = nivel.steaguri.some((s) => s.activ) ? 'la steag' : 'la start';

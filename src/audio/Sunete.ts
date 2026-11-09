@@ -50,5 +50,6 @@ export const sunete = {
   lava: () => { bip('sawtooth', 300, 90, 0.35, 0, 0.3); bip('triangle', 500, 160, 0.4, 0.05, 0.5); },
   final: () => [523, 659, 784, 659, 784, 1047].forEach((f, i) => bip('triangle', f, f, i === 5 ? 0.5 : 0.15, i * 0.13, 0.7)),
   cumparare: () => [784, 988, 1175, 1568].forEach((f, i) => bip('square', f, f, 0.09, i * 0.06, 0.25)),
+  secret: () => [659, 831, 988, 1319, 1661, 1976].forEach((f, i) => bip('sine', f, f * 1.01, 0.35, i * 0.08, 0.5)),
   click: () => bip('triangle', 700, 500, 0.05, 0, 0.4),
 };

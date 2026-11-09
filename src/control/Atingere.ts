@@ -53,7 +53,7 @@ export function pornesteAtingere(intrari: Intrari) {
 
   window.addEventListener('pointerdown', (e) => {
     // butoanele și panoul de personalizare se ocupă singure
-    if ((e.target as HTMLElement).closest('button, .panou')) return;
+    if ((e.target as HTMLElement).closest('button, input, .panou, .clasament')) return;
     if (degetJoystick === null && e.pointerType !== 'mouse' && eInZonaJoystick(e.clientX, e.clientY)) {
       degetJoystick = e.pointerId;
       const r = baza.getBoundingClientRect();

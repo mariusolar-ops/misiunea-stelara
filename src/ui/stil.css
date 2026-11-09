@@ -255,3 +255,55 @@ button.scoate { background: #3b4380; color: #fff; }
 .buton-instalare { position: absolute; bottom: 14px; right: max(16px, env(safe-area-inset-right)); font-size: 16px !important; padding: 8px 16px !important; }
 .pasi { text-align: left; font-size: 19px; line-height: 1.4; max-width: 620px; display: flex; flex-direction: column; gap: 8px; padding-left: 28px; }
 .pasi b { color: var(--turcoaz); }
+
+/* Nivelul și accesoriul secret */
+.card-nivel.secret { border-color: #d36bff; background: linear-gradient(#3a1f6b, #1d1045); }
+.card-nivel.secret .nr { color: #d36bff; }
+.stele-secrete { font-size: 18px; color: #d36bff; letter-spacing: 1px; }
+.stele-secrete .goale { color: #3a2f5b; }
+.card-accesoriu.secret { border-color: #d36bff; background: #2c1a5a; }
+.card-accesoriu .indiciu { font-size: 11px; opacity: 0.8; line-height: 1.1; }
+.rand-butoane .mic-buton { font-size: 17px; padding: 10px 14px; }
+.coloana-butoane { min-width: 320px; }
+.card-nivel { width: 112px; }
+
+/* Clasamentul */
+.clasament {
+  width: 100%; height: 100%; display: flex; gap: 14px; padding: 4px 4px 0 max(130px, env(safe-area-inset-left));
+}
+.clasament h2 { font-size: 24px !important; text-align: left; }
+.coloana-lista { flex: 1.3; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.coloana-coduri {
+  flex: 1; display: flex; flex-direction: column; gap: 6px; text-align: left; overflow-y: auto; touch-action: pan-y;
+  background: rgba(18, 24, 69, 0.9); border: 2px solid rgba(46, 230, 214, 0.4); border-radius: 16px; padding: 10px;
+}
+.taburi-mici button { font-size: 15px; padding: 6px 4px; }
+.subtitlu { font-size: 14px; opacity: 0.75; text-align: left; }
+.lista { list-style: none; overflow-y: auto; touch-action: pan-y; display: flex; flex-direction: column; gap: 5px; flex: 1; }
+.lista li {
+  display: flex; align-items: center; gap: 10px; background: #232a6a; border-radius: 12px; padding: 6px 10px;
+  font-size: 18px; font-weight: 700;
+}
+.lista li.tu { background: #1e5a63; border: 2px solid var(--turcoaz); }
+.lista li.gol { background: none; font-size: 14px; font-weight: 500; opacity: 0.7; justify-content: center; }
+.lista .loc { width: 30px; text-align: center; }
+.lista .nume-rand { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lista .nume-rand small { opacity: 0.7; font-weight: 500; }
+.lista .valoare { font-variant-numeric: tabular-nums; }
+.lista .sterge, .lista .sterge-loc { width: 30px; height: 30px; flex-shrink: 0; }
+.lista .sterge { border: none; border-radius: 8px; background: #3b4380; color: #fff; font-size: 14px; pointer-events: auto; }
+.coloana-coduri label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; font-weight: 700; }
+.coloana-coduri input {
+  font-size: 16px; padding: 8px 10px; border-radius: 10px; border: 2px solid #3b4380; background: #0b0f2e; color: #fff;
+  user-select: text; -webkit-user-select: text; pointer-events: auto; touch-action: manipulation;
+}
+.eticheta-mica { font-size: 14px; font-weight: 700; }
+.cod {
+  font-family: ui-monospace, monospace; font-size: 12px; word-break: break-all; background: #0b0f2e;
+  border-radius: 10px; padding: 6px 8px; user-select: all; -webkit-user-select: all; color: var(--turcoaz);
+}
+.coloana-coduri .rand-butoane .mic-buton { font-size: 15px; padding: 7px 10px; flex: 1; }
+.coloana-coduri .mare { font-size: 18px; padding: 9px; }
+.mesaj-cod { font-size: 14px; color: #ffd23f; min-height: 18px; }
+.rand-butoane .mic-buton { white-space: nowrap; }
+.buton-instalare { bottom: auto !important; top: 14px; right: auto !important; left: max(16px, env(safe-area-inset-left)); }

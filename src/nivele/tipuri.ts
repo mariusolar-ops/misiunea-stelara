@@ -19,4 +19,8 @@ export interface DefinitieNivel {
   monede: Punct[];
   /** Poarta de final */
   final: { poz: Punct; directie: number };
+  /** Steaua secretă ascunsă în nivel (opțional) */
+  secret?: Punct;
+  /** True pentru nivelul secret (apare doar după ce strângi toate stelele secrete) */
+  esteSecret?: boolean;
 }

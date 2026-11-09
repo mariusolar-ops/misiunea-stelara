@@ -28,6 +28,7 @@ export const nivel3: DefinitieNivel = {
     bloc(0, 5, -51, 4, 4, ALB),
     bloc(0, 5, -57, 3, 3, METAL),
     trambulina(0, 3, -62, 3, 3),
+    bloc(5, 8, -62, 2, 2, METAL),             // ascunzătoare SECRETĂ: sari în dreapta de pe trambulină
     bloc(0, 8, -68, 4, 4, ALB),
     bloc(0, 8, -76, 7, 7, C.turcoaz),       // steagul 2
 
@@ -70,4 +71,7 @@ export const nivel3: DefinitieNivel = {
   ],
 
   final: { poz: [41, 15, -107], directie: ÎNAINTE },
+
+  // Steaua secretă (adună-le pe toate 5 ca să deblochezi o surpriză!)
+  secret: [5, 9.2, -62],
 };

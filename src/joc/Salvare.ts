@@ -29,6 +29,27 @@ export interface Progres {
   echipate: Partial<Record<Slot, string>>;
   /** Sunetul pornit sau oprit */
   sunet: boolean;
+  /** În ce niveluri a găsit steaua secretă (numerele nivelurilor: 0, 1, ...) */
+  secrete: number[];
+  /** Numele jucătorului (apare în clasament) */
+  nume: string;
+  /** Scorurile prietenilor, adăugate cu „codul de scor” */
+  prieteni: Prieten[];
+}
+
+/** Un prieten din clasament: numele lui, cel mai bun timp și stelele pe fiecare nivel */
+export interface Prieten {
+  nume: string;
+  timpi: (number | null)[];
+  stele: number[];
+}
+
+/** Câte stele secrete există (câte una în fiecare nivel normal) */
+export const NR_STELE_SECRETE = 5;
+
+/** A găsit toate stelele secrete? (atunci se deschide nivelul secret și accesoriul secret) */
+export function areToateSecretele(p: Progres) {
+  return p.secrete.length >= NR_STELE_SECRETE;
 }
 
 function progresNou(): Progres {
@@ -36,6 +57,7 @@ function progresNou(): Progres {
     deblocate: 1, nivele: {}, portofel: 0,
     culori: { ...CULORI_IMPLICITE }, culoareCatel: 0xb8692a,
     cumparate: [], echipate: {}, sunet: true,
+    secrete: [], nume: 'Mihai', prieteni: [],
   };
 }
 

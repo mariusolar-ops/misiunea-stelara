@@ -152,6 +152,11 @@ export class Personaj {
     const t = performance.now() / 1000;
     for (const o of this.sloturi.spate.children) {
       if (o.userData.flutura) o.rotation.x = 0.08 + viteza * 0.7 + (inAer ? 0.5 : 0) + Math.sin(t * 9) * 0.05 * (viteza + 0.3);
+      if (o.userData.aripi) {
+        // aripile bat mai repede în aer
+        const bataie = Math.sin(t * (inAer ? 14 : 4)) * (inAer ? 0.5 : 0.2);
+        for (const a of o.children) a.rotation.y = (a.userData.parte as number) * (-0.35 + bataie);
+      }
       const f = o.userData.flacara as THREE.Object3D | undefined;
       if (f) f.scale.y = (inAer ? 1.6 : 0.7) + Math.sin(t * 30) * 0.25;
     }

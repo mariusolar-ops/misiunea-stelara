@@ -22,10 +22,15 @@ Actualizările vin singure: când telefonul are internet și deschizi jocul, ia 
 - Fără multiplayer, fără chat, fără conturi.
 - Fără reclame și fără cumpărături cu bani reali (magazinul folosește doar monedele din joc).
 - Nu colectează date și nu trimite nimic pe internet. Progresul stă doar pe telefon (localStorage).
+- Clasamentul cu prietenii merge prin **coduri de scor**: jucătorul își copiază codul (nume + timpi + stele)
+  și îl trimite el, de mână, cui vrea (ex. pe WhatsApp). Jocul nu trimite nimic singur.
 
 ## Ce conține
 
 - 5 niveluri: Baza de pe Lună, Inelul de asteroizi, Stația spațială, Luna vulcanică, Lângă gaura neagră
+- 5 stele secrete mov (câte una ascunsă în fiecare nivel). Toate 5 deblochează accesoriul secret
+  „Aripi de stea” și nivelul secret „Nebuloasa secretă”
+- Clasament (total stele + cel mai bun timp pe fiecare nivel) cu prietenii adăugați prin cod
 - Platforme care se mișcă, blocuri care dispar, lavă, trambuline, benzi rulante
 - Steaguri de checkpoint, monede, cronometru, stele (1–3) și recorduri
 - Personalizare: culori + 8 accesorii din cuburi, un cățeluș care te urmează

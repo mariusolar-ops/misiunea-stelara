@@ -6,11 +6,13 @@ import { creeazaPlatforma } from '../lume/platforme';
 import { Steag } from '../lume/Steag';
 import { Moneda } from '../lume/Moneda';
 import { Poarta } from '../lume/Poarta';
+import { SteaSecreta } from '../lume/SteaSecreta';
 import { creeazaDecor, type Decor } from '../lume/Decor';
 import type { DefinitieNivel } from '../nivele/tipuri';
 
 export interface Evenimente {
   steagNou: boolean;
+  secretNou: boolean;
   monedeNoi: number;
   final: boolean;
 }
@@ -21,13 +23,15 @@ export class Nivel {
   steaguri: Steag[];
   monede: Moneda[];
   poarta: Poarta;
+  steaSecreta: SteaSecreta | null = null;
   decor: Decor;
   /** Locul unde revii când cazi (start sau ultimul steag) */
   punctReintoarcere: THREE.Vector3;
   directieReintoarcere: number;
   monedeLuate = 0;
 
-  constructor(public def: DefinitieNivel) {
+  /** @param secretGasit dacă steaua secretă a acestui nivel a fost deja găsită */
+  constructor(public def: DefinitieNivel, secretGasit = false) {
     this.platforme = def.platforme.map((d) => creeazaPlatforma(d));
     this.steaguri = def.steaguri.map((s) => new Steag(new THREE.Vector3(...s.poz), s.directie));
     this.monede = def.monede.map((m) => new Moneda(new THREE.Vector3(...m)));
@@ -36,6 +40,10 @@ export class Nivel {
     for (const p of this.platforme) this.grup.add(p.obiect);
     for (const s of this.steaguri) this.grup.add(s.obiect);
     for (const m of this.monede) this.grup.add(m.obiect);
+    if (def.secret) {
+      this.steaSecreta = new SteaSecreta(new THREE.Vector3(...def.secret), secretGasit);
+      this.grup.add(this.steaSecreta.obiect);
+    }
     this.decor = creeazaDecor(def.tema);
     this.grup.add(this.poarta.obiect, this.decor.obiect);
 
@@ -47,7 +55,8 @@ export class Nivel {
 
   /** Verifică ce a atins personajul în acest cadru */
   verifica(poz: THREE.Vector3, timp: number): Evenimente {
-    const ev: Evenimente = { steagNou: false, monedeNoi: 0, final: false };
+    const ev: Evenimente = { steagNou: false, secretNou: false, monedeNoi: 0, final: false };
+    if (this.steaSecreta?.atinsa(poz)) { this.steaSecreta.ia(timp); ev.secretNou = true; }
     for (const m of this.monede) {
       if (!m.luata && m.atinsa(poz)) { m.ia(timp); this.monedeLuate++; ev.monedeNoi++; }
     }
@@ -73,6 +82,7 @@ export class Nivel {
     for (const m of this.monede) if (m.obiect.visible) m.actualizeaza(timp);
     for (const p of this.platforme) p.anima(timp);
     this.poarta.actualizeaza(timp);
+    this.steaSecreta?.actualizeaza(timp);
     this.decor.anima?.(timp);
   }
 }

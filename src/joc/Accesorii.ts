@@ -13,6 +13,8 @@ export interface Accesoriu {
   pret: number;
   slot: Slot;
   construieste: () => THREE.Object3D;
+  /** Accesoriu secret: nu se cumpără, se câștigă (cu toate stelele secrete) */
+  secret?: boolean;
 }
 
 const CUB = new THREE.BoxGeometry(1, 1, 1);
@@ -127,6 +129,26 @@ export const CATALOG: Accesoriu[] = [
       // zimții coroanei
       for (const [x, z] of [[-0.27, 0.27], [0.27, 0.27], [-0.27, -0.27], [0.27, -0.27], [0, 0.27], [0, -0.27]])
         g.add(cub(0.08, 0.12, 0.08, aur, x, 0.55, z, { emissive: 0x5a4000 }));
+      return g;
+    },
+  },
+  {
+    id: 'aripi', nume: 'Aripi de stea', emoji: '✨', pret: 0, slot: 'spate', secret: true,
+    construieste: () => {
+      // două aripi din cuburi turcoaz și aurii, care bat ușor din aripi
+      const g = new THREE.Group();
+      for (const parte of [-1, 1]) {
+        const aripa = new THREE.Group();
+        aripa.position.set(parte * 0.12, 0.25, -0.08);
+        const pene: [number, number, number, number][] = [
+          [0.3, 0.42, 0x2ee6d6, 0], [0.62, 0.32, 0x9ffcf3, 0.06], [0.9, 0.22, 0xffd23f, 0.12],
+        ];
+        for (const [x, h, c, y] of pene)
+          aripa.add(cub(0.34, h, 0.05, c, parte * x, y, 0, { emissive: c, emissiveIntensity: 0.25 }));
+        aripa.userData.parte = parte;
+        g.add(aripa);
+      }
+      g.userData.aripi = true;
       return g;
     },
   },

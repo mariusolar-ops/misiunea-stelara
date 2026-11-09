@@ -24,6 +24,7 @@ export const nivel4: DefinitieNivel = {
     bloc(-1, 0, -15, 2, 2, STANCA2),
     bloc(2.5, 0, -19, 2, 2, STANCA2),
     bloc(0, 0, -25, 4, 4, STANCA),
+    bloc(5, 1, -25, 1.5, 1.5, STANCA2),                 // ascunzătoare SECRETĂ, în dreapta
     bloc(0, 0, -32, 7, 7, C.turcoaz),                   // steagul 1
 
     // --- Partea 2: blocuri care dispar, peste lavă ---
@@ -81,4 +82,7 @@ export const nivel4: DefinitieNivel = {
   ],
 
   final: { poz: [31, 5.2, -89], directie: ÎNAINTE },
+
+  // Steaua secretă (adună-le pe toate 5 ca să deblochezi o surpriză!)
+  secret: [5, 2.2, -25],
 };

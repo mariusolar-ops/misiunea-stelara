@@ -2,7 +2,7 @@
 // Fiecare decor e făcut din puține obiecte, ca să nu încetinească telefonul.
 import * as THREE from 'three';
 
-export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura';
+export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -19,6 +19,7 @@ export function creeazaDecor(tema: Tema): Decor {
     case 'statie': return decorStatie();
     case 'vulcan': return decorVulcan();
     case 'gaura': return decorGauraNeagra();
+    case 'nebuloasa': return decorNebuloasa();
   }
 }
 
@@ -165,4 +166,29 @@ function decorGauraNeagra(): Decor {
     fundal: 0x0a0418,
     anima: (timp) => { disc.rotation.z = timp * 0.15; halou.lookAt(0, 10, 0); },
   };
+}
+
+function decorNebuloasa(): Decor {
+  // Nori colorați de gaz (sfere mari, aproape transparente) – arată ca o nebuloasă
+  const grup = new THREE.Group();
+  const nori: [number, number, number, number, number][] = [
+    [-120, 20, -200, 70, 0xff5fa8], [90, -10, -230, 80, 0x8a6cff], [0, 60, -300, 90, 0x2ee6d6],
+    [-60, -60, -150, 60, 0xffb04a], [150, 50, -120, 55, 0xd36bff],
+  ];
+  for (const [x, y, z, r, c] of nori) {
+    const nor = new THREE.Mesh(
+      new THREE.SphereGeometry(r, 16, 12),
+      new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.18, depthWrite: false }),
+    );
+    nor.position.set(x, y, z);
+    grup.add(nor);
+    // un miez mai luminos în fiecare nor
+    const miez = new THREE.Mesh(
+      new THREE.SphereGeometry(r * 0.45, 12, 8),
+      new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.25, depthWrite: false }),
+    );
+    miez.position.set(x, y, z);
+    grup.add(miez);
+  }
+  return { obiect: grup, fundal: 0x1a0b33, anima: (timp) => { grup.rotation.y = Math.sin(timp * 0.05) * 0.1; } };
 }

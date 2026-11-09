@@ -39,17 +39,19 @@ export class Hud {
   }
 
   /** Ecranul „Felicitări!”, cu stele (1–3), timp, monede și butoanele potrivite */
-  arataFinal(o: { nume: string; timp: number; monede: number; total: number; stele: number; record: boolean; ultimul: boolean }) {
+  arataFinal(o: { nume: string; timp: number; monede: number; total: number; stele: number; record: boolean; ultimul: boolean; textUrmator?: string; nota?: string }) {
     el('final-titlu').textContent = o.ultimul ? 'Bravo, cosmonaut Mihai!' : 'Felicitări, Mihai!';
     el('final-nivel').textContent = o.ultimul
       ? 'Ai terminat toate nivelurile! 🚀'
       : `Ai terminat „${o.nume}”`;
+    if (o.nota) el('final-nivel').textContent = o.nota;
     el('final-stele').innerHTML = [1, 2, 3]
       .map((i) => `<span class="stea${i <= o.stele ? ' plina' : ''}">★</span>`).join('');
     el('final-timp').textContent = formatTimp(o.timp);
     el('final-monede').textContent = `${o.monede}/${o.total}`;
     el('final-record').textContent = o.record ? 'Record nou de timp!' : '';
     el('buton-urmator').classList.toggle('ascuns', o.ultimul);
+    el('buton-urmator').textContent = o.textUrmator ?? 'Nivelul următor';
     this.ecranFinal.classList.add('vizibil');
   }
 

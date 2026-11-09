@@ -16,6 +16,7 @@ export const nivel1: DefinitieNivel = {
   platforme: [
     // --- Partea 1: start, goluri mici și scări ---
     bloc(0, 0, 0, 10, 10, C.gri),
+    bloc(0, 0, 9, 2, 2, C.mov),                  // ascunzătoare SECRETĂ, în spatele startului
     bloc(0, 0, -8.5, 3, 3, C.lime),
     bloc(0, 0, -13.5, 3, 3, C.lime),
     bloc(0, 1, -18.5, 4, 3, C.portocaliu),
@@ -77,4 +78,7 @@ export const nivel1: DefinitieNivel = {
   ],
 
   final: { poz: [12, 9.4, -75], directie: DREAPTA },
+
+  // Steaua secretă (adună-le pe toate 5 ca să deblochezi o surpriză!)
+  secret: [0, 1.2, 9],
 };

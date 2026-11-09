@@ -31,6 +31,7 @@ export const nivel2: DefinitieNivel = {
     mobila(bloc(4, 4.6, -53, 2.5, 2.5, C.portocaliu), [0, 0, -5], 4),
     bloc(4, 4.6, -63, 3, 3, PIATRA),
     bloc(4, 4.6, -70, 7, 7, C.turcoaz),                     // steagul 2
+    bloc(-3.5, 5.4, -70, 2, 2, PIATRA2),                    // ascunzătoare SECRETĂ, în stânga steagului 2
 
     // --- Partea 3: spre dreapta, trei pietre care alunecă pe rând ---
     mobila(bloc(10, 4.6, -72, 2.5, 2.5, C.portocaliu), [0, 0, 4], 3),
@@ -76,4 +77,7 @@ export const nivel2: DefinitieNivel = {
   ],
 
   final: { poz: [17, 10, -91], directie: DREAPTA },
+
+  // Steaua secretă (adună-le pe toate 5 ca să deblochezi o surpriză!)
+  secret: [-3.5, 6.6, -70],
 };

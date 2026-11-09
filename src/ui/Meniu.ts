@@ -1,6 +1,7 @@
 // Meniurile jocului: principal, alegerea nivelului și pauza.
 // Sunt construite din cod, în elementul #meniu.
-import type { Progres } from '../joc/Salvare';
+import { areToateSecretele, NR_STELE_SECRETE, type Progres } from '../joc/Salvare';
+import { NR_NIVELE_NORMALE, INDEX_SECRET } from '../nivele';
 import type { DefinitieNivel } from '../nivele/tipuri';
 import { formatTimp } from './Hud';
 import { sunete } from '../audio/Sunete';
@@ -12,6 +13,7 @@ export interface ActiuniMeniu {
   reincepe(): void;
   personalizeaza(): void;
   comutaSunet(): boolean;
+  clasament(): void;
 }
 
 const container = document.getElementById('meniu')!;
@@ -42,12 +44,19 @@ export class Meniu {
     const coloana = document.createElement('div');
     coloana.className = 'coloana-butoane';
     // „Joacă” pornește primul nivel neterminat (sau ultimul, dacă le-ai terminat pe toate)
-    const urmator = Math.min(p.deblocate, this.nivele.length) - 1;
+    const urmator = Math.min(p.deblocate, NR_NIVELE_NORMALE) - 1;
     coloana.append(
       buton('JOACĂ', 'mare', () => this.actiuni.joacaNivel(urmator)),
+    );
+    // sub JOACĂ: trei butoane pe un rând
+    const rand = document.createElement('div');
+    rand.className = 'rand-butoane';
+    rand.append(
       buton('Alege nivelul', 'mic-buton', () => this.arataNivele(p)),
       buton('Personalizează', 'mic-buton', () => this.actiuni.personalizeaza()),
+      buton('🏆 Clasament', 'mic-buton', () => this.actiuni.clasament()),
     );
+    coloana.append(rand);
     container.append(coloana);
     // butonul de instalare (doar dacă nu e deja instalat ca aplicație)
     if (!esteInstalat()) {
@@ -69,17 +78,25 @@ export class Meniu {
     const rand = document.createElement('div');
     rand.className = 'rand-nivele';
     this.nivele.forEach((n, i) => {
-      const deschis = i < p.deblocate;
+      const esteSecret = i === INDEX_SECRET;
+      const deschis = esteSecret ? areToateSecretele(p) : i < p.deblocate;
       const rez = p.nivele[i];
       const card = document.createElement('button');
-      card.className = 'card-nivel' + (deschis ? '' : ' blocat');
+      card.className = 'card-nivel' + (deschis ? '' : ' blocat') + (esteSecret ? ' secret' : '');
       card.disabled = !deschis;
-      card.innerHTML = deschis
-        ? `<span class="nr">${i + 1}</span><span class="nume">${n.nume}</span>
+      if (deschis) {
+        card.innerHTML = `<span class="nr">${esteSecret ? '✨' : i + 1}</span><span class="nume">${n.nume}</span>
            <span class="stele">${stele(rez?.stele ?? 0)}</span>
-           <span class="timp">${rez ? 'Record: ' + formatTimp(rez.timp) : ''}</span>`
-        : `<span class="nr">${i + 1}</span><span class="nume">${n.nume}</span><span class="lacat">🔒</span><span class="timp"></span>`;
-      if (deschis) card.addEventListener('click', () => this.actiuni.joacaNivel(i));
+           <span class="timp">${rez ? 'Record: ' + formatTimp(rez.timp) : ''}</span>`;
+        card.addEventListener('click', () => this.actiuni.joacaNivel(i));
+      } else if (esteSecret) {
+        // nivelul secret: doar semne de întrebare și câte stele secrete ai găsit
+        card.innerHTML = `<span class="nr">?</span><span class="nume">Nivel secret</span>
+           <span class="stele-secrete">${'★'.repeat(p.secrete.length)}<span class="goale">${'★'.repeat(NR_STELE_SECRETE - p.secrete.length)}</span></span>
+           <span class="timp">Găsește stelele mov!</span>`;
+      } else {
+        card.innerHTML = `<span class="nr">${i + 1}</span><span class="nume">${n.nume}</span><span class="lacat">🔒</span><span class="timp"></span>`;
+      }
       rand.append(card);
     });
     container.append(rand);

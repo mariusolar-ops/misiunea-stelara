@@ -98,7 +98,13 @@ export class Personalizare {
       const cumparat = p.cumparate.includes(a.id);
       const purtat = p.echipate[a.slot] === a.id;
       const card = document.createElement('div');
-      card.className = 'card-accesoriu' + (purtat ? ' purtat' : '');
+      card.className = 'card-accesoriu' + (purtat ? ' purtat' : '') + (a.secret ? ' secret' : '');
+      if (a.secret && !cumparat) {
+        // accesoriul secret: nu se vinde, se câștigă cu toate stelele secrete
+        card.innerHTML = `<span class="emoji">❓</span><span class="nume">Secret</span><span class="indiciu">Găsește toate stelele mov ascunse</span>`;
+        grila.append(card);
+        continue;
+      }
       card.innerHTML = `<span class="emoji">${a.emoji}</span><span class="nume">${a.nume}</span>`;
       const b = document.createElement('button');
       if (!cumparat) {
@@ -128,7 +134,7 @@ export class Personalizare {
       grila.append(card);
     }
     el.append(grila);
-    if (p.portofel < Math.min(...CATALOG.filter((a) => !p.cumparate.includes(a.id)).map((a) => a.pret))) {
+    if (p.portofel < Math.min(...CATALOG.filter((a) => !a.secret && !p.cumparate.includes(a.id)).map((a) => a.pret))) {
       const sfat = document.createElement('p');
       sfat.className = 'sfat';
       sfat.textContent = 'Strânge monede în niveluri ca să cumperi accesorii!';
