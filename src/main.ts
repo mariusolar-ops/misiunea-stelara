@@ -2,10 +2,14 @@
 import './ui/stil.css';
 import { Joc } from './joc/Joc';
 import { pregatesteSunetul } from './audio/Sunete';
+import { pornestePwa } from './pwa/Instalare';
 
 const canvas = document.getElementById('scena') as HTMLCanvasElement;
 const joc = new Joc(canvas);
 joc.porneste();
+
+// Aplicație instalabilă + offline. Când apare posibilitatea de instalare, reîmprospătăm meniul.
+pornestePwa(() => joc.reimprospateazaMeniu());
 
 // Doar în timpul dezvoltării: acces la joc din consolă, pentru teste
 if (import.meta.env.DEV) (window as unknown as { joc: Joc }).joc = joc;

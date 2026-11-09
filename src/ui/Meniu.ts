@@ -4,6 +4,7 @@ import type { Progres } from '../joc/Salvare';
 import type { DefinitieNivel } from '../nivele/tipuri';
 import { formatTimp } from './Hud';
 import { sunete } from '../audio/Sunete';
+import { esteInstalat, instaleaza } from '../pwa/Instalare';
 
 export interface ActiuniMeniu {
   joacaNivel(index: number): void;
@@ -48,6 +49,12 @@ export class Meniu {
       buton('Personalizează', 'mic-buton', () => this.actiuni.personalizeaza()),
     );
     container.append(coloana);
+    // butonul de instalare (doar dacă nu e deja instalat ca aplicație)
+    if (!esteInstalat()) {
+      container.append(buton('📲 Instalează pe telefon', 'mic-buton buton-instalare', async () => {
+        if (!(await instaleaza())) this.arataInstructiuni(p);
+      }));
+    }
     // butonul de sunet, în colțul din dreapta-sus
     const sunet = buton(p.sunet ? '🔊' : '🔇', 'buton-sunet', () => {
       sunet.textContent = this.actiuni.comutaSunet() ? '🔊' : '🔇';
@@ -76,6 +83,19 @@ export class Meniu {
       rand.append(card);
     });
     container.append(rand);
+  }
+
+  /** Pașii de instalare, pentru părinte (când Chrome nu oferă butonul direct) */
+  arataInstructiuni(p: Progres) {
+    container.innerHTML = `
+      <h2>Instalează pe telefon</h2>
+      <ol class="pasi">
+        <li>Apasă pe <b>cele 3 puncte ⋮</b> din dreapta-sus în Chrome.</li>
+        <li>Alege <b>„Instalează aplicația”</b> sau <b>„Adaugă pe ecranul de pornire”</b>.</li>
+        <li>Apasă <b>„Instalează”</b>.</li>
+        <li>Iconița cu Mihai apare pe ecran. De acum jocul merge și <b>fără internet</b>!</li>
+      </ol>`;
+    container.append(buton('‹ Înapoi', 'mic-buton inapoi', () => this.arataPrincipal(p)));
   }
 
   arataPauza(p: Progres) {

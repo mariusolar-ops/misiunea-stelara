@@ -1,0 +1,17 @@
+{
+  "name": "Mihai: Misiunea Stelară",
+  "short_name": "Mihai",
+  "description": "Un joc de sărituri prin spațiu, făcut pentru Mihai.",
+  "lang": "ro",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0b0f2e",
+  "theme_color": "#0b0f2e",
+  "icons": [
+    { "src": "iconite/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "iconite/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "iconite/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

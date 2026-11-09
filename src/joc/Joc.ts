@@ -42,6 +42,8 @@ export class Joc {
   private elInterfata = document.getElementById('interfata')!;
   private elSunet = document.getElementById('buton-sunet')!;
   private elFps = document.getElementById('fps')!;
+  /** Contorul de FPS apare doar dacă adresa conține ?fps (pentru teste) */
+  private aratFps = new URLSearchParams(location.search).has('fps');
   private cadre = 0;
   private timpFps = 0;
 
@@ -84,6 +86,11 @@ export class Joc {
     this.hud.ascundeFinal();
     this.elInterfata.classList.add('ascuns');
     this.meniu.arataPrincipal(this.progres);
+  }
+
+  /** Redesenează meniul principal (ex. când apare butonul de instalare) */
+  reimprospateazaMeniu() {
+    if (this.stare === 'meniu') this.meniu.arataPrincipal(this.progres);
   }
 
   joacaNivel(index: number) {
@@ -267,7 +274,7 @@ export class Joc {
     this.cadre++;
     this.timpFps += dt;
     if (this.timpFps >= 1) {
-      this.elFps.textContent = `${Math.round(this.cadre / this.timpFps)} FPS`;
+      if (this.aratFps) this.elFps.textContent = `${Math.round(this.cadre / this.timpFps)} FPS`;
       this.cadre = 0;
       this.timpFps = 0;
     }

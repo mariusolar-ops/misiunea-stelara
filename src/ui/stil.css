@@ -250,3 +250,8 @@ button.scoate { background: #3b4380; color: #fff; }
 .card-accesoriu .moneda-mica, .portofel .moneda-mica { box-shadow: inset -2px -2px 0 #d9a400; border: 1.5px solid #a87e00; }
 .card-accesoriu { padding: 6px 4px; }
 .card-accesoriu .emoji { font-size: 26px; }
+
+/* Instalare */
+.buton-instalare { position: absolute; bottom: 14px; right: max(16px, env(safe-area-inset-right)); font-size: 16px !important; padding: 8px 16px !important; }
+.pasi { text-align: left; font-size: 19px; line-height: 1.4; max-width: 620px; display: flex; flex-direction: column; gap: 8px; padding-left: 28px; }
+.pasi b { color: var(--turcoaz); }

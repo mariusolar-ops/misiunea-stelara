@@ -4,8 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host",
-    "build": "tsc --noEmit && vite build",
+    "dev": "node scripts/genereaza-iconite.mjs && vite --host",
+    "iconite": "node scripts/genereaza-iconite.mjs",
+    "build": "node scripts/genereaza-iconite.mjs && tsc --noEmit && vite build",
     "preview": "vite preview --host"
   },
   "dependencies": {
