@@ -194,3 +194,59 @@ button:disabled { opacity: 0.45; }
 .rand-butoane { display: flex; gap: 12px; align-items: center; }
 #final-record { color: #ffd23f; font-weight: 800; min-height: 0; }
 #final-record:empty { display: none; }
+
+/* Ecranul de personalizare: panou în dreapta, personajul se vede în stânga */
+#meniu.lateral {
+  background: linear-gradient(90deg, transparent 0%, transparent 42%, rgba(11, 15, 46, 0.55) 46%);
+  align-items: flex-end; padding: 10px max(14px, env(safe-area-inset-right)) 10px 10px;
+}
+.panou {
+  width: min(56vw, 560px); height: 100%; display: flex; flex-direction: column; gap: 8px;
+  background: rgba(18, 24, 69, 0.92); border: 3px solid var(--turcoaz); border-radius: 20px; padding: 10px 14px;
+}
+.panou .antet { display: flex; justify-content: space-between; align-items: center; }
+.panou h2 { font-size: 24px !important; }
+.taburi { display: flex; gap: 8px; }
+.taburi button {
+  flex: 1; font-size: 18px; font-weight: 800; padding: 8px; border-radius: 12px; border: none;
+  background: #2a3170; color: #fff; pointer-events: auto;
+}
+.taburi button.activ { background: var(--turcoaz); color: var(--fundal); }
+.continut { flex: 1; overflow-y: auto; touch-action: pan-y; display: flex; flex-direction: column; gap: 8px; padding: 2px; }
+.panou .gata { padding: 8px; font-size: 22px; }
+.rand-culori { display: flex; align-items: center; gap: 10px; }
+.eticheta-culoare { width: 86px; text-align: left; font-size: 16px; font-weight: 700; flex-shrink: 0; }
+.bule { display: flex; flex-wrap: wrap; gap: 7px; }
+.bula {
+  width: 34px; height: 34px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.25); pointer-events: auto;
+}
+.bula.aleasa { border-color: #fff; box-shadow: 0 0 0 3px var(--turcoaz); }
+.grila-magazin { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.card-accesoriu {
+  background: #232a6a; border-radius: 14px; padding: 8px 4px; border: 2px solid transparent;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.card-accesoriu.purtat { border-color: var(--turcoaz); }
+.card-accesoriu .emoji { font-size: 30px; }
+.card-accesoriu .nume { font-size: 12px; font-weight: 700; line-height: 1.1; min-height: 26px; }
+.card-accesoriu button {
+  width: 100%; border: none; border-radius: 10px; padding: 6px 2px; font-size: 15px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; gap: 4px; pointer-events: auto;
+}
+.card-accesoriu .moneda-mica { width: 14px; height: 14px; }
+button.cumpara { background: #ffd23f; color: #3a2a00; }
+button.pune { background: var(--turcoaz); color: var(--fundal); }
+button.scoate { background: #3b4380; color: #fff; }
+.sfat { font-size: 14px; opacity: 0.8; }
+
+/* Butonul de sunet */
+.buton-sunet {
+  width: 52px; height: 52px; border-radius: 14px; font-size: 26px; pointer-events: auto;
+  background: rgba(11, 15, 46, 0.65); border: 2px solid rgba(46, 230, 214, 0.4); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+#buton-sunet { position: absolute; top: 10px; left: calc(max(12px, env(safe-area-inset-left)) + 62px); }
+#meniu .buton-sunet { position: absolute; top: 14px; right: max(16px, env(safe-area-inset-right)); }
+.card-accesoriu .moneda-mica, .portofel .moneda-mica { box-shadow: inset -2px -2px 0 #d9a400; border: 1.5px solid #a87e00; }
+.card-accesoriu { padding: 6px 4px; }
+.card-accesoriu .emoji { font-size: 26px; }

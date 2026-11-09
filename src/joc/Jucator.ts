@@ -22,6 +22,8 @@ export class Jucator {
   /** Împingerea de la banda rulantă (se pune la fiecare pas cât stai pe bandă) */
   impingere = new THREE.Vector3();
   peSol = false;
+  /** Devine true când personajul sare (pentru sunet); Joc îl resetează */
+  aSarit = false;
   private platformaSub: Platforma | null = null;
   private timpInAer = 0;
   private timpDeLaSari = 99;
@@ -76,6 +78,7 @@ export class Jucator {
     this.timpInAer = this.peSol ? 0 : this.timpInAer + dt;
     if (this.timpDeLaSari < TIMP_MEMORIE_SARI && this.timpInAer < TIMP_COYOTE) {
       this.viteza.y = VITEZA_SARITURA;
+      this.aSarit = true;
       this.timpDeLaSari = 99;
       this.timpInAer = TIMP_COYOTE; // nu mai sare a doua oară din aer
       this.peSol = false;

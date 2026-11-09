@@ -96,3 +96,9 @@ export class Catel {
     this.coada.rotation.y = Math.sin(timp * 14) * 0.5;
   }
 }
+
+/** Schimbă blana cățelului (urechile și coada ies puțin mai închise) */
+export function vopsesteCatel(culoare: number) {
+  materiale.get(MARO)?.color.set(culoare);
+  materiale.get(MARO_INCHIS)?.color.set(culoare).multiplyScalar(0.65);
+}

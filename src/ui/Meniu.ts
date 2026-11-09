@@ -3,11 +3,14 @@
 import type { Progres } from '../joc/Salvare';
 import type { DefinitieNivel } from '../nivele/tipuri';
 import { formatTimp } from './Hud';
+import { sunete } from '../audio/Sunete';
 
 export interface ActiuniMeniu {
   joacaNivel(index: number): void;
   continua(): void;
   reincepe(): void;
+  personalizeaza(): void;
+  comutaSunet(): boolean;
 }
 
 const container = document.getElementById('meniu')!;
@@ -18,7 +21,7 @@ function buton(text: string, clasa: string, apasare: () => void, dezactivat = fa
   b.className = clasa;
   b.innerHTML = text;
   b.disabled = dezactivat;
-  b.addEventListener('click', apasare);
+  b.addEventListener('click', () => { sunete.click(); apasare(); });
   return b;
 }
 
@@ -42,9 +45,15 @@ export class Meniu {
     coloana.append(
       buton('JOACĂ', 'mare', () => this.actiuni.joacaNivel(urmator)),
       buton('Alege nivelul', 'mic-buton', () => this.arataNivele(p)),
-      buton('Personalizează<span class="eticheta-curand">în curând</span>', 'mic-buton', () => {}, true),
+      buton('Personalizează', 'mic-buton', () => this.actiuni.personalizeaza()),
     );
     container.append(coloana);
+    // butonul de sunet, în colțul din dreapta-sus
+    const sunet = buton(p.sunet ? '🔊' : '🔇', 'buton-sunet', () => {
+      sunet.textContent = this.actiuni.comutaSunet() ? '🔊' : '🔇';
+    });
+    sunet.setAttribute('aria-label', 'Sunet');
+    container.append(sunet);
   }
 
   arataNivele(p: Progres) {

@@ -1,6 +1,7 @@
 // Punctul de pornire al jocului „Mihai: Misiunea Stelară”
 import './ui/stil.css';
 import { Joc } from './joc/Joc';
+import { pregatesteSunetul } from './audio/Sunete';
 
 const canvas = document.getElementById('scena') as HTMLCanvasElement;
 const joc = new Joc(canvas);
@@ -26,3 +27,6 @@ async function ecranComplet() {
 document.addEventListener('click', (e) => {
   if ((e.target as HTMLElement).closest('#meniu button, #ecran-final button')) ecranComplet();
 });
+
+// Sunetul se poate porni doar după ce copilul atinge ecranul (regulă a browserelor)
+window.addEventListener('pointerdown', pregatesteSunetul);

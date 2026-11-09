@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 
 const SENSIBILITATE = 0.006;   // cât de repede se rotește la tras cu degetul
-const DISTANTA = 8;
+const DISTANTA = 8;  // distanța obișnuită față de personaj
 const UNGHI_SUS_MIN = -0.15;   // cât de jos poate coborî camera
 const UNGHI_SUS_MAX = 1.2;     // cât de sus (aproape de deasupra)
 
@@ -11,9 +11,11 @@ export class CameraUrmarire {
   unghi = 0;
   /** Cât de sus e camera (în radiani) */
   inaltime = 0.38;
+  /** Cât de departe stă camera (se apropie la Personalizare) */
+  distanta = DISTANTA;
   private tinta = new THREE.Vector3();
 
-  constructor(private camera: THREE.PerspectiveCamera) {}
+  constructor(public camera: THREE.PerspectiveCamera) {}
 
   roteste(dx: number, dy: number) {
     this.unghi -= dx * SENSIBILITATE;
@@ -31,10 +33,10 @@ export class CameraUrmarire {
     const dorit = poz.clone(); dorit.y += 1.4;
     this.tinta.lerp(dorit, Math.min(1, dt * 10));
 
-    const oriz = Math.cos(this.inaltime) * DISTANTA;
+    const oriz = Math.cos(this.inaltime) * this.distanta;
     this.camera.position.set(
       this.tinta.x + Math.sin(this.unghi) * oriz,
-      this.tinta.y + Math.sin(this.inaltime) * DISTANTA + 0.6,
+      this.tinta.y + Math.sin(this.inaltime) * this.distanta + 0.6,
       this.tinta.z + Math.cos(this.unghi) * oriz,
     );
     this.camera.lookAt(this.tinta);

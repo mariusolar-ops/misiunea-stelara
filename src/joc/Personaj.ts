@@ -1,6 +1,7 @@
 // Personajul din cuburi: cap, corp, două mâini, două picioare.
 // Mâinile și picioarele au „încheietura” sus (umăr / șold), ca să se balanseze natural.
 import * as THREE from 'three';
+import type { Slot } from './Accesorii';
 
 export interface CuloriPersonaj {
   piele: number;
@@ -45,6 +46,8 @@ export class Personaj {
   private pantofi: THREE.Mesh[] = [];
   private maneci: THREE.Mesh[] = [];
   private brate: THREE.Mesh[] = [];
+  /** Locurile unde se prind accesoriile */
+  private sloturi: Record<Slot, THREE.Group> = { cap: new THREE.Group(), fata: new THREE.Group(), spate: new THREE.Group() };
 
   constructor(culori: CuloriPersonaj = CULORI_IMPLICITE) {
     this.obiect.add(this.corpGrup);
@@ -80,6 +83,12 @@ export class Personaj {
     this.par = this.creeazaPar(culori.par);
 
     this.corpGrup.add(this.piciorSt, this.piciorDr, this.corp, this.manaSt, this.manaDr, this.cap, fata, this.par);
+
+    // sloturile pentru accesorii: capul și fața la centrul capului, spatele la mijlocul spatelui
+    this.sloturi.cap.position.set(0, 1.68, 0);
+    this.sloturi.fata.position.set(0, 1.68, 0);
+    this.sloturi.spate.position.set(0, 1.05, -0.21);
+    this.corpGrup.add(this.sloturi.cap, this.sloturi.fata, this.sloturi.spate);
   }
 
   /** Fața: totul e pus pe partea din față a capului (spre +z) */
@@ -132,11 +141,28 @@ export class Personaj {
     this.par.children.forEach((m) => vopseste(m, c.par));
   }
 
+  /** Pune un accesoriu într-un slot (sau îl golește, cu null) */
+  puneAccesoriu(slot: Slot, obiect: THREE.Object3D | null) {
+    this.sloturi[slot].clear();
+    if (obiect) this.sloturi[slot].add(obiect);
+  }
+
+  /** Mantia flutură, flăcările rachetei pâlpâie */
+  private animeazaAccesorii(viteza: number, inAer: boolean) {
+    const t = performance.now() / 1000;
+    for (const o of this.sloturi.spate.children) {
+      if (o.userData.flutura) o.rotation.x = 0.08 + viteza * 0.7 + (inAer ? 0.5 : 0) + Math.sin(t * 9) * 0.05 * (viteza + 0.3);
+      const f = o.userData.flacara as THREE.Object3D | undefined;
+      if (f) f.scale.y = (inAer ? 1.6 : 0.7) + Math.sin(t * 30) * 0.25;
+    }
+  }
+
   /**
    * Animația: viteza (0..1) decide cât de tare balansează mâinile și picioarele.
    * În aer, mâinile se ridică și picioarele se strâng puțin.
    */
   animeaza(dt: number, viteza: number, inAer: boolean, urca: boolean) {
+    this.animeazaAccesorii(viteza, inAer);
     const lerp = (a: number, b: number, k: number) => a + (b - a) * Math.min(1, k * dt);
     let picior = 0, mana = 0, aplecare = 0;
 

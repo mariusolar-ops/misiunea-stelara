@@ -6,7 +6,11 @@ import { Jucator } from './Jucator';
 import { Catel } from './Catel';
 import { CameraUrmarire } from './CameraUrmarire';
 import { Nivel } from './Nivel';
-import { incarca, inregistreazaFinal, type Progres } from './Salvare';
+import { incarca, inregistreazaFinal, salveaza, type Progres } from './Salvare';
+import { vopsesteCatel } from './Catel';
+import { cautaAccesoriu, type Slot } from './Accesorii';
+import { Personalizare } from '../ui/Personalizare';
+import { sunete, seteazaSunet } from '../audio/Sunete';
 import { Intrari } from '../control/Intrari';
 import { pornesteAtingere } from '../control/Atingere';
 import { Hud } from '../ui/Hud';
@@ -17,7 +21,7 @@ const PAS_FIZICA = 1 / 120;   // fizica rulează în pași mici, ca să nu treac
 const INALTIME_CADERE = -25;  // sub înălțimea asta personajul „cade” și revine la steag
 
 /** În ce „moment” e jocul: în meniu, jucând, pe pauză sau la ecranul de final */
-type Stare = 'meniu' | 'joaca' | 'pauza' | 'final';
+type Stare = 'meniu' | 'joaca' | 'pauza' | 'final' | 'personalizare';
 
 export class Joc {
   private intrari = new Intrari();
@@ -36,6 +40,7 @@ export class Joc {
   private stare: Stare = 'meniu';
   private cronometru = 0;
   private elInterfata = document.getElementById('interfata')!;
+  private elSunet = document.getElementById('buton-sunet')!;
   private elFps = document.getElementById('fps')!;
   private cadre = 0;
   private timpFps = 0;
@@ -51,7 +56,15 @@ export class Joc {
       joacaNivel: (i) => this.joacaNivel(i),
       continua: () => this.continua(),
       reincepe: () => this.joacaNivel(this.indexNivel),
+      personalizeaza: () => this.personalizeaza(),
+      comutaSunet: () => this.comutaSunet(),
     });
+
+    // Aspectul salvat (culori, accesorii, cățel) și sunetul
+    this.aplicaAspect();
+    seteazaSunet(this.progres.sunet);
+    this.elSunet.textContent = this.progres.sunet ? '🔊' : '🔇';
+    this.elSunet.addEventListener('click', () => this.comutaSunet());
 
     // Butoanele din joc și de pe ecranul de final
     document.getElementById('buton-pauza')!.addEventListener('click', () => this.pauza());
@@ -81,6 +94,42 @@ export class Joc {
     this.elInterfata.classList.remove('ascuns');
     this.stare = 'joaca';
     this.hud.arataMesaj(`Nivelul ${index + 1}: ${NIVELE[index].nume}`, 2.5);
+  }
+
+  /** Pune pe personaj culorile și accesoriile salvate */
+  private aplicaAspect() {
+    const p = this.progres;
+    this.jucator.personaj.seteazaCulori(p.culori);
+    vopsesteCatel(p.culoareCatel);
+    for (const slot of ['cap', 'fata', 'spate'] as Slot[]) {
+      const a = cautaAccesoriu(p.echipate[slot]);
+      this.jucator.personaj.puneAccesoriu(slot, a ? a.construieste() : null);
+    }
+  }
+
+  private personalizeaza() {
+    this.stare = 'personalizare';
+    // personajul stă la start, întors spre noi
+    this.revino();
+    new Personalizare(this.progres, () => this.aplicaAspect(), () => {
+      this.camera.distanta = 8;
+      this.camera.inaltime = 0.38;
+      this.camera.camera.clearViewOffset();
+      this.revino();
+      this.arataMeniu();
+    }).arata();
+    this.camera.unghi = this.jucator.directie; // camera în fața personajului
+    this.camera.distanta = 4.2;
+    this.camera.inaltime = 0.12;
+  }
+
+  /** Pornește / oprește sunetul (și ține minte alegerea) */
+  private comutaSunet() {
+    this.progres.sunet = !this.progres.sunet;
+    seteazaSunet(this.progres.sunet);
+    salveaza(this.progres);
+    this.elSunet.textContent = this.progres.sunet ? '🔊' : '🔇';
+    return this.progres.sunet;
   }
 
   private pauza() {
@@ -149,8 +198,25 @@ export class Joc {
     if (this.stare === 'meniu') {
       // în meniu camera se rotește încet în jurul personajului, ca o prezentare
       this.camera.unghi += dt * 0.15;
+    } else if (this.stare === 'personalizare') {
+      // personajul se vede în stânga ecranului (panoul e în dreapta) și se rotește încet;
+      // cu degetul îl poți întoarce cum vrei
+      this.camera.unghi += dt * 0.3 - rot.x * 0.006;
+      const w = window.innerWidth, h = window.innerHeight;
+      this.camera.camera.setViewOffset(w, h, w * 0.25, 0, w, h);
     } else {
       this.camera.roteste(rot.x, rot.y);
+    }
+
+    if (this.stare === 'personalizare') {
+      // personajul stă cuminte pe platformă (fizică fără comenzi, ca să stea pe sol)
+      this.intrari.mers.x = 0; this.intrari.mers.y = 0;
+      this.rezervaFizica += dt;
+      while (this.rezervaFizica >= PAS_FIZICA) {
+        this.jucator.actualizeaza(PAS_FIZICA, this.intrari, this.camera.unghi, nivel.platforme, false, this.timp);
+        this.rezervaFizica -= PAS_FIZICA;
+      }
+      this.jucator.aSarit = false;
     }
 
     if (this.stare === 'joaca') {
@@ -161,6 +227,8 @@ export class Joc {
         nivel.actualizeaza(PAS_FIZICA, this.timp);
         const efect = this.jucator.actualizeaza(PAS_FIZICA, this.intrari, this.camera.unghi, nivel.platforme, sari, this.timp);
         if (efect === 'lava') peLava = true;
+        if (efect === 'trambulina') sunete.trambulina();
+        if (this.jucator.aSarit) { sunete.saritura(); this.jucator.aSarit = false; }
         sari = false;
         this.rezervaFizica -= PAS_FIZICA;
       }
@@ -170,16 +238,18 @@ export class Joc {
 
       // ce a atins personajul?
       const ev = nivel.verifica(this.jucator.poz, this.timp);
-      if (ev.monedeNoi) this.hud.seteazaMonede(nivel.monedeLuate, nivel.totalMonede, true);
-      if (ev.steagNou) this.hud.arataMesaj('Steag atins!');
-      if (ev.final) this.terminaNivel();
+      if (ev.monedeNoi) { this.hud.seteazaMonede(nivel.monedeLuate, nivel.totalMonede, true); sunete.moneda(); }
+      if (ev.steagNou) { this.hud.arataMesaj('Steag atins!'); sunete.steag(); }
+      if (ev.final) { this.terminaNivel(); sunete.final(); }
 
       const unde = nivel.steaguri.some((s) => s.activ) ? 'la steag' : 'la start';
       if (peLava) {
         this.hud.arataMesaj(`Au, lavă fierbinte! Înapoi ${unde}.`);
+        sunete.lava();
         this.revino();
       } else if (this.jucator.poz.y < INALTIME_CADERE) {
         this.hud.arataMesaj(`Ai căzut! Înapoi ${unde}.`);
+        sunete.cadere();
         this.revino();
       }
     } else if (this.stare === 'meniu') {

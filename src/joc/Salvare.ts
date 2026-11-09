@@ -1,4 +1,7 @@
 // Salvarea progresului pe telefon (localStorage). Nimic nu pleacă pe internet.
+import { CULORI_IMPLICITE, type CuloriPersonaj } from './Personaj';
+import type { Slot } from './Accesorii';
+
 // Dacă browserul nu permite salvarea (ex. mod incognito), jocul merge oricum, doar nu ține minte.
 
 const CHEIE = 'misiunea-stelara-v1';
@@ -16,17 +19,33 @@ export interface Progres {
   nivele: Record<number, RezultatNivel>;
   /** Monedele strânse în total – se cheltuie în magazin */
   portofel: number;
+  /** Culorile alese pentru personaj */
+  culori: CuloriPersonaj;
+  /** Culoarea cățelului */
+  culoareCatel: number;
+  /** Accesoriile cumpărate (după id) */
+  cumparate: string[];
+  /** Ce poartă acum, pe fiecare slot */
+  echipate: Partial<Record<Slot, string>>;
+  /** Sunetul pornit sau oprit */
+  sunet: boolean;
 }
 
 function progresNou(): Progres {
-  return { deblocate: 1, nivele: {}, portofel: 0 };
+  return {
+    deblocate: 1, nivele: {}, portofel: 0,
+    culori: { ...CULORI_IMPLICITE }, culoareCatel: 0xb8692a,
+    cumparate: [], echipate: {}, sunet: true,
+  };
 }
 
 export function incarca(): Progres {
   try {
     const text = localStorage.getItem(CHEIE);
     if (!text) return progresNou();
-    return { ...progresNou(), ...JSON.parse(text) };
+    const nou = progresNou();
+    const citit = JSON.parse(text);
+    return { ...nou, ...citit, culori: { ...nou.culori, ...citit.culori } };
   } catch {
     return progresNou();
   }
