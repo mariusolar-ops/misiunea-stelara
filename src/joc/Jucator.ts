@@ -4,6 +4,7 @@ import { Personaj } from './Personaj';
 import { misca, solulDeSub } from './Fizica';
 import type { Platforma, EfectCalcare } from '../lume/Platforma';
 import type { Intrari } from '../control/Intrari';
+import type { PuteriActive } from './Puteri';
 
 // Reglaje de „senzație” – le putem ajusta ușor
 const VITEZA_MERS = 7.5;       // unități pe secundă
@@ -14,6 +15,11 @@ const VITEZA_SARITURA = 12.5;  // => sare cam 2,3 unități în sus
 const VITEZA_MAX_CADERE = 40;
 const TIMP_COYOTE = 0.1;       // mai poți sări o clipă după ce ai ieșit de pe margine
 const TIMP_MEMORIE_SARI = 0.12; // dacă apeși SARI puțin înainte să aterizezi, tot sare
+// Super-puteri
+const FACTOR_SUPER_SARITURA = 1.32; // => cam 4 unități în sus
+const FACTOR_VITEZA = 1.35;
+const VITEZA_ZBOR = 5.5;            // cât de repede urci când zbori
+export const ENERGIE_ZBOR = 1.6;    // câte secunde poți zbura până aterizezi din nou
 
 export class Jucator {
   personaj = new Personaj();
@@ -24,6 +30,13 @@ export class Jucator {
   peSol = false;
   /** Devine true când personajul sare (pentru sunet); Joc îl resetează */
   aSarit = false;
+  /** Super-puterile pornite */
+  puteri: PuteriActive = { saritura: false, viteza: false, dubla: false, zbor: false };
+  /** Energia de zbor rămasă (secunde) */
+  energie = ENERGIE_ZBOR;
+  /** True cât timp zboară acum */
+  zboara = false;
+  private dublaFolosita = false;
   private platformaSub: Platforma | null = null;
   private timpInAer = 0;
   private timpDeLaSari = 99;
@@ -49,6 +62,7 @@ export class Jucator {
     this.directie = directie;
     this.platformaSub = null;
     this.impingere.set(0, 0, 0);
+    this.energie = ENERGIE_ZBOR;
   }
 
   /**
@@ -69,23 +83,42 @@ export class Jucator {
     const putere = Math.min(1, Math.hypot(ix, iy));
 
     const acc = (this.peSol ? ACCELERATIE : ACCELERATIE_AER) * dt;
-    const tintaX = dx * VITEZA_MERS, tintaZ = dz * VITEZA_MERS;
+    const vMers = VITEZA_MERS * (this.puteri.viteza ? FACTOR_VITEZA : 1);
+    const tintaX = dx * vMers, tintaZ = dz * vMers;
     this.viteza.x += THREE.MathUtils.clamp(tintaX - this.viteza.x, -acc, acc);
     this.viteza.z += THREE.MathUtils.clamp(tintaZ - this.viteza.z, -acc, acc);
 
     // 3) Săritura (cu „coyote time” și memorie a apăsării, ca să fie iertător)
     if (sariAcum) this.timpDeLaSari = 0; else this.timpDeLaSari += dt;
     this.timpInAer = this.peSol ? 0 : this.timpInAer + dt;
+    const vSaritura = VITEZA_SARITURA * (this.puteri.saritura ? FACTOR_SUPER_SARITURA : 1);
+    if (this.peSol) { this.dublaFolosita = false; this.energie = Math.min(ENERGIE_ZBOR, this.energie + dt * 2); }
     if (this.timpDeLaSari < TIMP_MEMORIE_SARI && this.timpInAer < TIMP_COYOTE) {
-      this.viteza.y = VITEZA_SARITURA;
+      this.viteza.y = vSaritura;
       this.aSarit = true;
       this.timpDeLaSari = 99;
       this.timpInAer = TIMP_COYOTE; // nu mai sare a doua oară din aer
       this.peSol = false;
     }
 
-    // 4) Gravitația
-    this.viteza.y = Math.max(this.viteza.y - GRAVITATIE * dt, -VITEZA_MAX_CADERE);
+    // 3b) Săritura dublă: o apăsare nouă pe SARI în aer
+    else if (sariAcum && !this.peSol && this.puteri.dubla && !this.dublaFolosita) {
+      this.viteza.y = vSaritura * 0.9;
+      this.dublaFolosita = true;
+      this.timpDeLaSari = 99;
+      this.aSarit = true;
+    }
+
+    // 3c) Zborul: ții apăsat SARI în aer și urci încet, cât ai energie
+    this.zboara = false;
+    if (this.puteri.zbor && !this.peSol && intrari.sariTinut && this.energie > 0 && this.viteza.y < VITEZA_ZBOR) {
+      this.zboara = true;
+      this.energie = Math.max(0, this.energie - dt);
+      this.viteza.y = VITEZA_ZBOR;
+    }
+
+    // 4) Gravitația (nu trage în jos cât timp zbori)
+    if (!this.zboara) this.viteza.y = Math.max(this.viteza.y - GRAVITATIE * dt, -VITEZA_MAX_CADERE);
 
     // 5) Mișcarea, cu coliziuni
     const pas = this.viteza.clone().add(this.impingere).multiplyScalar(dt);
@@ -116,8 +149,8 @@ export class Jucator {
   deseneaza(dt: number, platforme: Platforma[]) {
     this.personaj.obiect.position.copy(this.poz);
     this.personaj.obiect.rotation.y = this.directie;
-    const vOriz = Math.hypot(this.viteza.x, this.viteza.z) / VITEZA_MERS;
-    this.personaj.animeaza(dt, vOriz, !this.peSol, this.viteza.y > 0);
+    const vOriz = Math.min(1, Math.hypot(this.viteza.x, this.viteza.z) / VITEZA_MERS);
+    this.personaj.animeaza(dt, vOriz, !this.peSol, this.viteza.y > 0, this.zboara);
 
     // umbra stă pe platforma de dedesubt și se micșorează cu cât ești mai sus
     const sol = solulDeSub(this.poz, platforme);

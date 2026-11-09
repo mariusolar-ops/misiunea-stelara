@@ -39,8 +39,10 @@ export class Hud {
   }
 
   /** Ecranul „Felicitări!”, cu stele (1–3), timp, monede și butoanele potrivite */
-  arataFinal(o: { nume: string; timp: number; monede: number; total: number; stele: number; record: boolean; ultimul: boolean; textUrmator?: string; nota?: string }) {
-    el('final-titlu').textContent = o.ultimul ? 'Bravo, cosmonaut Mihai!' : 'Felicitări, Mihai!';
+  arataFinal(o: { nume: string; timp: number; monede: number; total: number; stele: number; record: boolean; ultimul: boolean; textUrmator?: string; nota?: string; numeJucator?: string; castig?: number; dublu?: boolean }) {
+    const n = o.numeJucator || 'Mihai';
+    el('final-titlu').textContent = o.ultimul ? `Bravo, ${n}!` : `Felicitări, ${n}!`;
+    el('final-castig').textContent = o.castig ? `+${o.castig} monede${o.dublu ? ' (🔥 x2!)' : ''}` : '';
     el('final-nivel').textContent = o.ultimul
       ? 'Ai terminat toate nivelurile! 🚀'
       : `Ai terminat „${o.nume}”`;
@@ -53,6 +55,17 @@ export class Hud {
     el('buton-urmator').classList.toggle('ascuns', o.ultimul);
     el('buton-urmator').textContent = o.textUrmator ?? 'Nivelul următor';
     this.ecranFinal.classList.add('vizibil');
+  }
+
+  /** Arată insigna „🔥 x2” cât timp e evenimentul */
+  seteazaEveniment(activ: boolean) {
+    el('hud-x2').classList.toggle('ascuns', !activ);
+  }
+
+  /** Bara de energie pentru zbor (null = ascunsă) */
+  seteazaEnergie(proc: number | null) {
+    el('energie').classList.toggle('ascuns', proc === null);
+    if (proc !== null) el('energie-plin').style.width = `${Math.round(proc * 100)}%`;
   }
 
   ascundeFinal() {

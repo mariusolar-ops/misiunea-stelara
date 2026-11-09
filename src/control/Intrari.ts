@@ -7,6 +7,8 @@ export class Intrari {
   mers = { x: 0, y: 0 };
   /** Devine true în momentul în care se apasă SARI (jocul îl resetează după ce îl citește) */
   sariApasat = false;
+  /** True cât timp butonul SARI e ținut apăsat (pentru zbor) */
+  sariTinut = false;
   /** Cât s-a rotit camera din deget de la ultimul cadru (în pixeli) */
   rotireCamera = { x: 0, y: 0 };
 
@@ -19,9 +21,9 @@ export class Intrari {
     window.addEventListener('keydown', (e) => {
       if (e.repeat) return;
       this.taste.add(e.code);
-      if (e.code === 'Space') this.sariApasat = true;
+      if (e.code === 'Space') { this.sariApasat = true; this.sariTinut = true; }
     });
-    window.addEventListener('keyup', (e) => this.taste.delete(e.code));
+    window.addEventListener('keyup', (e) => { this.taste.delete(e.code); if (e.code === 'Space') this.sariTinut = false; });
     window.addEventListener('blur', () => this.taste.clear());
   }
 

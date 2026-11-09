@@ -307,3 +307,29 @@ button.scoate { background: #3b4380; color: #fff; }
 .mesaj-cod { font-size: 14px; color: #ffd23f; min-height: 18px; }
 .rand-butoane .mic-buton { white-space: nowrap; }
 .buton-instalare { bottom: auto !important; top: 14px; right: auto !important; left: max(16px, env(safe-area-inset-left)); }
+
+/* Personalizare: 5 taburi, butoane-text */
+.taburi button { font-size: 14px; padding: 7px 2px; white-space: nowrap; }
+.optiune {
+  font-size: 14px; font-weight: 700; padding: 7px 10px; border-radius: 10px; pointer-events: auto;
+  border: 2px solid transparent; background: #2a3170; color: #fff;
+}
+.optiune.aleasa { background: var(--turcoaz); color: var(--fundal); }
+.bula { width: 30px; height: 30px; }
+.card-accesoriu.putere .indiciu { min-height: 26px; }
+
+/* Evenimentul x2 */
+#hud-x2 { background: #ff7a2f !important; border-color: #ffd23f !important; animation: puls 1.2s infinite; }
+.eveniment {
+  font-size: 15px; font-weight: 800; border-radius: 12px; padding: 4px 12px; background: rgba(0,0,0,.25);
+}
+.eveniment.activ { background: #ff7a2f; box-shadow: 0 0 14px rgba(255, 122, 47, 0.7); }
+#final-castig { font-weight: 800; color: #ffd23f; }
+#final-castig:empty { display: none; }
+
+/* Bara de energie pentru zbor, deasupra butonului SARI */
+#energie {
+  position: absolute; right: max(32px, env(safe-area-inset-right)); bottom: 172px; width: 120px; height: 12px;
+  border-radius: 6px; background: rgba(11, 15, 46, 0.7); border: 2px solid rgba(255,255,255,0.4); overflow: hidden;
+}
+#energie-plin { height: 100%; width: 100%; background: linear-gradient(90deg, #2ee6d6, #9ffcf3); }

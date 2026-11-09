@@ -1,0 +1,239 @@
+// Animalul de companie: câine, pisică, iepure, capră sau zebră – toate din cuburi.
+// Aleargă după personaj. Nu are fizică proprie – doar „plutește” lin spre un loc din spatele lui,
+// așa că nu cade niciodată și nu încurcă jocul.
+import * as THREE from 'three';
+
+export type TipAnimal = 'caine' | 'pisica' | 'iepure' | 'capra' | 'zebra';
+
+export interface InfoAnimal {
+  tip: TipAnimal;
+  nume: string;
+  emoji: string;
+  /** Culoarea de pornire a blănii */
+  culoare: number;
+  /** Se poate schimba culoarea? (zebra are dungi fixe) */
+  recolorabil: boolean;
+}
+
+export const ANIMALE: InfoAnimal[] = [
+  { tip: 'caine', nume: 'Cățel', emoji: '🐶', culoare: 0xb8692a, recolorabil: true },
+  { tip: 'pisica', nume: 'Pisică', emoji: '🐱', culoare: 0xf0a050, recolorabil: true },
+  { tip: 'iepure', nume: 'Iepuraș', emoji: '🐰', culoare: 0xf2f2f2, recolorabil: true },
+  { tip: 'capra', nume: 'Capră', emoji: '🐐', culoare: 0xe8e2d4, recolorabil: true },
+  { tip: 'zebra', nume: 'Zebră', emoji: '🦓', culoare: 0xffffff, recolorabil: false },
+];
+
+const CUB = new THREE.BoxGeometry(1, 1, 1);
+const NEGRU = 0x151515;
+
+/** Ce întoarce fiecare „rețetă” de animal */
+interface Model {
+  grup: THREE.Group;
+  picioare: THREE.Object3D[];
+  coada: THREE.Object3D;
+  /** Iepurele țopăie în loc să meargă */
+  topaie?: boolean;
+  /** Cât de departe stă în spatele personajului */
+  distanta: number;
+}
+
+function cub(l: number, h: number, a: number, culoare: number, x: number, y: number, z: number) {
+  const m = new THREE.Mesh(CUB, new THREE.MeshLambertMaterial({ color: culoare }));
+  m.scale.set(l, h, a);
+  m.position.set(x, y, z);
+  return m;
+}
+
+/** Un picior cu încheietura sus, ca să se poată mișca */
+function picior(x: number, y: number, z: number, l: number, h: number, culoare: number, copita?: number) {
+  const p = new THREE.Group();
+  p.position.set(x, y, z);
+  p.add(cub(l, h, l, culoare, 0, -h / 2, 0));
+  if (copita !== undefined) p.add(cub(l * 1.05, 0.06, l * 1.05, copita, 0, -h + 0.03, 0));
+  return p;
+}
+
+/** Coada, prinsă de corp într-un punct */
+function coada(x: number, y: number, z: number, ...bucati: THREE.Mesh[]) {
+  const c = new THREE.Group();
+  c.position.set(x, y, z);
+  c.add(...bucati);
+  return c;
+}
+
+function inchis(c: number, k = 0.65) { return new THREE.Color(c).multiplyScalar(k).getHex(); }
+
+// --- Rețetele: fiecare animal privește spre +z ---
+
+function caine(c: number): Model {
+  const g = new THREE.Group();
+  g.add(cub(0.36, 0.32, 0.8, c, 0, 0.36, 0));                 // corp lung (ca un șoricar)
+  g.add(cub(0.34, 0.32, 0.32, c, 0, 0.62, 0.45));             // cap
+  g.add(cub(0.2, 0.15, 0.18, c, 0, 0.55, 0.66));              // bot
+  g.add(cub(0.09, 0.07, 0.04, NEGRU, 0, 0.6, 0.76));          // nas
+  g.add(cub(0.05, 0.06, 0.02, NEGRU, -0.09, 0.69, 0.615));    // ochi
+  g.add(cub(0.05, 0.06, 0.02, NEGRU, 0.09, 0.69, 0.615));
+  g.add(cub(0.07, 0.28, 0.16, inchis(c), -0.2, 0.56, 0.43));  // urechi lăsate
+  g.add(cub(0.07, 0.28, 0.16, inchis(c), 0.2, 0.56, 0.43));
+  const picioare = [[-0.12, 0.28], [0.12, 0.28], [-0.12, -0.28], [0.12, -0.28]].map(([x, z]) => picior(x, 0.22, z, 0.1, 0.22, c));
+  const cd = coada(0, 0.46, -0.4, cub(0.07, 0.07, 0.28, inchis(c), 0, 0.06, -0.12));
+  cd.rotation.x = 0.6;
+  g.add(...picioare, cd);
+  return { grup: g, picioare, coada: cd, distanta: 1.4 };
+}
+
+function pisica(c: number): Model {
+  const g = new THREE.Group();
+  g.add(cub(0.3, 0.28, 0.6, c, 0, 0.34, 0));
+  g.add(cub(0.32, 0.28, 0.28, c, 0, 0.56, 0.36));             // cap
+  g.add(cub(0.09, 0.11, 0.06, c, -0.1, 0.75, 0.38));          // urechi ascuțite
+  g.add(cub(0.09, 0.11, 0.06, c, 0.1, 0.75, 0.38));
+  g.add(cub(0.05, 0.06, 0.02, 0xf2a0b0, -0.1, 0.74, 0.412));  // interiorul urechilor
+  g.add(cub(0.05, 0.06, 0.02, 0xf2a0b0, 0.1, 0.74, 0.412));
+  g.add(cub(0.06, 0.07, 0.02, 0x3fbf5a, -0.08, 0.6, 0.505));  // ochi verzi
+  g.add(cub(0.06, 0.07, 0.02, 0x3fbf5a, 0.08, 0.6, 0.505));
+  g.add(cub(0.05, 0.04, 0.02, 0xf27a9a, 0, 0.53, 0.51));      // năsuc roz
+  g.add(cub(0.34, 0.012, 0.012, 0xffffff, 0, 0.51, 0.51));     // mustăți
+  g.add(cub(0.34, 0.012, 0.012, 0xffffff, 0, 0.49, 0.51));
+  const picioare = [[-0.09, 0.2], [0.09, 0.2], [-0.09, -0.2], [0.09, -0.2]].map(([x, z]) => picior(x, 0.2, z, 0.09, 0.2, c));
+  // coada lungă, ridicată
+  const cd = coada(0, 0.42, -0.3, cub(0.06, 0.06, 0.5, c, 0, 0, -0.22), cub(0.07, 0.07, 0.1, inchis(c, 0.8), 0, 0, -0.48));
+  cd.rotation.x = -0.9;
+  g.add(...picioare, cd);
+  return { grup: g, picioare, coada: cd, distanta: 1.3 };
+}
+
+function iepure(c: number): Model {
+  const g = new THREE.Group();
+  g.add(cub(0.34, 0.32, 0.42, c, 0, 0.28, 0));
+  g.add(cub(0.28, 0.28, 0.28, c, 0, 0.52, 0.22));             // cap
+  for (const x of [-0.07, 0.07]) {
+    g.add(cub(0.07, 0.38, 0.05, c, x, 0.84, 0.2));            // urechi lungi
+    g.add(cub(0.04, 0.3, 0.01, 0xf2a0b0, x, 0.84, 0.226));
+    g.add(cub(0.05, 0.06, 0.02, NEGRU, x * 1.2, 0.56, 0.362)); // ochi
+  }
+  g.add(cub(0.05, 0.04, 0.02, 0xf27a9a, 0, 0.49, 0.365));     // năsuc
+  g.add(cub(0.06, 0.05, 0.01, 0xffffff, 0, 0.44, 0.365));     // dinți
+  const picioare = [
+    picior(-0.1, 0.14, 0.14, 0.08, 0.14, c), picior(0.1, 0.14, 0.14, 0.08, 0.14, c),
+    picior(-0.12, 0.16, -0.12, 0.12, 0.16, c), picior(0.12, 0.16, -0.12, 0.12, 0.16, c),
+  ];
+  const cd = coada(0, 0.32, -0.24, cub(0.14, 0.14, 0.12, 0xffffff, 0, 0, -0.02)); // codiță pufoasă
+  g.add(...picioare, cd);
+  return { grup: g, picioare, coada: cd, topaie: true, distanta: 1.2 };
+}
+
+function capra(c: number): Model {
+  const g = new THREE.Group();
+  g.add(cub(0.36, 0.34, 0.7, c, 0, 0.58, 0));
+  g.add(cub(0.18, 0.3, 0.2, c, 0, 0.82, 0.3));                // gâtul
+  g.add(cub(0.26, 0.26, 0.32, c, 0, 0.98, 0.44));             // cap
+  g.add(cub(0.05, 0.2, 0.05, 0x6b6560, -0.08, 1.2, 0.36));    // coarne
+  g.add(cub(0.05, 0.2, 0.05, 0x6b6560, 0.08, 1.2, 0.36));
+  g.add(cub(0.05, 0.06, 0.12, 0x6b6560, -0.08, 1.29, 0.3));
+  g.add(cub(0.05, 0.06, 0.12, 0x6b6560, 0.08, 1.29, 0.3));
+  g.add(cub(0.16, 0.05, 0.08, c, -0.2, 1.02, 0.4));           // urechi în lateral
+  g.add(cub(0.16, 0.05, 0.08, c, 0.2, 1.02, 0.4));
+  g.add(cub(0.05, 0.05, 0.02, NEGRU, -0.08, 1.03, 0.605));    // ochi
+  g.add(cub(0.05, 0.05, 0.02, NEGRU, 0.08, 1.03, 0.605));
+  g.add(cub(0.08, 0.14, 0.05, inchis(c, 0.85), 0, 0.8, 0.56)); // bărbiță
+  const picioare = [[-0.12, 0.26], [0.12, 0.26], [-0.12, -0.26], [0.12, -0.26]].map(([x, z]) => picior(x, 0.42, z, 0.09, 0.42, c, 0x4a4540));
+  const cd = coada(0, 0.72, -0.35, cub(0.07, 0.14, 0.06, c, 0, 0.06, 0));
+  cd.rotation.x = -0.4;
+  g.add(...picioare, cd);
+  return { grup: g, picioare, coada: cd, distanta: 1.7 };
+}
+
+function zebra(): Model {
+  const ALB = 0xf6f6f2;
+  const g = new THREE.Group();
+  g.add(cub(0.4, 0.38, 0.85, ALB, 0, 0.72, 0));
+  for (const z of [-0.3, -0.12, 0.06, 0.24]) g.add(cub(0.42, 0.4, 0.06, NEGRU, 0, 0.72, z)); // dungi
+  g.add(cub(0.2, 0.42, 0.22, ALB, 0, 1.02, 0.4));              // gâtul
+  g.add(cub(0.21, 0.06, 0.23, NEGRU, 0, 0.94, 0.4));
+  g.add(cub(0.21, 0.06, 0.23, NEGRU, 0, 1.1, 0.4));
+  g.add(cub(0.06, 0.46, 0.24, NEGRU, 0, 1.08, 0.36));          // coama
+  g.add(cub(0.22, 0.22, 0.42, ALB, 0, 1.24, 0.6));             // cap
+  g.add(cub(0.23, 0.05, 0.43, NEGRU, 0, 1.28, 0.6));
+  g.add(cub(0.2, 0.16, 0.12, NEGRU, 0, 1.18, 0.84));           // bot negru
+  g.add(cub(0.05, 0.05, 0.02, NEGRU, -0.115, 1.3, 0.66));      // ochi (pe laterale)
+  g.add(cub(0.05, 0.05, 0.02, NEGRU, 0.115, 1.3, 0.66));
+  g.add(cub(0.06, 0.14, 0.05, ALB, -0.07, 1.42, 0.5));         // urechi
+  g.add(cub(0.06, 0.14, 0.05, ALB, 0.07, 1.42, 0.5));
+  const picioare = [[-0.13, 0.3], [0.13, 0.3], [-0.13, -0.3], [0.13, -0.3]].map(([x, z]) => {
+    const p = picior(x, 0.54, z, 0.1, 0.54, ALB, NEGRU);
+    p.add(cub(0.11, 0.06, 0.11, NEGRU, 0, -0.22, 0));          // dungă pe picior
+    return p;
+  });
+  const cd = coada(0, 0.86, -0.43, cub(0.04, 0.4, 0.04, ALB, 0, -0.2, 0), cub(0.07, 0.12, 0.07, NEGRU, 0, -0.42, 0));
+  cd.rotation.x = 0.25;
+  g.add(...picioare, cd);
+  return { grup: g, picioare, coada: cd, distanta: 1.9 };
+}
+
+export class Animal {
+  obiect = new THREE.Group();
+  private model!: Model;
+  private faza = 0;
+  private directie = 0;
+
+  constructor(scena: THREE.Scene, tip: TipAnimal = 'caine', culoare = 0xb8692a) {
+    this.schimba(tip, culoare);
+    scena.add(this.obiect);
+  }
+
+  /** Schimbă animalul (sau culoarea lui) */
+  schimba(tip: TipAnimal, culoare: number) {
+    this.obiect.traverse((o) => { if (o instanceof THREE.Mesh) (o.material as THREE.Material).dispose(); });
+    this.obiect.clear();
+    this.model = tip === 'pisica' ? pisica(culoare) : tip === 'iepure' ? iepure(culoare)
+      : tip === 'capra' ? capra(culoare) : tip === 'zebra' ? zebra() : caine(culoare);
+    this.obiect.add(this.model.grup);
+  }
+
+  /** Locul unde vrea să stea: puțin în spatele și în dreapta personajului */
+  private loc(poz: THREE.Vector3, dir: number) {
+    const d = this.model.distanta;
+    return new THREE.Vector3(
+      poz.x - Math.sin(dir) * d + Math.cos(dir) * 0.8,
+      poz.y,
+      poz.z - Math.cos(dir) * d - Math.sin(dir) * 0.8,
+    );
+  }
+
+  /** Îl pune imediat lângă personaj (la start sau după o cădere) */
+  teleporteaza(pozMihai: THREE.Vector3, directieMihai: number) {
+    this.obiect.position.copy(this.loc(pozMihai, directieMihai));
+    this.directie = directieMihai;
+  }
+
+  actualizeaza(dt: number, pozMihai: THREE.Vector3, directieMihai: number, timp: number) {
+    const tinta = this.loc(pozMihai, directieMihai);
+    const p = this.obiect.position;
+    const inainte = p.clone();
+    // dacă a rămas foarte în urmă (ex. personajul a căzut), sare direct lângă el
+    if (p.distanceTo(tinta) > 15) this.teleporteaza(pozMihai, directieMihai);
+    else p.lerp(tinta, Math.min(1, dt * 6));
+
+    // se întoarce în direcția în care aleargă
+    const dx = p.x - inainte.x, dz = p.z - inainte.z;
+    const viteza = Math.hypot(dx, dz) / Math.max(dt, 0.001);
+    if (viteza > 0.6) {
+      let dif = Math.atan2(dx, dz) - this.directie;
+      dif = Math.atan2(Math.sin(dif), Math.cos(dif));
+      this.directie += dif * Math.min(1, dt * 10);
+    }
+    this.obiect.rotation.y = this.directie;
+
+    const k = Math.min(1, viteza / 6);
+    this.faza += dt * (8 + k * 10);
+    if (this.model.topaie) {
+      // iepurele țopăie: tot corpul sare
+      this.model.grup.position.y = Math.abs(Math.sin(this.faza * 0.7)) * 0.3 * k;
+    } else {
+      this.model.picioare.forEach((pic, i) =>
+        (pic.rotation.x = Math.sin(this.faza + (i % 2 ? Math.PI : 0) + (i > 1 ? Math.PI : 0)) * 0.8 * k));
+    }
+    this.model.coada.rotation.y = Math.sin(timp * 12) * 0.45; // dă din coadă
+  }
+}

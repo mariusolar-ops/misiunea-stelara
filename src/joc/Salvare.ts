@@ -1,5 +1,6 @@
 // Salvarea progresului pe telefon (localStorage). Nimic nu pleacă pe internet.
-import { CULORI_IMPLICITE, type CuloriPersonaj } from './Personaj';
+import { CULORI_IMPLICITE, ASPECT_IMPLICIT, type CuloriPersonaj, type AspectPersonaj } from './Personaj';
+import type { TipAnimal } from './Animal';
 import type { Slot } from './Accesorii';
 
 // Dacă browserul nu permite salvarea (ex. mod incognito), jocul merge oricum, doar nu ține minte.
@@ -21,8 +22,13 @@ export interface Progres {
   portofel: number;
   /** Culorile alese pentru personaj */
   culori: CuloriPersonaj;
-  /** Culoarea cățelului */
-  culoareCatel: number;
+  /** Băiat/fată, coafura, modelul hainelor */
+  aspect: AspectPersonaj;
+  /** Animalul de companie și culoarea lui */
+  animal: TipAnimal;
+  culoareAnimal: number;
+  /** Super-puterile pornite (cele cumpărate stau în „cumparate”) */
+  puteriActive: string[];
   /** Accesoriile cumpărate (după id) */
   cumparate: string[];
   /** Ce poartă acum, pe fiecare slot */
@@ -55,7 +61,8 @@ export function areToateSecretele(p: Progres) {
 function progresNou(): Progres {
   return {
     deblocate: 1, nivele: {}, portofel: 0,
-    culori: { ...CULORI_IMPLICITE }, culoareCatel: 0xb8692a,
+    culori: { ...CULORI_IMPLICITE }, aspect: { ...ASPECT_IMPLICIT },
+    animal: 'caine', culoareAnimal: 0xb8692a, puteriActive: [],
     cumparate: [], echipate: {}, sunet: true,
     secrete: [], nume: 'Mihai', prieteni: [],
   };
@@ -67,7 +74,10 @@ export function incarca(): Progres {
     if (!text) return progresNou();
     const nou = progresNou();
     const citit = JSON.parse(text);
-    return { ...nou, ...citit, culori: { ...nou.culori, ...citit.culori } };
+    const p: Progres = { ...nou, ...citit, culori: { ...nou.culori, ...citit.culori }, aspect: { ...nou.aspect, ...citit.aspect } };
+    // din versiunea veche: culoarea cățelului se numea altfel
+    if (typeof citit.culoareCatel === 'number' && citit.culoareAnimal === undefined) p.culoareAnimal = citit.culoareCatel;
+    return p;
   } catch {
     return progresNou();
   }
@@ -84,10 +94,10 @@ export function calculeazaStele(monede: number, total: number) {
 
 /**
  * Înregistrează un nivel terminat: păstrează cele mai bune rezultate,
- * deschide nivelul următor și adaugă monedele în portofel.
+ * deschide nivelul următor și adaugă monedele în portofel (dublu în timpul evenimentului x2).
  * Întoarce true dacă e un timp record.
  */
-export function inregistreazaFinal(p: Progres, index: number, timp: number, monede: number, total: number, nrNivele: number) {
+export function inregistreazaFinal(p: Progres, index: number, timp: number, monede: number, total: number, nrNivele: number, multiplicator = 1) {
   const vechi = p.nivele[index];
   const stele = calculeazaStele(monede, total);
   const record = !vechi || timp < vechi.timp;
@@ -97,7 +107,8 @@ export function inregistreazaFinal(p: Progres, index: number, timp: number, mone
     monede: Math.max(monede, vechi?.monede ?? 0),
   };
   p.deblocate = Math.min(nrNivele, Math.max(p.deblocate, index + 2));
-  p.portofel += monede;
+  const castig = monede * multiplicator;
+  p.portofel += castig;
   salveaza(p);
-  return { stele, record: record && !!vechi };
+  return { stele, record: record && !!vechi, castig };
 }

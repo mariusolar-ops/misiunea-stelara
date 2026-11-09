@@ -6,6 +6,7 @@ import type { DefinitieNivel } from '../nivele/tipuri';
 import { formatTimp } from './Hud';
 import { sunete } from '../audio/Sunete';
 import { esteInstalat, instaleaza } from '../pwa/Instalare';
+import { esteEveniment, textEveniment } from '../joc/Eveniment';
 
 export interface ActiuniMeniu {
   joacaNivel(index: number): void;
@@ -40,7 +41,10 @@ export class Meniu {
   arataPrincipal(p: Progres) {
     container.innerHTML = `
       <h1>Mihai:<span>Misiunea Stelară</span></h1>
-      <div class="portofel"><span class="moneda-mica"></span>${p.portofel}</div>`;
+      <div class="rand-butoane">
+        <div class="portofel"><span class="moneda-mica"></span>${p.portofel}</div>
+        <div class="eveniment ${esteEveniment() ? 'activ' : ''}">${textEveniment()}</div>
+      </div>`;
     const coloana = document.createElement('div');
     coloana.className = 'coloana-butoane';
     // „Joacă” pornește primul nivel neterminat (sau ultimul, dacă le-ai terminat pe toate)

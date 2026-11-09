@@ -33,7 +33,11 @@ Actualizările vin singure: când telefonul are internet și deschizi jocul, ia 
 - Clasament (total stele + cel mai bun timp pe fiecare nivel) cu prietenii adăugați prin cod
 - Platforme care se mișcă, blocuri care dispar, lavă, trambuline, benzi rulante
 - Steaguri de checkpoint, monede, cronometru, stele (1–3) și recorduri
-- Personalizare: culori + 8 accesorii din cuburi, un cățeluș care te urmează
+- Personalizare: băiat sau fată, 5 coafuri, 6 modele de tricou, pantaloni lungi/scurți sau fustă, 18 culori
+- 8 accesorii din cuburi + un animal de companie la alegere: câine, pisică, iepuraș, capră sau zebră
+- Super-puteri cumpărate cu monedele din joc: super-săritură, viteză, săritură dublă, zbor
+  (se pot opri oricând, pentru joc „greu”)
+- Eveniment „Monede x2” în primele 15 minute din fiecare oră (după ceasul telefonului)
 - Sunete generate din cod (Web Audio), cu buton de sunet pornit/oprit
 - Tot ce se vede e desenat din cod: nicio imagine sau model descărcat
 

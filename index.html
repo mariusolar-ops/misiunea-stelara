@@ -23,9 +23,12 @@
       <div id="hud">
         <div id="hud-monede"><span class="moneda-mica"></span><span id="nr-monede">0/0</span></div>
         <div id="hud-timp">0:00</div>
+        <div id="hud-x2" class="ascuns">🔥 x2</div>
       </div>
       <div id="joystick"><div id="joystick-buton"></div></div>
       <button id="buton-sari" aria-label="Sari">SARI</button>
+      <!-- bara de energie pentru zbor (apare doar dacă puterea Zbor e pornită) -->
+      <div id="energie" class="ascuns"><div id="energie-plin"></div></div>
       <div id="mesaj"></div>
       <div id="fps"></div>
     </div>
@@ -44,6 +47,7 @@
           <div><span class="eticheta">Monede</span><span id="final-monede"></span></div>
         </div>
         <p id="final-record"></p>
+        <p id="final-castig"></p>
         <div class="rand-butoane">
           <button id="buton-meniu-final" class="mic-buton">Meniu</button>
           <button id="buton-din-nou" class="mic-buton">Din nou</button>

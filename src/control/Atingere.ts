@@ -21,9 +21,10 @@ export function pornesteAtingere(intrari: Intrari) {
     e.preventDefault();
     e.stopPropagation();
     intrari.sariApasat = true;
+    intrari.sariTinut = true;
     sari.classList.add('apasat');
   });
-  const ridicaSari = () => sari.classList.remove('apasat');
+  const ridicaSari = () => { sari.classList.remove('apasat'); intrari.sariTinut = false; };
   sari.addEventListener('pointerup', ridicaSari);
   sari.addEventListener('pointercancel', ridicaSari);
   sari.addEventListener('pointerleave', ridicaSari);

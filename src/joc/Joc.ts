@@ -3,11 +3,13 @@
 import * as THREE from 'three';
 import { creeazaScena } from '../lume/Scena';
 import { Jucator } from './Jucator';
-import { Catel } from './Catel';
+import { Animal } from './Animal';
 import { CameraUrmarire } from './CameraUrmarire';
 import { Nivel } from './Nivel';
 import { incarca, inregistreazaFinal, salveaza, areToateSecretele, NR_STELE_SECRETE, type Progres } from './Salvare';
-import { vopsesteCatel } from './Catel';
+import { puteriDin } from './Puteri';
+import { esteEveniment, textEveniment } from './Eveniment';
+import { ENERGIE_ZBOR } from './Jucator';
 import { cautaAccesoriu, type Slot } from './Accesorii';
 import { Personalizare } from '../ui/Personalizare';
 import { Clasament } from '../ui/Clasament';
@@ -28,7 +30,10 @@ export class Joc {
   private intrari = new Intrari();
   private grafica: ReturnType<typeof creeazaScena>;
   jucator: Jucator;
-  private catel: Catel;
+  private animal: Animal;
+  /** Era eveniment x2 când a început nivelul? (dacă da, primește dublu chiar dacă se termină între timp) */
+  private eraEveniment = false;
+  private ultimaVerificareEveniment = 0;
   camera: CameraUrmarire;
   nivel: Nivel | null = null;
   private indexNivel = 0;
@@ -53,7 +58,7 @@ export class Joc {
   constructor(canvas: HTMLCanvasElement) {
     this.grafica = creeazaScena(canvas);
     this.jucator = new Jucator(this.grafica.scena);
-    this.catel = new Catel(this.grafica.scena);
+    this.animal = new Animal(this.grafica.scena);
     this.camera = new CameraUrmarire(this.grafica.camera);
     pornesteAtingere(this.intrari);
 
@@ -104,14 +109,18 @@ export class Joc {
     this.hud.ascundeFinal();
     this.elInterfata.classList.remove('ascuns');
     this.stare = 'joaca';
-    this.hud.arataMesaj(`Nivelul ${index + 1}: ${NIVELE[index].nume}`, 2.5);
+    this.eraEveniment = esteEveniment();
+    this.hud.seteazaEveniment(this.eraEveniment);
+    this.hud.arataMesaj(this.eraEveniment ? '🔥 Eveniment: monede x2!' : `Nivelul ${index + 1}: ${NIVELE[index].nume}`, 2.5);
   }
 
   /** Pune pe personaj culorile și accesoriile salvate */
   private aplicaAspect() {
     const p = this.progres;
-    this.jucator.personaj.seteazaCulori(p.culori);
-    vopsesteCatel(p.culoareCatel);
+    this.jucator.personaj.construieste(p.culori, p.aspect);
+    this.animal.schimba(p.animal, p.culoareAnimal);
+    this.animal.teleporteaza(this.jucator.poz, this.jucator.directie);
+    this.jucator.puteri = puteriDin(p.puteriActive);
     for (const slot of ['cap', 'fata', 'spate'] as Slot[]) {
       const a = cautaAccesoriu(p.echipate[slot]);
       this.jucator.personaj.puneAccesoriu(slot, a ? a.construieste() : null);
@@ -172,7 +181,7 @@ export class Joc {
     if (!this.nivel) return;
     const dir = this.nivel.directieReintoarcere;
     this.jucator.teleporteaza(this.nivel.punctReintoarcere, dir);
-    this.catel.teleporteaza(this.jucator.poz, dir);
+    this.animal.teleporteaza(this.jucator.poz, dir);
     // camera stă în spatele personajului (pe partea opusă direcției în care privește)
     this.camera.unghi = dir + Math.PI;
     this.camera.sari(this.jucator.poz);
@@ -196,15 +205,16 @@ export class Joc {
   private terminaNivel() {
     const nivel = this.nivel!;
     this.stare = 'final';
-    const { stele, record } = inregistreazaFinal(
-      this.progres, this.indexNivel, this.cronometru, nivel.monedeLuate, nivel.totalMonede, NR_NIVELE_NORMALE);
+    const dublu = this.eraEveniment || esteEveniment();
+    const { stele, record, castig } = inregistreazaFinal(
+      this.progres, this.indexNivel, this.cronometru, nivel.monedeLuate, nivel.totalMonede, NR_NIVELE_NORMALE, dublu ? 2 : 1);
     // după nivelul 5 urmează nivelul secret doar dacă a găsit toate stelele secrete
     const dupa5 = this.indexNivel === NR_NIVELE_NORMALE - 1;
     const secretDeschis = areToateSecretele(this.progres);
     this.urmatorul = dupa5 && secretDeschis ? INDEX_SECRET : this.indexNivel + 1;
     this.hud.arataFinal({
       nume: nivel.def.nume, timp: this.cronometru, monede: nivel.monedeLuate, total: nivel.totalMonede,
-      stele, record,
+      stele, record, castig, dublu, numeJucator: this.progres.nume,
       ultimul: this.indexNivel === INDEX_SECRET || (dupa5 && !secretDeschis),
       textUrmator: this.urmatorul === INDEX_SECRET ? 'Nivelul secret ✨' : 'Nivelul următor',
       nota: dupa5 && !secretDeschis
@@ -230,6 +240,11 @@ export class Joc {
     const rot = this.intrari.iaRotireCamera();
     let sari = this.intrari.iaSari();
 
+    if (this.stare === 'meniu' && this.timp - this.ultimaVerificareEveniment > 1) {
+      this.ultimaVerificareEveniment = this.timp;
+      const e = document.querySelector('#meniu .eveniment');
+      if (e) { e.textContent = textEveniment(); e.classList.toggle('activ', esteEveniment()); }
+    }
     if (this.stare === 'meniu') {
       // în meniu camera se rotește încet în jurul personajului, ca o prezentare
       this.camera.unghi += dt * 0.15;
@@ -270,6 +285,16 @@ export class Joc {
 
       this.cronometru += dt;
       this.hud.seteazaTimp(this.cronometru);
+      this.hud.seteazaEnergie(this.jucator.puteri.zbor ? this.jucator.energie / ENERGIE_ZBOR : null);
+      // evenimentul x2 poate începe în timpul nivelului
+      if (this.timp - this.ultimaVerificareEveniment > 1) {
+        this.ultimaVerificareEveniment = this.timp;
+        if (esteEveniment() && !this.eraEveniment) {
+          this.eraEveniment = true;
+          this.hud.seteazaEveniment(true);
+          this.hud.arataMesaj('🔥 A început evenimentul: monede x2!', 2.5);
+        }
+      }
 
       // ce a atins personajul?
       const ev = nivel.verifica(this.jucator.poz, this.timp);
@@ -295,7 +320,7 @@ export class Joc {
 
     nivel.anima(this.timp);
     this.jucator.deseneaza(dt, nivel.platforme);
-    this.catel.actualizeaza(dt, this.jucator.poz, this.jucator.directie, this.timp);
+    this.animal.actualizeaza(dt, this.jucator.poz, this.jucator.directie, this.timp);
     this.camera.actualizeaza(this.jucator.poz, dt);
     this.grafica.renderer.render(this.grafica.scena, this.grafica.camera);
 
