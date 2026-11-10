@@ -77,4 +77,7 @@ export const nivel6: DefinitieNivel = {
   ],
 
   final: { poz: [33, 2.4, -63], directie: DREAPTA },
+
+  // Steaua de aur: chiar pe stâlpul laserului rotativ! Sari pe el când trece laserul.
+  secret: [0, 3.9, -54],
 };

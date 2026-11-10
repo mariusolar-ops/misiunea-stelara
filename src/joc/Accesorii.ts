@@ -4,7 +4,8 @@
 import * as THREE from 'three';
 
 /** Unde se pune un accesoriu: pe cap, pe față sau în spate */
-export type Slot = 'cap' | 'fata' | 'spate';
+export type Slot = 'cap' | 'fata' | 'spate' | 'umar';
+export const SLOTURI: Slot[] = ['cap', 'fata', 'spate', 'umar'];
 
 export interface Accesoriu {
   id: string;
@@ -33,7 +34,7 @@ function grup(...copii: THREE.Object3D[]) {
 }
 
 // Pentru „cap” și „fata”, (0,0,0) e centrul capului; capul are 0,52 pe fiecare latură.
-// Pentru „spate”, (0,0,0) e mijlocul spatelui.
+// Pentru „spate”, (0,0,0) e mijlocul spatelui. Pentru „umar”, (0,0,0) e deasupra umărului stâng.
 export const CATALOG: Accesoriu[] = [
   {
     id: 'sapca', nume: 'Șapcă', emoji: '🧢', pret: 10, slot: 'cap',
@@ -149,6 +150,86 @@ export const CATALOG: Accesoriu[] = [
         g.add(aripa);
       }
       g.userData.aripi = true;
+      return g;
+    },
+  },
+  // --- accesorii noi (ideile lui Mihai) ---
+  {
+    id: 'mustata', nume: 'Mustață', emoji: '🥸', pret: 10, slot: 'fata',
+    construieste: () => grup(
+      cub(0.22, 0.06, 0.03, 0x3a2410, 0, -0.08, 0.28),
+      cub(0.08, 0.05, 0.03, 0x3a2410, -0.14, -0.1, 0.28),
+      cub(0.08, 0.05, 0.03, 0x3a2410, 0.14, -0.1, 0.28),
+    ),
+  },
+  {
+    id: 'bandana', nume: 'Bandană', emoji: '🥷', pret: 15, slot: 'cap',
+    construieste: () => {
+      const rosu = 0xd8304a;
+      const g = grup(
+        cub(0.58, 0.13, 0.58, rosu, 0, 0.17, 0),
+        cub(0.1, 0.1, 0.06, rosu, 0, 0.17, -0.31),            // nodul
+        cub(0.08, 0.22, 0.04, rosu, -0.06, 0.04, -0.33),        // capetele care atârnă
+        cub(0.08, 0.18, 0.04, rosu, 0.07, 0.06, -0.33),
+      );
+      // buline albe
+      for (const [x, z] of [[-0.18, 0.295], [0.05, 0.295], [0.22, 0.295]]) g.add(cub(0.05, 0.05, 0.01, 0xffffff, x, 0.17, z));
+      return g;
+    },
+  },
+  {
+    id: 'casti', nume: 'Căști audio', emoji: '🎧', pret: 25, slot: 'cap',
+    construieste: () => grup(
+      cub(0.08, 0.1, 0.5, 0x2a2a33, 0, 0.44, 0),               // arcul de deasupra
+      cub(0.06, 0.34, 0.08, 0x2a2a33, -0.31, 0.24, 0),
+      cub(0.06, 0.34, 0.08, 0x2a2a33, 0.31, 0.24, 0),
+      cub(0.1, 0.22, 0.22, 0x2ee6d6, -0.31, 0.0, 0),          // căștile
+      cub(0.1, 0.22, 0.22, 0x2ee6d6, 0.31, 0.0, 0),
+    ),
+  },
+  {
+    id: 'pirat', nume: 'Pălărie de pirat', emoji: '🏴‍☠️', pret: 40, slot: 'cap',
+    construieste: () => grup(
+      cub(0.86, 0.06, 0.5, 0x1c1c24, 0, 0.38, 0),              // borul
+      cub(0.56, 0.24, 0.42, 0x1c1c24, 0, 0.52, 0),
+      cub(0.2, 0.18, 0.12, 0x1c1c24, -0.38, 0.48, 0),          // colțurile ridicate
+      cub(0.2, 0.18, 0.12, 0x1c1c24, 0.38, 0.48, 0),
+      cub(0.12, 0.12, 0.02, 0xffffff, 0, 0.52, 0.215),          // craniu mic și simpatic
+      cub(0.03, 0.03, 0.01, 0x1c1c24, -0.03, 0.54, 0.227),
+      cub(0.03, 0.03, 0.01, 0x1c1c24, 0.03, 0.54, 0.227),
+    ),
+  },
+  {
+    id: 'balon-aur', nume: 'Balon de aur', emoji: '🎈', pret: 60, slot: 'umar',
+    construieste: () => {
+      const g = new THREE.Group();
+      g.add(cub(0.02, 1.1, 0.02, 0xffffff, 0, 0.55, 0));        // sfoara
+      const balon = grup(
+        cub(0.46, 0.52, 0.46, 0xffd23f, 0, 0, 0, { emissive: 0x6a4a00 }),
+        cub(0.36, 0.62, 0.36, 0xffd23f, 0, 0, 0, { emissive: 0x6a4a00 }),
+        cub(0.1, 0.08, 0.1, 0xe0a800, 0, -0.33, 0),             // nodul
+        cub(0.08, 0.14, 0.02, 0xfff3c0, -0.1, 0.12, 0.24),       // luciu
+      );
+      balon.position.y = 1.4;
+      g.add(balon);
+      g.userData.balon = true;
+      return g;
+    },
+  },
+  {
+    id: 'papagal', nume: 'Papagal', emoji: '🦜', pret: 70, slot: 'umar',
+    construieste: () => {
+      const g = grup(
+        cub(0.2, 0.26, 0.2, 0x3fbf5a, 0, 0.13, 0),               // corp
+        cub(0.18, 0.16, 0.18, 0xe84a4a, 0, 0.33, 0.02),          // cap
+        cub(0.07, 0.06, 0.1, 0xffd23f, 0, 0.31, 0.15),           // cioc
+        cub(0.04, 0.04, 0.01, 0x111111, -0.07, 0.36, 0.1),        // ochi
+        cub(0.04, 0.04, 0.01, 0x111111, 0.07, 0.36, 0.1),
+        cub(0.06, 0.22, 0.16, 0x2a8fd8, -0.12, 0.13, -0.02),     // aripi
+        cub(0.06, 0.22, 0.16, 0x2a8fd8, 0.12, 0.13, -0.02),
+        cub(0.08, 0.06, 0.26, 0x2a8fd8, 0, 0.0, -0.18),          // coada
+      );
+      g.userData.papagal = true;
       return g;
     },
   },

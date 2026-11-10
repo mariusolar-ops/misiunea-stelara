@@ -11,21 +11,51 @@ import { nivel6 } from './nivel6';
 import { nivel7 } from './nivel7';
 import { nivel8 } from './nivel8';
 import { nivel9 } from './nivel9';
+import { nivel10 } from './nivel10';
+import { nivel11 } from './nivel11';
+import { nivelSecret2 } from './nivelSecret2';
 
-export const NIVELE = [nivel1, nivel2, nivel3, nivel4, nivel5, nivelSecret, nivel6, nivel7, nivel8, nivel9];
+export const NIVELE = [nivel1, nivel2, nivel3, nivel4, nivel5, nivelSecret, nivel6, nivel7, nivel8, nivel9, nivel10, nivel11, nivelSecret2];
 
-/** Poziția nivelului secret în listă (apare doar după ce găsești toate stelele secrete) */
+/** Poziția primului nivel secret în listă (apare doar după ce găsești toate stelele secrete mov) */
 export const INDEX_SECRET = 5;
 
+/**
+ * Nivelurile secrete: fiecare se deschide când găsești stelele din anumite niveluri.
+ *  - Nebuloasa secretă: stelele MOV din nivelurile 1–5
+ *  - Templul de aur: stelele de AUR din nivelurile 6–9
+ */
+export const SECRETE = [
+  { index: 5, nivele: [0, 1, 2, 3, 4], culoare: 0xd36bff, numeStea: 'Stea secretă', emoji: '✨' },
+  { index: 12, nivele: [6, 7, 8, 9], culoare: 0xffc23f, numeStea: 'Stea de aur', emoji: '🌟' },
+];
+
+/** Grupa de stele secrete din care face parte un nivel (sau undefined) */
+export function grupaSecret(indexNivel: number) {
+  return SECRETE.find((s) => s.nivele.includes(indexNivel));
+}
+
+/** Este nivelul (secret) cu poziția „index” deschis? */
+export function secretDeschis(steleGasite: number[], index: number) {
+  const g = SECRETE.find((s) => s.index === index);
+  return !!g && g.nivele.every((n) => steleGasite.includes(n));
+}
+
+/** E nivel secret? */
+export function esteNivelSecret(index: number) {
+  return SECRETE.some((s) => s.index === index);
+}
+
 /** Ordinea în care se joacă nivelurile normale (pozițiile din NIVELE) */
-export const ORDINE_NORMALA = [0, 1, 2, 3, 4, 6, 7, 8, 9];
+export const ORDINE_NORMALA = [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11];
 
 /** Câte niveluri „normale” sunt (fără cel secret) */
 export const NR_NIVELE_NORMALE = ORDINE_NORMALA.length;
 
 /** Numărul afișat pe ecran pentru un nivel (ex. „6”), sau ✨ pentru cel secret */
 export function numarAfisat(index: number) {
-  return index === INDEX_SECRET ? '✨' : String(ORDINE_NORMALA.indexOf(index) + 1);
+  const s = SECRETE.find((x) => x.index === index);
+  return s ? s.emoji : String(ORDINE_NORMALA.indexOf(index) + 1);
 }
 
 /** Nivelul care urmează după acesta în ordinea normală (sau null dacă e ultimul) */

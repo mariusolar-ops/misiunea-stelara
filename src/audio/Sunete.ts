@@ -77,6 +77,17 @@ export const sunete = {
       default: bip('square', 280, 560, 0.13, 0, 0.35);
     }
   },
+  /** Un pas, după varianta aleasă (din cufere). „stang” alternează puțin sunetul */
+  pas: (v: string, stang: boolean) => {
+    const k = stang ? 1 : 1.12;
+    switch (v) {
+      case 'scartait': bip('sine', 900 * k, 1500 * k, 0.07, 0, 0.35); bip('sine', 1400 * k, 800 * k, 0.07, 0.07, 0.3); break;
+      case 'toba': bip('triangle', 150 * k, 60, 0.12, 0, 0.8); break;
+      case 'clopotei': bip('sine', 1568 * k, 1568 * k, 0.18, 0, 0.25); bip('sine', 2093 * k, 2093 * k, 0.14, 0.02, 0.15); break;
+      case 'robot': bip('square', 260 * k, 220 * k, 0.07, 0, 0.18); bip('sawtooth', 120, 90, 0.05, 0.05, 0.12); break;
+      case 'bule': bip('sine', 320 * k, 900 * k, 0.07, 0, 0.45); break;
+    }
+  },
   aterizare: () => bip('triangle', 160, 60, 0.18, 0, 0.6),
   cufar: () => {
     // tobă: câteva bătăi tot mai repezi, apoi fanfară

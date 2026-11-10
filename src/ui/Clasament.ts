@@ -2,10 +2,11 @@
 // Totul stă pe telefon. Codurile se trimit doar de mână (copiere / „Trimite”).
 import { salveaza, type Progres } from '../joc/Salvare';
 import { codulMeu, citesteCod, curataNume } from '../joc/CodScor';
+import { cautaTitlu } from '../joc/Titluri';
 import { formatTimp } from './Hud';
 import { sunete } from '../audio/Sunete';
 import type { DefinitieNivel } from '../nivele/tipuri';
-import { ORDINE_NORMALA, INDEX_SECRET, numarAfisat } from '../nivele';
+import { ORDINE_NORMALA, SECRETE, numarAfisat } from '../nivele';
 
 const container = document.getElementById('meniu')!;
 
@@ -16,7 +17,7 @@ function text(s: string) {
   return d.innerHTML;
 }
 
-interface Rand { nume: string; tu: boolean; timp: number | null; stele: number; index: number }
+interface Rand { nume: string; tu: boolean; timp: number | null; stele: number; index: number; titlu?: string }
 
 export class Clasament {
   /** -1 = clasamentul total (după stele), altfel numărul nivelului */
@@ -26,14 +27,14 @@ export class Clasament {
   constructor(
     private progres: Progres,
     private nivele: DefinitieNivel[],
-    private esteDeschisSecret: () => boolean,
+    private esteDeschisSecret: (index: number) => boolean,
     private laIesire: () => void,
   ) {}
 
   arata() {
     const p = this.progres;
     // nivelul secret apare în clasament doar dacă l-ai deschis
-    const indici = this.esteDeschisSecret() ? [...ORDINE_NORMALA, INDEX_SECRET] : ORDINE_NORMALA;
+    const indici = [...ORDINE_NORMALA, ...SECRETE.map((x) => x.index).filter((i) => this.esteDeschisSecret(i))];
     const taburi = [`<button data-tab="-1" class="${this.tab === -1 ? 'activ' : ''}">⭐</button>`]
       .concat(indici.map((i) =>
         `<button data-tab="${i}" class="${this.tab === i ? 'activ' : ''}">${numarAfisat(i)}</button>`))
@@ -128,13 +129,13 @@ export class Clasament {
   private randuri() {
     const p = this.progres;
     const totiNoi: Rand[] = [{
-      nume: p.nume, tu: true, index: -1,
+      nume: p.nume, tu: true, index: -1, titlu: p.titluAles ?? undefined,
       timp: this.tab >= 0 ? p.nivele[this.tab]?.timp ?? null : null,
       stele: this.tab >= 0 ? p.nivele[this.tab]?.stele ?? 0
         : Object.values(p.nivele).reduce((s, r) => s + r.stele, 0),
     }];
     p.prieteni.forEach((f, i) => totiNoi.push({
-      nume: f.nume, tu: false, index: i,
+      nume: f.nume, tu: false, index: i, titlu: f.titlu,
       timp: this.tab >= 0 ? f.timpi[this.tab] : null,
       stele: this.tab >= 0 ? f.stele[this.tab] : f.stele.reduce((s, x) => s + x, 0),
     }));
@@ -152,7 +153,7 @@ export class Clasament {
     const randuri = lista.map((r, loc) => `
       <li class="${r.tu ? 'tu' : ''}">
         <span class="loc">${medalii[loc] ?? loc + 1}</span>
-        <span class="nume-rand">${text(r.nume)}${r.tu ? ' <small>(tu)</small>' : ''}</span>
+        <span class="nume-rand">${cautaTitlu(r.titlu)?.emoji ?? ''} ${text(r.nume)}${r.tu ? ' <small>(tu)</small>' : ''}${cautaTitlu(r.titlu) ? ` <small class="titlu-rand">${cautaTitlu(r.titlu)!.nume}</small>` : ''}</span>
         <span class="valoare">${this.tab >= 0 ? formatTimp(r.timp!) : r.stele + ' ⭐'}</span>
         ${r.tu ? '<span class="sterge-loc"></span>' : `<button class="sterge" data-index="${r.index}" aria-label="Șterge">✕</button>`}
       </li>`).join('');

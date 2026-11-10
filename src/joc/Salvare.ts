@@ -46,6 +46,11 @@ export interface Progres {
   efecte: StareEfecte;
   /** Setările (volum, muzică, controale) */
   setari: Setari;
+  /** Seria zilnică */
+  zilnic: { ultimaZi: string | null; serie: number };
+  /** Titlurile câștigate (după id) și cel ales să apară lângă nume */
+  titluri: string[];
+  titluAles: string | null;
 }
 
 export interface Setari {
@@ -67,14 +72,8 @@ export interface Prieten {
   nume: string;
   timpi: (number | null)[];
   stele: number[];
-}
-
-/** Câte stele secrete există (câte una în fiecare nivel normal) */
-export const NR_STELE_SECRETE = 5;
-
-/** A găsit toate stelele secrete? (atunci se deschide nivelul secret și accesoriul secret) */
-export function areToateSecretele(p: Progres) {
-  return p.secrete.length >= NR_STELE_SECRETE;
+  /** Titlul ales de prieten (id), dacă are */
+  titlu?: string;
 }
 
 function progresNou(): Progres {
@@ -85,6 +84,7 @@ function progresNou(): Progres {
     cumparate: [], echipate: {}, sunet: true,
     secrete: [], nume: 'Mihai', prieteni: [],
     efecte: { ...EFECTE_IMPLICITE, detinute: [] }, setari: { ...SETARI_IMPLICITE },
+    zilnic: { ultimaZi: null, serie: 0 }, titluri: [], titluAles: null,
   };
 }
 
@@ -98,6 +98,7 @@ export function incarca(): Progres {
       ...nou, ...citit,
       culori: { ...nou.culori, ...citit.culori }, aspect: { ...nou.aspect, ...citit.aspect },
       efecte: { ...nou.efecte, ...citit.efecte }, setari: { ...nou.setari, ...citit.setari },
+      zilnic: { ...nou.zilnic, ...citit.zilnic },
     };
     // din versiunea veche: culoarea cățelului se numea altfel
     if (typeof citit.culoareCatel === 'number' && citit.culoareAnimal === undefined) p.culoareAnimal = citit.culoareCatel;

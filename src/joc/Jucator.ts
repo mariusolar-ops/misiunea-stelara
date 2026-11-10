@@ -38,6 +38,8 @@ export class Jucator {
   /** True cât timp zboară acum */
   zboara = false;
   private dublaFolosita = false;
+  /** Gravitația nivelului (1 = normală, 0.4 = gravitație mică) */
+  gravitatie = 1;
   /** Cât de tare a aterizat în ultimul pas (0 = n-a aterizat). Joc îl citește și îl resetează. */
   aterizare = 0;
   /** Stă pe gheață? (atunci alunecă) */
@@ -123,7 +125,7 @@ export class Jucator {
     }
 
     // 4) Gravitația (nu trage în jos cât timp zbori)
-    if (!this.zboara) this.viteza.y = Math.max(this.viteza.y - GRAVITATIE * dt, -VITEZA_MAX_CADERE);
+    if (!this.zboara) this.viteza.y = Math.max(this.viteza.y - GRAVITATIE * this.gravitatie * dt, -VITEZA_MAX_CADERE);
 
     // 5) Mișcarea, cu coliziuni
     const pas = this.viteza.clone().add(this.impingere).multiplyScalar(dt);

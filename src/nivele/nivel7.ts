@@ -24,6 +24,7 @@ export const nivel7: DefinitieNivel = {
 
     // --- Partea 2: curentul de aer și cristalele ---
     bloc(0, 6, -45, 4, 6, STANCA),                    // începe chiar la marginea curentului
+    bloc(3.8, 8, -39.8, 1.5, 1.5, STANCA),            // ascunzătoarea stelei de aur (lângă vârful curentului)
     bloc(0, 6, -53, 4, 8, ZAPADA),
     bloc(0, 6, -62, 6, 6, C.turcoaz),                 // steagul 2
 
@@ -64,4 +65,7 @@ export const nivel7: DefinitieNivel = {
   ],
 
   final: { poz: [0, 11, -91], directie: ÎNAINTE },
+
+  // Steaua de aur: sus, lângă curentul de aer – lasă-te dus spre dreapta
+  secret: [3.8, 9.2, -39.8],
 };

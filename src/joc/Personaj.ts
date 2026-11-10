@@ -61,7 +61,7 @@ export class Personaj {
   private piciorDr = new THREE.Group();
   private faza = 0; // pentru animația de mers
   /** Locurile unde se prind accesoriile */
-  private sloturi: Record<Slot, THREE.Group> = { cap: new THREE.Group(), fata: new THREE.Group(), spate: new THREE.Group() };
+  private sloturi: Record<Slot, THREE.Group> = { cap: new THREE.Group(), fata: new THREE.Group(), spate: new THREE.Group(), umar: new THREE.Group() };
 
   constructor(culori: CuloriPersonaj = CULORI_IMPLICITE, aspect: AspectPersonaj = ASPECT_IMPLICIT) {
     this.obiect.add(this.corpGrup);
@@ -92,8 +92,9 @@ export class Personaj {
     this.sloturi.cap.position.set(0, 1.68, 0);
     this.sloturi.fata.position.set(0, 1.68, 0);
     this.sloturi.spate.position.set(0, 1.05, a.tricou === 'hanorac' ? -0.27 : -0.21);
+    this.sloturi.umar.position.set(-0.53, 1.42, 0);
     this.corpGrup.add(this.piciorSt, this.piciorDr, this.manaSt, this.manaDr,
-      this.sloturi.cap, this.sloturi.fata, this.sloturi.spate);
+      this.sloturi.cap, this.sloturi.fata, this.sloturi.spate, this.sloturi.umar);
   }
 
   private construiestePicioare(c: CuloriPersonaj, a: AspectPersonaj) {
@@ -259,6 +260,11 @@ export class Personaj {
       }
       const f = o.userData.flacara as THREE.Object3D | undefined;
       if (f) f.scale.y = (zboara ? 2.6 : inAer ? 1.6 : 0.7) + Math.sin(t * 30) * 0.25;
+    }
+    for (const o of this.sloturi.umar.children) {
+      // balonul se leagănă și rămâne puțin în urmă când alergi; papagalul dă din cap
+      if (o.userData.balon) { o.rotation.x = 0.15 + viteza * 0.5 + Math.sin(t * 2) * 0.08; o.rotation.z = Math.sin(t * 1.3) * 0.12; }
+      if (o.userData.papagal) o.rotation.y = Math.sin(t * 3) * 0.4;
     }
   }
 

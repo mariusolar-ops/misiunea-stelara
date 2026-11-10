@@ -33,6 +33,7 @@ export const nivel9: DefinitieNivel = {
     bloc(-8, 0, -20.5, 3, 3, VERDE),
     trambulina(-8, 0, -26, 3, 3),
     bloc(-8, 5, -32, 3, 3, VERDE),
+    bloc(-3.5, 4, -32, 1.5, 1.5, PIATRA),              // ascunzătoarea stelei de aur, între drumuri
     banda(-8, 5, -39, 3, 8, 0, -2.5),                  // te duce înainte
     bloc(-8, 5, -47, 5, 5, C.turcoaz),                 // steag pe drumul din stânga
     bloc(-5, 5, -51.5, 2, 2, VERDE),
@@ -104,4 +105,7 @@ export const nivel9: DefinitieNivel = {
   ],
 
   final: { poz: [0, 10, -95], directie: ÎNAINTE },
+
+  // Steaua de aur: pe o piatră mică între cele două drumuri
+  secret: [-3.5, 5.2, -32],
 };

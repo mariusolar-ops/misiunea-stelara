@@ -43,7 +43,7 @@ export function codulMeu(p: Progres) {
     return t === undefined ? '' : String(Math.round(t * 10));
   });
   const stele = Array.from({ length: NR_NIVELE }, (_, i) => p.nivele[i]?.stele ?? 0);
-  const date = `${curataNume(p.nume) || 'Jucător'}|${timpi.join(',')}|${stele.join('')}`;
+  const date = `${curataNume(p.nume) || 'Jucător'}|${timpi.join(',')}|${stele.join('')}|${p.titluAles ?? ''}`;
   const b64 = inBase64(date);
   return `MS-${b64}-${control(b64)}`;
 }
@@ -53,7 +53,7 @@ export function citesteCod(cod: string): Prieten | null {
   try {
     const m = cod.trim().match(/^MS-([A-Za-z0-9_-]+)-([0-9A-Z]{2})$/);
     if (!m || control(m[1]) !== m[2]) return null;
-    const [nume, timpiText, steleText] = dinBase64(m[1]).split('|');
+    const [nume, timpiText, steleText, titlu] = dinBase64(m[1]).split('|');
     const numeCurat = curataNume(nume ?? '');
     if (!numeCurat || timpiText === undefined || steleText === undefined) return null;
     const timpi = timpiText.split(',').slice(0, NR_NIVELE).map((t) => {
@@ -62,7 +62,8 @@ export function citesteCod(cod: string): Prieten | null {
     });
     while (timpi.length < NR_NIVELE) timpi.push(null);
     const stele = Array.from({ length: NR_NIVELE }, (_, i) => Math.min(3, Math.max(0, Number(steleText[i]) || 0)));
-    return { nume: numeCurat, timpi, stele };
+    // titlul (doar dacă e unul cunoscut – literele mici și cratima sunt destul de sigure)
+    return { nume: numeCurat, timpi, stele, titlu: /^[a-z-]{1,20}$/.test(titlu ?? '') ? titlu : undefined };
   } catch {
     return null;
   }

@@ -36,7 +36,7 @@ export class Nivel {
   monedeLuate = 0;
 
   /** @param secretGasit dacă steaua secretă a acestui nivel a fost deja găsită */
-  constructor(public def: DefinitieNivel, secretGasit = false) {
+  constructor(public def: DefinitieNivel, secretGasit = false, culoareSecret = 0xd36bff) {
     this.platforme = def.platforme.map((d) => creeazaPlatforma(d));
     this.steaguri = def.steaguri.map((s) => new Steag(new THREE.Vector3(...s.poz), s.directie));
     this.monede = def.monede.map((m) => new Moneda(new THREE.Vector3(...m)));
@@ -48,7 +48,7 @@ export class Nivel {
     for (const s of this.steaguri) this.grup.add(s.obiect);
     for (const m of this.monede) this.grup.add(m.obiect);
     if (def.secret) {
-      this.steaSecreta = new SteaSecreta(new THREE.Vector3(...def.secret), secretGasit);
+      this.steaSecreta = new SteaSecreta(new THREE.Vector3(...def.secret), secretGasit, culoareSecret);
       this.grup.add(this.steaSecreta.obiect);
     }
     this.decor = creeazaDecor(def.tema);

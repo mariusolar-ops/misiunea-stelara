@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import type { Particule } from '../lume/Particule';
 
-export type CategorieEfect = 'urma' | 'saritura' | 'aterizare';
+export type CategorieEfect = 'urma' | 'saritura' | 'aterizare' | 'pasi';
 
 export interface Efect {
   id: string;
@@ -33,10 +33,16 @@ export const EFECTE: Efect[] = [
   { id: 'a-unda', categorie: 'aterizare', nume: 'Undă de șoc', emoji: '💫' },
   { id: 'a-stele', categorie: 'aterizare', nume: 'Ploaie de stele', emoji: '✨' },
   { id: 'a-confetti', categorie: 'aterizare', nume: 'Confetti', emoji: '🎉' },
+  // sunete de pași (ideea lui Mihai)
+  { id: 'p-scartait', categorie: 'pasi', nume: 'Pantofi care scârțâie', emoji: '👟' },
+  { id: 'p-toba', categorie: 'pasi', nume: 'Tobă', emoji: '🥁' },
+  { id: 'p-clopotei', categorie: 'pasi', nume: 'Clopoței', emoji: '🔔' },
+  { id: 'p-robot', categorie: 'pasi', nume: 'Pași de robot', emoji: '🦾' },
+  { id: 'p-bule', categorie: 'pasi', nume: 'Bule', emoji: '🫧' },
 ];
 
 export const NUME_CATEGORII: Record<CategorieEfect, string> = {
-  urma: 'Urmă', saritura: 'Săritură', aterizare: 'Aterizare',
+  urma: 'Urmă', saritura: 'Săritură', aterizare: 'Aterizare', pasi: 'Pași',
 };
 
 /** Ce efecte are jucătorul și pe care le folosește acum */
@@ -45,9 +51,10 @@ export interface StareEfecte {
   urma: string | null;
   saritura: string | null;
   aterizare: string | null;
+  pasi: string | null;
 }
 
-export const EFECTE_IMPLICITE: StareEfecte = { detinute: [], urma: null, saritura: null, aterizare: null };
+export const EFECTE_IMPLICITE: StareEfecte = { detinute: [], urma: null, saritura: null, aterizare: null, pasi: null };
 
 /** Deschide un cufăr: alege la întâmplare un efect pe care nu-l ai. null = le ai pe toate */
 export function deschideCufar(stare: StareEfecte): Efect | null {

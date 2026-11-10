@@ -8,7 +8,8 @@ import { CATALOG } from '../joc/Accesorii';
 import { ANIMALE } from '../joc/Animal';
 import { PUTERI } from '../joc/Puteri';
 import { sunete } from '../audio/Sunete';
-import { EFECTE, PRET_CUFAR, NUME_CATEGORII, deschideCufar, type CategorieEfect, type Efect } from '../joc/Efecte';
+import { EFECTE, PRET_CUFAR, NUME_CATEGORII, deschideCufar, type CategorieEfect } from '../joc/Efecte';
+import { arataCufar } from './AnimatieCufar';
 
 const container = document.getElementById('meniu')!;
 
@@ -256,18 +257,18 @@ export class Personalizare {
       if (!castigat) return;
       p.portofel -= PRET_CUFAR;
       salveaza(p);
-      this.animatieCufar(castigat);
+      arataCufar({ efect: castigat }, () => this.salveazaSiAplica());
     });
     zona.append(b);
     el.append(zona);
 
     // ce ai și ce folosești, pe categorii
-    for (const cat of ['urma', 'saritura', 'aterizare'] as CategorieEfect[]) {
+    for (const cat of ['urma', 'saritura', 'pasi', 'aterizare'] as CategorieEfect[]) {
       const ale = EFECTE.filter((e) => e.categorie === cat);
       const optiuni: HTMLElement[] = [];
       const fara = document.createElement('button');
       fara.className = 'optiune' + (ef[cat] === null ? ' aleasa' : '');
-      fara.textContent = cat === 'saritura' ? 'Obișnuit' : 'Fără';
+      fara.textContent = cat === 'saritura' || cat === 'pasi' ? 'Obișnuit' : 'Fără';
       fara.addEventListener('click', () => { ef[cat] = null; sunete.click(); this.salveazaSiAplica(); });
       optiuni.push(fara);
       for (const e of ale) {
@@ -278,32 +279,14 @@ export class Personalizare {
         o.disabled = !are;
         o.addEventListener('click', () => {
           ef[cat] = e.id;
-          if (cat === 'saritura') sunete.sarituraVarianta(e.id.slice(2)); else sunete.click();
+          if (cat === 'saritura') sunete.sarituraVarianta(e.id.slice(2));
+          else if (cat === 'pasi') { sunete.pas(e.id.slice(2), true); setTimeout(() => sunete.pas(e.id.slice(2), false), 280); }
+          else sunete.click();
           this.salveazaSiAplica();
         });
         optiuni.push(o);
       }
       el.append(this.rand(NUME_CATEGORII[cat], ...optiuni));
     }
-  }
-
-  /** Animația de deschidere: cufărul tremură, apoi „explodează” și apare ce ai câștigat */
-  private animatieCufar(e: Efect) {
-    sunete.cufar();
-    const strat = document.createElement('div');
-    strat.className = 'strat-cufar';
-    strat.innerHTML = `<div class="cufar-mare">🎁</div>`;
-    document.body.append(strat);
-    setTimeout(() => {
-      strat.innerHTML = `
-        <div class="premiu">
-          <div class="emoji-premiu">${e.emoji}</div>
-          <div class="categorie-premiu">${NUME_CATEGORII[e.categorie]} nouă!</div>
-          <div class="nume-premiu">${e.nume}</div>
-          <button class="mare">Super!</button>
-        </div>`;
-      if (e.categorie === 'saritura') sunete.sarituraVarianta(e.id.slice(2));
-      strat.querySelector('button')!.addEventListener('click', () => { strat.remove(); this.salveazaSiAplica(); });
-    }, 1100);
   }
 }

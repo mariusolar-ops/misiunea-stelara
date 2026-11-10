@@ -28,6 +28,7 @@ export const nivel8: DefinitieNivel = {
     bloc(0, 0, -40, 2, 12, METAL2),
     bloc(0, 0, -50, 5, 5, METAL),
     bloc(0, 0, -58, 6, 6, C.turcoaz),                    // steagul 2
+    bloc(-6, 1, -58, 1.5, 1.5, METAL),                   // ascunzătoarea stelei de aur
 
     // --- Partea 3: spre dreapta – gheață, cristale, curent de aer ---
     gheata(8, 0, -58, 8, 4),
@@ -81,4 +82,7 @@ export const nivel8: DefinitieNivel = {
   ],
 
   final: { poz: [32, 7.2, -88], directie: ÎNAINTE },
+
+  // Steaua de aur: în stânga steagului 2
+  secret: [-6, 2.2, -58],
 };

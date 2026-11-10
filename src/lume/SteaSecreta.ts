@@ -11,9 +11,12 @@ export class SteaSecreta {
   private material: THREE.MeshLambertMaterial;
 
   /** @param dejaGasita dacă a fost găsită altă dată: apare ca o „fantomă” transparentă */
-  constructor(public poz: THREE.Vector3, public dejaGasita: boolean) {
+  private emisiv: THREE.Color;
+
+  constructor(public poz: THREE.Vector3, public dejaGasita: boolean, culoare = 0xd36bff) {
+    this.emisiv = new THREE.Color(culoare).multiplyScalar(0.55);
     this.material = new THREE.MeshLambertMaterial({
-      color: 0xd36bff, emissive: 0x7a1fb0,
+      color: culoare, emissive: this.emisiv,
       transparent: dejaGasita, opacity: dejaGasita ? 0.3 : 1,
     });
     const a = new THREE.Mesh(CUB, this.material);
@@ -42,7 +45,7 @@ export class SteaSecreta {
       this.obiect.rotation.x = Math.sin(timp * 1.3) * 0.4;
       this.obiect.position.y = this.poz.y + Math.sin(timp * 2) * 0.18;
       // „pulsează” ca să atragă privirea
-      this.material.emissive.setRGB(0.45 + Math.sin(timp * 5) * 0.2, 0.1, 0.7);
+      this.material.emissive.copy(this.emisiv).multiplyScalar(0.8 + Math.sin(timp * 5) * 0.35);
       return;
     }
     const t = timp - this.timpLuare;
