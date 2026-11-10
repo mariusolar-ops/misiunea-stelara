@@ -17,6 +17,7 @@ import { sunete, seteazaSunet } from '../audio/Sunete';
 import { pornesteMuzica } from '../audio/Muzica';
 import { Particule } from '../lume/Particule';
 import { emiteUrma, efectAterizare, confettiFinal } from './Efecte';
+import { centruPoarta } from '../lume/Poarta';
 import { EcranSetari, aplicaSetari, sensibilitateCamera } from '../ui/Setari';
 import { EcranTitluri, anuntaTitluri } from '../ui/Titluri';
 import { titluriNoi } from './Titluri';
@@ -45,6 +46,7 @@ export class Joc {
   private timpUrma = 0;
   /** Pentru sunetele de pași */
   private timpPas = 0;
+  private timpPortal = 0;
   private pasStang = true;
   private timerFinal = 0;
   /** Era eveniment x2 când a început nivelul? (dacă da, primește dublu chiar dacă se termină între timp) */
@@ -301,6 +303,18 @@ export class Joc {
       if (ef.aterizare && this.stare === 'joaca') { efectAterizare(ef.aterizare, this.particule, j.poz, j.aterizare); sunete.aterizare(); }
       j.aterizare = 0;
     }
+    // scântei care urcă din portalul de la final
+    if (this.nivel && (this.stare === 'joaca' || this.stare === 'meniu')) {
+      this.timpPortal += dt;
+      if (this.timpPortal > 0.09) {
+        this.timpPortal = 0;
+        const c = centruPoarta(this.nivel.poarta);
+        // un punct la întâmplare în rama portalului (ținem cont și de cum e întoarsă poarta)
+        const local = new THREE.Vector3((Math.random() - 0.5) * 3.2, (Math.random() - 0.5) * 3.4, (Math.random() - 0.5) * 0.4);
+        c.add(local.applyAxisAngle(THREE.Object3D.DEFAULT_UP, this.nivel.poarta.obiect.rotation.y));
+        this.particule.emite(c, new THREE.Vector3(0, 1.5, 0), Math.random() < 0.5 ? 0x9ffcf3 : 0xffd23f, 1, 0.12);
+      }
+    }
     this.particule.actualizeaza(dt);
   }
 
@@ -385,6 +399,12 @@ export class Joc {
 
       // ce a atins personajul?
       const ev = nivel.verifica(this.jucator.poz, this.timp);
+      // scântei aurii unde era moneda, artificii la steag
+      for (const pm of ev.pozMonede) this.particule.explozie(pm, 8, [0xffd23f, 0xffffff], 2.5, 0.1, 6, 0.5);
+      if (ev.pozSteag) {
+        this.particule.explozie(ev.pozSteag.clone().setY(ev.pozSteag.y + 2.9), 30, [0x2ee6d6, 0xffd23f, 0xffffff, 0x8a6cff], 5, 0.16, 6, 1.3);
+        this.particule.inel(ev.pozSteag.clone().setY(ev.pozSteag.y + 0.05), 0x2ee6d6, 0.3, 3, 0.8, 0.9);
+      }
       if (ev.monedeNoi) { this.hud.seteazaMonede(nivel.monedeLuate, nivel.tintaMonede, true); sunete.moneda(); }
       if (ev.steagNou) { this.hud.arataMesaj(t('Steag atins!')); sunete.steag(); }
       if (ev.secretNou) this.gasesteSecret();

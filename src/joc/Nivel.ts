@@ -14,6 +14,10 @@ import type { DefinitieNivel } from '../nivele/tipuri';
 
 export interface Evenimente {
   steagNou: boolean;
+  /** Unde e steagul atins acum (pentru artificii) */
+  pozSteag: THREE.Vector3 | null;
+  /** Unde erau monedele luate acum (pentru scântei) */
+  pozMonede: THREE.Vector3[];
   secretNou: boolean;
   /** Textul unui indiciu, dacă tocmai a trecut pe lângă unul */
   indiciu: string | null;
@@ -43,6 +47,7 @@ export class Nivel {
     this.poarta = new Poarta(new THREE.Vector3(...def.final.poz), def.final.directie);
 
     for (const p of this.platforme) this.grup.add(p.obiect);
+    this.grup.add(luminiPlatforme(def));
     this.obstacole = (def.obstacole ?? []).map((o) => creeazaObstacol(o));
     for (const o of this.obstacole) this.grup.add(o.obiect);
     for (const s of this.steaguri) this.grup.add(s.obiect);
@@ -65,7 +70,7 @@ export class Nivel {
 
   /** Verifică ce a atins personajul în acest cadru */
   verifica(poz: THREE.Vector3, timp: number): Evenimente {
-    const ev: Evenimente = { steagNou: false, secretNou: false, indiciu: null, monedeNoi: 0, final: false };
+    const ev: Evenimente = { steagNou: false, pozSteag: null, pozMonede: [], secretNou: false, indiciu: null, monedeNoi: 0, final: false };
     for (const [i, ind] of (this.def.indicii ?? []).entries()) {
       if (this.indiciiAratate.has(i)) continue;
       const dx = poz.x - ind.poz[0], dz = poz.z - ind.poz[2];
@@ -76,7 +81,7 @@ export class Nivel {
     }
     if (this.steaSecreta?.atinsa(poz)) { this.steaSecreta.ia(timp); ev.secretNou = true; }
     for (const m of this.monede) {
-      if (!m.luata && m.atinsa(poz)) { m.ia(timp); this.monedeLuate++; ev.monedeNoi++; }
+      if (!m.luata && m.atinsa(poz)) { m.ia(timp); this.monedeLuate++; ev.monedeNoi++; ev.pozMonede.push(m.poz); }
     }
     for (const s of this.steaguri) {
       if (!s.activ && s.atins(poz)) {
@@ -84,6 +89,7 @@ export class Nivel {
         this.punctReintoarcere.copy(s.poz);
         this.directieReintoarcere = s.directie;
         ev.steagNou = true;
+        ev.pozSteag = s.poz;
       }
     }
     if (this.poarta.atinsa(poz)) ev.final = true;
@@ -117,4 +123,29 @@ export class Nivel {
     this.steaSecreta?.actualizeaza(timp);
     this.decor.anima?.(timp);
   }
+}
+
+/**
+ * Lumini mici pe colțurile de sus ale platformelor fixe și destul de mari.
+ * Toate sunt desenate dintr-o singură bucată (InstancedMesh), deci nu încetinesc jocul.
+ */
+function luminiPlatforme(def: DefinitieNivel) {
+  const colturi: THREE.Vector3[] = [];
+  const culori: THREE.Color[] = [];
+  for (const p of def.platforme) {
+    if (p.tip && p.tip !== 'normal') continue; // doar platformele care stau pe loc
+    const [l, h, a] = p.dim;
+    if (Math.min(l, a) < 2.5 || h > 2) continue; // nu pe stâlpi sau turnuri
+    const sus = p.poz[1] + h / 2 + 0.06;
+    const c = new THREE.Color(p.culoare ?? 0x2ee6d6).lerp(new THREE.Color(0xffffff), 0.6);
+    for (const [dx, dz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+      colturi.push(new THREE.Vector3(p.poz[0] + dx * (l / 2 - 0.18), sus, p.poz[2] + dz * (a / 2 - 0.18)));
+      culori.push(c);
+    }
+  }
+  const mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(0.16, 0.12, 0.16), new THREE.MeshBasicMaterial({ color: 0xffffff }), Math.max(1, colturi.length));
+  const m = new THREE.Matrix4();
+  colturi.forEach((c, i) => { mesh.setMatrixAt(i, m.makeTranslation(c.x, c.y, c.z)); mesh.setColorAt(i, culori[i]); });
+  mesh.count = colturi.length;
+  return mesh;
 }

@@ -152,6 +152,17 @@ export const TRADUCERI: Record<string, [string, string, string, string]> = {
   'Iepuraș': ['Bunny', 'Lapin', 'Conejito', 'Häschen'],
   'Capră': ['Goat', 'Chèvre', 'Cabra', 'Ziege'],
   'Zebră': ['Zebra', 'Zèbre', 'Cebra', 'Zebra'],
+  'Cal': ['Horse', 'Cheval', 'Caballo', 'Pferd'],
+  'Măgar': ['Donkey', 'Âne', 'Burro', 'Esel'],
+  'Găină': ['Chicken', 'Poule', 'Gallina', 'Huhn'],
+  'Șopârlă': ['Lizard', 'Lézard', 'Lagartija', 'Eidechse'],
+  'Porc': ['Pig', 'Cochon', 'Cerdo', 'Schwein'],
+  'Tigru': ['Tiger', 'Tigre', 'Tigre', 'Tiger'],
+  'Girafă': ['Giraffe', 'Girafe', 'Jirafa', 'Giraffe'],
+  'Crocodil': ['Crocodile', 'Crocodile', 'Cocodrilo', 'Krokodil'],
+  'Porumbel': ['Pigeon', 'Pigeon', 'Paloma', 'Taube'],
+  'Pinguin': ['Penguin', 'Manchot', 'Pingüino', 'Pinguin'],
+  'Flamingo': ['Flamingo', 'Flamant rose', 'Flamenco', 'Flamingo'],
 
   // --- accesorii ---
   'Șapcă': ['Cap', 'Casquette', 'Gorra', 'Kappe'],

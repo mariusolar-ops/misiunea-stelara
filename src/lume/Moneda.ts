@@ -1,9 +1,36 @@
 // Moneda de aur care se rotește. O strângi trecând prin ea.
 import * as THREE from 'three';
 
-// Toate monedele folosesc aceeași formă și același material (economie)
-const FORMA = new THREE.CylinderGeometry(0.38, 0.38, 0.1, 16).rotateX(Math.PI / 2);
-const MATERIAL = new THREE.MeshLambertMaterial({ color: 0xffd23f, emissive: 0x6a4a00 });
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+
+/**
+ * Forma monedei, făcută o singură dată și folosită de toate monedele:
+ * discul + o margine + o stea în relief pe fiecare față. Totul e lipit într-o singură formă
+ * (cu două „grupe” de material), ca să fie ieftin de desenat.
+ */
+function formaMoneda() {
+  const disc = new THREE.CylinderGeometry(0.38, 0.38, 0.1, 18).rotateX(Math.PI / 2);
+  const margine = new THREE.TorusGeometry(0.36, 0.035, 4, 18);
+  const relief: THREE.BufferGeometry[] = [];
+  for (const z of [0.055, -0.055]) {
+    // steaua: o cruce mare + o cruce mică rotită (8 colțuri)
+    relief.push(new THREE.BoxGeometry(0.42, 0.08, 0.03).translate(0, 0, z));
+    relief.push(new THREE.BoxGeometry(0.08, 0.42, 0.03).translate(0, 0, z));
+    relief.push(new THREE.BoxGeometry(0.26, 0.07, 0.03).rotateZ(Math.PI / 4).translate(0, 0, z));
+    relief.push(new THREE.BoxGeometry(0.26, 0.07, 0.03).rotateZ(-Math.PI / 4).translate(0, 0, z));
+  }
+  const curat = (g: THREE.BufferGeometry) => { g.deleteAttribute('uv'); return g.index ? g.toNonIndexed() : g; };
+  const corp = mergeGeometries([disc, margine].map(curat));
+  const stea = mergeGeometries(relief.map(curat));
+  return mergeGeometries([corp!, stea!], true)!; // grupa 0 = aur, grupa 1 = aur închis
+}
+
+// Toate monedele folosesc aceeași formă și aceleași materiale (economie)
+const FORMA = formaMoneda();
+const MATERIAL = [
+  new THREE.MeshLambertMaterial({ color: 0xffd23f, emissive: 0x6a4a00 }),
+  new THREE.MeshLambertMaterial({ color: 0xffb800, emissive: 0x8a5a00 }),
+];
 
 export class Moneda {
   obiect: THREE.Mesh;

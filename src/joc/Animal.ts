@@ -3,7 +3,8 @@
 // așa că nu cade niciodată și nu încurcă jocul.
 import * as THREE from 'three';
 
-export type TipAnimal = 'caine' | 'pisica' | 'iepure' | 'capra' | 'zebra';
+export type TipAnimal = 'caine' | 'pisica' | 'iepure' | 'capra' | 'zebra'
+  | 'cal' | 'magar' | 'gaina' | 'soparla' | 'porc' | 'tigru' | 'girafa' | 'crocodil' | 'porumbel' | 'pinguin' | 'flamingo';
 
 export interface InfoAnimal {
   tip: TipAnimal;
@@ -21,47 +22,22 @@ export const ANIMALE: InfoAnimal[] = [
   { tip: 'iepure', nume: 'Iepuraș', emoji: '🐰', culoare: 0xf2f2f2, recolorabil: true },
   { tip: 'capra', nume: 'Capră', emoji: '🐐', culoare: 0xe8e2d4, recolorabil: true },
   { tip: 'zebra', nume: 'Zebră', emoji: '🦓', culoare: 0xffffff, recolorabil: false },
+  // animalele noi (ideea lui Mihai)
+  { tip: 'cal', nume: 'Cal', emoji: '🐴', culoare: 0x8b4a22, recolorabil: true },
+  { tip: 'magar', nume: 'Măgar', emoji: '🫏', culoare: 0x8f8a88, recolorabil: false },
+  { tip: 'gaina', nume: 'Găină', emoji: '🐔', culoare: 0xf5f0e8, recolorabil: true },
+  { tip: 'soparla', nume: 'Șopârlă', emoji: '🦎', culoare: 0x3fbf6a, recolorabil: false },
+  { tip: 'porc', nume: 'Porc', emoji: '🐷', culoare: 0xf5a0b0, recolorabil: false },
+  { tip: 'tigru', nume: 'Tigru', emoji: '🐯', culoare: 0xf08a2a, recolorabil: false },
+  { tip: 'girafa', nume: 'Girafă', emoji: '🦒', culoare: 0xf0c060, recolorabil: false },
+  { tip: 'crocodil', nume: 'Crocodil', emoji: '🐊', culoare: 0x3f7a3a, recolorabil: false },
+  { tip: 'porumbel', nume: 'Porumbel', emoji: '🕊️', culoare: 0x9aa0b0, recolorabil: false },
+  { tip: 'pinguin', nume: 'Pinguin', emoji: '🐧', culoare: 0x1c1c28, recolorabil: false },
+  { tip: 'flamingo', nume: 'Flamingo', emoji: '🦩', culoare: 0xff7ab0, recolorabil: false },
 ];
 
-const CUB = new THREE.BoxGeometry(1, 1, 1);
-const NEGRU = 0x151515;
-
-/** Ce întoarce fiecare „rețetă” de animal */
-interface Model {
-  grup: THREE.Group;
-  picioare: THREE.Object3D[];
-  coada: THREE.Object3D;
-  /** Iepurele țopăie în loc să meargă */
-  topaie?: boolean;
-  /** Cât de departe stă în spatele personajului */
-  distanta: number;
-}
-
-function cub(l: number, h: number, a: number, culoare: number, x: number, y: number, z: number) {
-  const m = new THREE.Mesh(CUB, new THREE.MeshLambertMaterial({ color: culoare }));
-  m.scale.set(l, h, a);
-  m.position.set(x, y, z);
-  return m;
-}
-
-/** Un picior cu încheietura sus, ca să se poată mișca */
-function picior(x: number, y: number, z: number, l: number, h: number, culoare: number, copita?: number) {
-  const p = new THREE.Group();
-  p.position.set(x, y, z);
-  p.add(cub(l, h, l, culoare, 0, -h / 2, 0));
-  if (copita !== undefined) p.add(cub(l * 1.05, 0.06, l * 1.05, copita, 0, -h + 0.03, 0));
-  return p;
-}
-
-/** Coada, prinsă de corp într-un punct */
-function coada(x: number, y: number, z: number, ...bucati: THREE.Mesh[]) {
-  const c = new THREE.Group();
-  c.position.set(x, y, z);
-  c.add(...bucati);
-  return c;
-}
-
-function inchis(c: number, k = 0.65) { return new THREE.Color(c).multiplyScalar(k).getHex(); }
+import { cub, picior, coada, inchis, NEGRU, type Model } from './animale/ajutor';
+import * as noi from './animale/AnimaleNoi';
 
 // --- Rețetele: fiecare animal privește spre +z ---
 
@@ -186,8 +162,15 @@ export class Animal {
   schimba(tip: TipAnimal, culoare: number) {
     this.obiect.traverse((o) => { if (o instanceof THREE.Mesh) (o.material as THREE.Material).dispose(); });
     this.obiect.clear();
-    this.model = tip === 'pisica' ? pisica(culoare) : tip === 'iepure' ? iepure(culoare)
-      : tip === 'capra' ? capra(culoare) : tip === 'zebra' ? zebra() : caine(culoare);
+    const retete: Record<TipAnimal, () => Model> = {
+      caine: () => caine(culoare), pisica: () => pisica(culoare), iepure: () => iepure(culoare),
+      capra: () => capra(culoare), zebra: () => zebra(),
+      cal: () => noi.cal(culoare), magar: () => noi.magar(), gaina: () => noi.gaina(culoare),
+      soparla: () => noi.soparla(), porc: () => noi.porc(), tigru: () => noi.tigru(),
+      girafa: () => noi.girafa(), crocodil: () => noi.crocodil(), porumbel: () => noi.porumbel(),
+      pinguin: () => noi.pinguin(), flamingo: () => noi.flamingo(),
+    };
+    this.model = (retete[tip] ?? retete.caine)();
     this.obiect.add(this.model.grup);
   }
 
@@ -235,5 +218,8 @@ export class Animal {
         (pic.rotation.x = Math.sin(this.faza + (i % 2 ? Math.PI : 0) + (i > 1 ? Math.PI : 0)) * 0.8 * k));
     }
     this.model.coada.rotation.y = Math.sin(timp * 12) * 0.45; // dă din coadă
+    // pinguinul se leagănă când merge; păsările și caii dau din cap
+    if (this.model.legana) this.model.grup.rotation.z = Math.sin(this.faza) * 0.2 * k;
+    if (this.model.cap) this.model.cap.rotation.x = Math.sin(this.faza * 2) * 0.12 * k;
   }
 }

@@ -1,6 +1,7 @@
 // Decorul fiecărei teme (doar de privit, nu se atinge).
 // Fiecare decor e făcut din puține obiecte, ca să nu încetinească telefonul.
 import * as THREE from 'three';
+import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur';
 
@@ -13,6 +14,15 @@ export interface Decor {
 }
 
 export function creeazaDecor(tema: Tema): Decor {
+  // decorul temei + detaliile de pe cer (planete, galaxie, stele căzătoare, OZN), comune tuturor
+  const d = decorTema(tema);
+  const detalii = creeazaDetaliiCer(tema);
+  const grup = new THREE.Group();
+  grup.add(d.obiect, detalii.obiect);
+  return { obiect: grup, fundal: d.fundal, anima: (timp) => { d.anima?.(timp); detalii.anima(timp); } };
+}
+
+function decorTema(tema: Tema): Decor {
   switch (tema) {
     case 'luna': return decorLuna();
     case 'asteroizi': return decorAsteroizi();

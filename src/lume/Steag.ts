@@ -12,6 +12,7 @@ export class Steag {
   private panza: THREE.Mesh;
   private materialPanza = new THREE.MeshLambertMaterial({ color: GRI });
   private timpActivare = -1;
+  private materialLumini = new THREE.MeshBasicMaterial({ color: 0x5a6080 });
 
   constructor(public poz: THREE.Vector3, public directie: number) {
     const stalp = new THREE.Mesh(CUB, new THREE.MeshLambertMaterial({ color: 0xe8ecf5 }));
@@ -23,7 +24,29 @@ export class Steag {
     this.panza = new THREE.Mesh(CUB, this.materialPanza);
     this.panza.scale.set(1, 0.6, 0.06);
     this.panza.position.set(0.56, 2.4, 0);
-    this.obiect.add(stalp, baza, this.panza);
+    // o stea albă pe pânză (pe ambele fețe) – se mișcă împreună cu pânza
+    const matStea = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    for (const z of [0.55, -0.55]) {
+      for (const [l, h] of [[0.36, 0.1], [0.12, 0.5]]) {
+        const s = new THREE.Mesh(CUB, matStea);
+        s.scale.set(l, h, 0.12);
+        s.position.set(0, 0, z);
+        this.panza.add(s);
+      }
+    }
+    // bila aurie din vârf
+    const bila = new THREE.Mesh(CUB, new THREE.MeshLambertMaterial({ color: 0xffd23f, emissive: 0x6a4a00 }));
+    bila.scale.setScalar(0.22);
+    bila.position.y = 2.88;
+    bila.rotation.set(Math.PI / 4, Math.PI / 4, 0);
+    // lumini la bază: gri, apoi turcoaz când e atins
+    for (const [x, z] of [[-0.26, -0.26], [0.26, -0.26], [-0.26, 0.26], [0.26, 0.26]]) {
+      const l = new THREE.Mesh(CUB, this.materialLumini);
+      l.scale.setScalar(0.1);
+      l.position.set(x, 0.24, z);
+      this.obiect.add(l);
+    }
+    this.obiect.add(stalp, baza, this.panza, bila);
     this.obiect.position.copy(poz);
   }
 
@@ -38,6 +61,7 @@ export class Steag {
     this.timpActivare = timp;
     this.materialPanza.color.set(TURCOAZ);
     this.materialPanza.emissive.set(0x0a5a54);
+    this.materialLumini.color.set(0x2ee6d6);
   }
 
   actualizeaza(timp: number) {
