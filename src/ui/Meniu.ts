@@ -15,6 +15,8 @@ export interface ActiuniMeniu {
   personalizeaza(): void;
   comutaSunet(): boolean;
   clasament(): void;
+  /** Deschide setările; „inapoi” e ecranul la care revii după */
+  setari(inapoi: () => void): void;
 }
 
 const container = document.getElementById('meniu')!;
@@ -73,7 +75,9 @@ export class Meniu {
       sunet.textContent = this.actiuni.comutaSunet() ? '🔊' : '🔇';
     });
     sunet.setAttribute('aria-label', 'Sunet');
-    container.append(sunet);
+    const setari = buton('⚙️', 'buton-sunet buton-setari', () => this.actiuni.setari(() => this.arataPrincipal(p)));
+    setari.setAttribute('aria-label', 'Setări');
+    container.append(sunet, setari);
   }
 
   arataNivele(p: Progres) {
@@ -128,6 +132,7 @@ export class Meniu {
     coloana.append(
       buton('Continuă', 'mare', () => this.actiuni.continua()),
       buton('Începe nivelul din nou', 'mic-buton', () => this.actiuni.reincepe()),
+      buton('⚙️ Setări', 'mic-buton', () => this.actiuni.setari(() => this.arataPauza(p))),
       buton('Meniul principal', 'mic-buton', () => this.arataPrincipal(p)),
     );
     container.append(coloana);

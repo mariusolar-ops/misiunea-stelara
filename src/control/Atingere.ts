@@ -31,7 +31,10 @@ export function pornesteAtingere(intrari: Intrari) {
 
   // Zona joystick-ului: tot sfertul din stânga-jos, ca să fie ușor de nimerit
   function eInZonaJoystick(x: number, y: number) {
-    return x < window.innerWidth * 0.4 && y > window.innerHeight * 0.4;
+    // joystick-ul poate fi mutat în dreapta din Setări
+    const inDreapta = document.body.classList.contains('joystick-dreapta');
+    const peLatura = inDreapta ? x > window.innerWidth * 0.6 : x < window.innerWidth * 0.4;
+    return peLatura && y > window.innerHeight * 0.4;
   }
 
   function mutaJoystick(x: number, y: number) {
@@ -54,7 +57,7 @@ export function pornesteAtingere(intrari: Intrari) {
 
   window.addEventListener('pointerdown', (e) => {
     // butoanele și panoul de personalizare se ocupă singure
-    if ((e.target as HTMLElement).closest('button, input, .panou, .clasament')) return;
+    if ((e.target as HTMLElement).closest('button, input, label, .panou, .clasament, .setari')) return;
     if (degetJoystick === null && e.pointerType !== 'mouse' && eInZonaJoystick(e.clientX, e.clientY)) {
       degetJoystick = e.pointerId;
       const r = baza.getBoundingClientRect();

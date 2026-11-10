@@ -38,6 +38,8 @@ export class Jucator {
   /** True cât timp zboară acum */
   zboara = false;
   private dublaFolosita = false;
+  /** Cât de tare a aterizat în ultimul pas (0 = n-a aterizat). Joc îl citește și îl resetează. */
+  aterizare = 0;
   /** Stă pe gheață? (atunci alunecă) */
   private peGheata = false;
   private platformaSub: Platforma | null = null;
@@ -126,7 +128,9 @@ export class Jucator {
     // 5) Mișcarea, cu coliziuni
     const pas = this.viteza.clone().add(this.impingere).multiplyScalar(dt);
     this.impingere.set(0, 0, 0);
+    const eraPeSol = this.peSol, vitezaCadere = -this.viteza.y;
     const rez = misca(this.poz, this.viteza, pas, platforme);
+    if (rez.peSol && !eraPeSol && vitezaCadere > 9) this.aterizare = vitezaCadere;
     this.peSol = rez.peSol;
     this.platformaSub = rez.platformaSub;
 

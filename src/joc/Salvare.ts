@@ -1,6 +1,7 @@
 // Salvarea progresului pe telefon (localStorage). Nimic nu pleacă pe internet.
 import { CULORI_IMPLICITE, ASPECT_IMPLICIT, type CuloriPersonaj, type AspectPersonaj } from './Personaj';
 import type { TipAnimal } from './Animal';
+import { EFECTE_IMPLICITE, type StareEfecte } from './Efecte';
 import type { Slot } from './Accesorii';
 
 // Dacă browserul nu permite salvarea (ex. mod incognito), jocul merge oricum, doar nu ține minte.
@@ -41,7 +42,25 @@ export interface Progres {
   nume: string;
   /** Scorurile prietenilor, adăugate cu „codul de scor” */
   prieteni: Prieten[];
+  /** Efectele din cufere (urme, sunete de săritură, aterizări) */
+  efecte: StareEfecte;
+  /** Setările (volum, muzică, controale) */
+  setari: Setari;
 }
+
+export interface Setari {
+  volumEfecte: number;   // 0..100
+  volumMuzica: number;   // 0..100
+  muzica: boolean;
+  /** În ce parte stă joystick-ul */
+  joystick: 'stanga' | 'dreapta';
+  marimeButoane: 'mici' | 'normale' | 'mari';
+  camera: 'lenta' | 'normala' | 'rapida';
+}
+
+export const SETARI_IMPLICITE: Setari = {
+  volumEfecte: 80, volumMuzica: 50, muzica: true, joystick: 'stanga', marimeButoane: 'normale', camera: 'normala',
+};
 
 /** Un prieten din clasament: numele lui, cel mai bun timp și stelele pe fiecare nivel */
 export interface Prieten {
@@ -65,6 +84,7 @@ function progresNou(): Progres {
     animal: 'caine', culoareAnimal: 0xb8692a, puteriActive: [],
     cumparate: [], echipate: {}, sunet: true,
     secrete: [], nume: 'Mihai', prieteni: [],
+    efecte: { ...EFECTE_IMPLICITE, detinute: [] }, setari: { ...SETARI_IMPLICITE },
   };
 }
 
@@ -74,7 +94,11 @@ export function incarca(): Progres {
     if (!text) return progresNou();
     const nou = progresNou();
     const citit = JSON.parse(text);
-    const p: Progres = { ...nou, ...citit, culori: { ...nou.culori, ...citit.culori }, aspect: { ...nou.aspect, ...citit.aspect } };
+    const p: Progres = {
+      ...nou, ...citit,
+      culori: { ...nou.culori, ...citit.culori }, aspect: { ...nou.aspect, ...citit.aspect },
+      efecte: { ...nou.efecte, ...citit.efecte }, setari: { ...nou.setari, ...citit.setari },
+    };
     // din versiunea veche: culoarea cățelului se numea altfel
     if (typeof citit.culoareCatel === 'number' && citit.culoareAnimal === undefined) p.culoareAnimal = citit.culoareCatel;
     // înainte erau doar 5 niveluri: cine l-a terminat pe al 5-lea are acum deschis nivelul 6 (cel nou)
@@ -91,7 +115,7 @@ export function salveaza(p: Progres) {
 
 /** Stelele: 1 = ai terminat, 2 = cel puțin jumătate din monede, 3 = toate monedele */
 export function calculeazaStele(monede: number, total: number) {
-  return monede === total ? 3 : monede >= total / 2 ? 2 : 1;
+  return monede >= total ? 3 : monede >= total / 2 ? 2 : 1;
 }
 
 /**

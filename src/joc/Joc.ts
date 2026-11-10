@@ -14,6 +14,10 @@ import { cautaAccesoriu, type Slot } from './Accesorii';
 import { Personalizare } from '../ui/Personalizare';
 import { Clasament } from '../ui/Clasament';
 import { sunete, seteazaSunet } from '../audio/Sunete';
+import { pornesteMuzica } from '../audio/Muzica';
+import { Particule } from '../lume/Particule';
+import { emiteUrma, efectAterizare, confettiFinal } from './Efecte';
+import { EcranSetari, aplicaSetari, sensibilitateCamera } from '../ui/Setari';
 import { Intrari } from '../control/Intrari';
 import { pornesteAtingere } from '../control/Atingere';
 import { Hud } from '../ui/Hud';
@@ -31,6 +35,10 @@ export class Joc {
   private grafica: ReturnType<typeof creeazaScena>;
   jucator: Jucator;
   private animal: Animal;
+  private particule: Particule;
+  /** Timp acumulat pentru urma din spatele personajului */
+  private timpUrma = 0;
+  private timerFinal = 0;
   /** Era eveniment x2 când a început nivelul? (dacă da, primește dublu chiar dacă se termină între timp) */
   private eraEveniment = false;
   private ultimaVerificareEveniment = 0;
@@ -59,6 +67,7 @@ export class Joc {
     this.grafica = creeazaScena(canvas);
     this.jucator = new Jucator(this.grafica.scena);
     this.animal = new Animal(this.grafica.scena);
+    this.particule = new Particule(this.grafica.scena);
     this.camera = new CameraUrmarire(this.grafica.camera);
     pornesteAtingere(this.intrari);
 
@@ -68,12 +77,15 @@ export class Joc {
       reincepe: () => this.joacaNivel(this.indexNivel),
       personalizeaza: () => this.personalizeaza(),
       comutaSunet: () => this.comutaSunet(),
+      setari: (inapoi) => new EcranSetari(this.progres, inapoi, () => this.aplicaSetari()).arata(),
       clasament: () => new Clasament(this.progres, NIVELE, () => areToateSecretele(this.progres), () => this.arataMeniu()).arata(),
     });
 
     // Aspectul salvat (culori, accesorii, cățel) și sunetul
     this.aplicaAspect();
     seteazaSunet(this.progres.sunet);
+    this.aplicaSetari();
+    pornesteMuzica();
     this.elSunet.textContent = this.progres.sunet ? '🔊' : '🔇';
     this.elSunet.addEventListener('click', () => this.comutaSunet());
 
@@ -114,6 +126,12 @@ export class Joc {
     this.hud.arataMesaj(this.eraEveniment ? '🔥 Eveniment: monede x2!' : `Nivelul ${numarAfisat(index)}: ${NIVELE[index].nume}`, 2.5);
   }
 
+  /** Volum, muzică, controale, viteza camerei */
+  private aplicaSetari() {
+    aplicaSetari(this.progres.setari);
+    this.camera.sensibilitate = sensibilitateCamera(this.progres.setari);
+  }
+
   /** Pune pe personaj culorile și accesoriile salvate */
   private aplicaAspect() {
     const p = this.progres;
@@ -147,6 +165,8 @@ export class Joc {
   private comutaSunet() {
     this.progres.sunet = !this.progres.sunet;
     seteazaSunet(this.progres.sunet);
+    this.aplicaSetari();
+    pornesteMuzica();
     salveaza(this.progres);
     this.elSunet.textContent = this.progres.sunet ? '🔊' : '🔇';
     return this.progres.sunet;
@@ -172,7 +192,7 @@ export class Joc {
     (this.grafica.scena.background as THREE.Color).set(this.nivel.decor.fundal);
     this.cronometru = 0;
     this.hud.seteazaTimp(0);
-    this.hud.seteazaMonede(0, this.nivel.totalMonede);
+    this.hud.seteazaMonede(0, this.nivel.tintaMonede);
     this.revino();
   }
 
@@ -207,22 +227,45 @@ export class Joc {
     this.stare = 'final';
     const dublu = this.eraEveniment || esteEveniment();
     const { stele, record, castig } = inregistreazaFinal(
-      this.progres, this.indexNivel, this.cronometru, nivel.monedeLuate, nivel.totalMonede,
+      this.progres, this.indexNivel, this.cronometru, nivel.monedeLuate, nivel.tintaMonede,
       ORDINE_NORMALA.indexOf(this.indexNivel), NR_NIVELE_NORMALE, dublu ? 2 : 1);
     // ce urmează: nivelul normal următor; după ultimul, nivelul secret (dacă e deschis)
     const secretDeschis = areToateSecretele(this.progres);
     const urm = urmatorulNormal(this.indexNivel);
     const ultimulNormal = this.indexNivel === ORDINE_NORMALA[ORDINE_NORMALA.length - 1];
     this.urmatorul = urm ?? (ultimulNormal && secretDeschis ? INDEX_SECRET : -1);
-    this.hud.arataFinal({
-      nume: nivel.def.nume, timp: this.cronometru, monede: nivel.monedeLuate, total: nivel.totalMonede,
+    // întâi sărbătorim: confetti + „Nivel terminat!”, apoi (după o clipă) apare ecranul de final
+    confettiFinal(this.particule, this.jucator.poz);
+    this.hud.arataMesaj('🎉 Nivel terminat! 🎉', 1.4);
+    const final = {
+      nume: nivel.def.nume, timp: this.cronometru, monede: nivel.monedeLuate, total: nivel.tintaMonede,
       stele, record, castig, dublu, numeJucator: this.progres.nume,
       ultimul: this.urmatorul < 0,
       textUrmator: this.urmatorul === INDEX_SECRET ? 'Nivelul secret ✨' : 'Nivelul următor',
       nota: ultimulNormal && !secretDeschis
         ? `Ai terminat toate nivelurile! Dar ai găsit toate stelele secrete? (${this.progres.secrete.length}/${NR_STELE_SECRETE})`
         : this.indexNivel === INDEX_SECRET ? 'Ai terminat nivelul secret! Ești un adevărat explorator! ✨' : undefined,
-    });
+    };
+    clearTimeout(this.timerFinal);
+    this.timerFinal = window.setTimeout(() => { if (this.stare === 'final') this.hud.arataFinal(final); }, 1300);
+  }
+
+  /** Urma din spatele personajului, efectul la aterizare și particulele */
+  private efecteVizuale(dt: number) {
+    const ef = this.progres.efecte;
+    const j = this.jucator;
+    if (ef.urma && (this.stare === 'joaca' || this.stare === 'personalizare' || this.stare === 'meniu')) {
+      // în joc: urmă deasă când te miști; în meniu: câte puțin, ca să se vadă cum arată
+      const seMisca = Math.hypot(j.viteza.x, j.viteza.z) > 1 || !j.peSol;
+      const pauza = this.stare === 'joaca' ? (seMisca ? 0.03 : 0.25) : 0.12;
+      this.timpUrma += dt;
+      while (this.timpUrma > pauza) { emiteUrma(ef.urma, this.particule, j.poz, this.timp); this.timpUrma -= pauza; }
+    }
+    if (j.aterizare > 0) {
+      if (ef.aterizare && this.stare === 'joaca') { efectAterizare(ef.aterizare, this.particule, j.poz, j.aterizare); sunete.aterizare(); }
+      j.aterizare = 0;
+    }
+    this.particule.actualizeaza(dt);
   }
 
   porneste() {
@@ -286,7 +329,7 @@ export class Joc {
         else if (ob === 'lovitura') sunete.lovitura();
         else if (ob === 'vant') sunete.vant();
         if (efect === 'trambulina') sunete.trambulina();
-        if (this.jucator.aSarit) { sunete.saritura(); this.jucator.aSarit = false; }
+        if (this.jucator.aSarit) { sunete.sarituraVarianta(this.progres.efecte.saritura?.slice(2) ?? 'clasic'); this.jucator.aSarit = false; }
         sari = false;
         this.rezervaFizica -= PAS_FIZICA;
       }
@@ -306,9 +349,10 @@ export class Joc {
 
       // ce a atins personajul?
       const ev = nivel.verifica(this.jucator.poz, this.timp);
-      if (ev.monedeNoi) { this.hud.seteazaMonede(nivel.monedeLuate, nivel.totalMonede, true); sunete.moneda(); }
+      if (ev.monedeNoi) { this.hud.seteazaMonede(nivel.monedeLuate, nivel.tintaMonede, true); sunete.moneda(); }
       if (ev.steagNou) { this.hud.arataMesaj('Steag atins!'); sunete.steag(); }
       if (ev.secretNou) this.gasesteSecret();
+      if (ev.indiciu) this.hud.arataMesaj(ev.indiciu, 3);
       if (ev.final) { this.terminaNivel(); sunete.final(); }
 
       const unde = nivel.steaguri.some((s) => s.activ) ? 'la steag' : 'la start';
@@ -336,6 +380,7 @@ export class Joc {
     }
 
     nivel.anima(this.timp);
+    this.efecteVizuale(dt);
     this.jucator.deseneaza(dt, nivel.platforme);
     this.animal.actualizeaza(dt, this.jucator.poz, this.jucator.directie, this.timp);
     this.camera.actualizeaza(this.jucator.poz, dt);

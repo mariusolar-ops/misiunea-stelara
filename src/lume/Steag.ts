@@ -46,6 +46,9 @@ export class Steag {
     if (this.timpActivare >= 0) {
       const t = timp - this.timpActivare;
       this.panza.scale.y = 0.6 * (1 + Math.max(0, 0.5 - t) * 1.2);
+      // tot steagul se învârte de 3 ori, din ce în ce mai încet
+      const k = Math.min(1, t / 1.4);
+      this.obiect.rotation.y = (1 - (1 - k) * (1 - k)) * Math.PI * 6;
     }
   }
 }

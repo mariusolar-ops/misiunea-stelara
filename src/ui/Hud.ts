@@ -42,6 +42,7 @@ export class Hud {
   arataFinal(o: { nume: string; timp: number; monede: number; total: number; stele: number; record: boolean; ultimul: boolean; textUrmator?: string; nota?: string; numeJucator?: string; castig?: number; dublu?: boolean }) {
     const n = o.numeJucator || 'Mihai';
     el('final-titlu').textContent = o.ultimul ? `Bravo, ${n}!` : `Felicitări, ${n}!`;
+    el('final-mesaj').textContent = mesajLauda(o.stele, o.record);
     el('final-castig').textContent = o.castig ? `+${o.castig} monede${o.dublu ? ' (🔥 x2!)' : ''}` : '';
     el('final-nivel').textContent = o.ultimul
       ? 'Ai terminat toate nivelurile! 🚀'
@@ -71,4 +72,13 @@ export class Hud {
   ascundeFinal() {
     this.ecranFinal.classList.remove('vizibil');
   }
+}
+
+/** Un mesaj de laudă la final, ales după cum a mers */
+function mesajLauda(stele: number, record: boolean) {
+  const lista = stele === 3
+    ? ['Perfect! Toate monedele! 🌟', 'Ești un campion al galaxiei!', 'Nimic nu-ți scapă!']
+    : record ? ['Record nou! Ești tot mai rapid! ⚡']
+      : ['Super săritură!', 'Ești un adevărat cosmonaut! 🚀', 'Galaxia e mândră de tine!', 'Bravo, nimic nu te oprește!', 'Încă o misiune reușită!'];
+  return lista[Math.floor(Math.random() * lista.length)];
 }

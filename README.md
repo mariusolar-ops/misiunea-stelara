@@ -27,8 +27,9 @@ Actualizările vin singure: când telefonul are internet și deschizi jocul, ia 
 
 ## Ce conține
 
-- 8 niveluri: Baza de pe Lună, Inelul de asteroizi, Stația spațială, Luna vulcanică, Lângă gaura neagră,
-  Laboratorul cu lasere, Planeta de gheață, Fortăreața robotului (+ nivelul secret)
+- 9 niveluri: Baza de pe Lună, Inelul de asteroizi, Stația spațială, Luna vulcanică, Lângă gaura neagră,
+  Laboratorul cu lasere, Planeta de gheață, Fortăreața robotului, Răscrucea cometei (cu două drumuri)
+  + nivelul secret
 - 5 stele secrete mov (câte una ascunsă în fiecare nivel). Toate 5 deblochează accesoriul secret
   „Aripi de stea” și nivelul secret „Nebuloasa secretă”
 - Clasament (total stele + cel mai bun timp pe fiecare nivel) cu prietenii adăugați prin cod
@@ -39,13 +40,15 @@ Actualizările vin singure: când telefonul are internet și deschizi jocul, ia 
 - 8 accesorii din cuburi + un animal de companie la alegere: câine, pisică, iepuraș, capră sau zebră
 - Super-puteri cumpărate cu monedele din joc: super-săritură, viteză, săritură dublă, zbor
   (se pot opri oricând, pentru joc „greu”)
+- Cufere surpriză (100 de monede din joc): urme în spatele personajului, sunete de săritură, efecte la aterizare
+- Muzică spațială compusă din cod și ecran de Setări (volum, muzică, joystick stânga/dreapta, mărime butoane, cameră)
 - Eveniment „Monede x2” în primele 15 minute din fiecare oră (după ceasul telefonului)
 - Sunete generate din cod (Web Audio), cu buton de sunet pornit/oprit
 - Tot ce se vede e desenat din cod: nicio imagine sau model descărcat
 
 ## Pentru cine modifică jocul
 
-- `src/nivele/` – fiecare nivel e în fișierul lui (`nivel1.ts` … `nivel8.ts`, `nivelSecret.ts`).
+- `src/nivele/` – fiecare nivel e în fișierul lui (`nivel1.ts` … `nivel9.ts`, `nivelSecret.ts`).
   Pentru un nivel nou: copiază un fișier, schimbă platformele și adaugă-l în `src/nivele/index.ts`
   (la SFÂRȘITUL listei NIVELE, apoi în ORDINE_NORMALA – așa progresul salvat rămâne corect).
 - `src/lume/obstacole/` – lasere, pendule, curenți de aer, cristale

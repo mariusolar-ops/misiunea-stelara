@@ -2,7 +2,7 @@
 // Fiecare decor e făcut din puține obiecte, ca să nu încetinească telefonul.
 import * as THREE from 'three';
 
-export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata';
+export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -23,6 +23,7 @@ export function creeazaDecor(tema: Tema): Decor {
     case 'laborator': return decorLaborator();
     case 'gheata': return decorGheata();
     case 'fortareata': return decorFortareata();
+    case 'cometa': return decorCometa();
   }
 }
 
@@ -294,5 +295,24 @@ function decorFortareata(): Decor {
     obiect: grup,
     fundal: 0x14080e,
     anima: (timp) => { bec.visible = Math.floor(timp * 2) % 2 === 0; },
+  };
+}
+
+function decorCometa(): Decor {
+  // O cometă mare care trece pe cer, cu coadă lungă, și o planetă verde-albăstruie dedesubt
+  const grup = planetaCuPete(0x3f8f8a, 0x2c6a66);
+  const cometa = new THREE.Group();
+  const cap = new THREE.Mesh(new THREE.IcosahedronGeometry(8, 0), new THREE.MeshBasicMaterial({ color: 0xe8fbff }));
+  const coada = new THREE.Mesh(
+    new THREE.ConeGeometry(9, 90, 16, 1, true).rotateZ(-Math.PI / 2).translate(45, 0, 0),
+    new THREE.MeshBasicMaterial({ color: 0x9ffcf3, transparent: true, opacity: 0.25, depthWrite: false, side: THREE.DoubleSide }),
+  );
+  cometa.add(cap, coada);
+  cometa.position.set(-60, 70, -220);
+  cometa.rotation.z = -0.35;
+  grup.add(cometa);
+  return {
+    obiect: grup, fundal: 0x071428,
+    anima: (timp) => { cap.rotation.y = timp * 0.5; cometa.position.x = -60 + Math.sin(timp * 0.05) * 30; },
   };
 }

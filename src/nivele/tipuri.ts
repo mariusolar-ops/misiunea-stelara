@@ -22,6 +22,10 @@ export interface DefinitieNivel {
   final: { poz: Punct; directie: number };
   /** Obstacole: lasere, pendule, curenți de aer, cristale (opțional) */
   obstacole?: DefinitieObstacol[];
+  /** Mesaje care apar o dată, când treci printr-un loc (ex. la o răscruce) */
+  indicii?: { poz: Punct; raza: number; text: string }[];
+  /** Câte monede trebuie pentru 3 stele (implicit: toate). Folositor când sunt mai multe drumuri. */
+  monedePentru3Stele?: number;
   /** Steaua secretă ascunsă în nivel (opțional) */
   secret?: Punct;
   /** True pentru nivelul secret (apare doar după ce strângi toate stelele secrete) */

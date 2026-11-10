@@ -13,13 +13,15 @@ export class CameraUrmarire {
   inaltime = 0.38;
   /** Cât de departe stă camera (se apropie la Personalizare) */
   distanta = DISTANTA;
+  /** Cât de repede se rotește la tras cu degetul (din Setări) */
+  sensibilitate = SENSIBILITATE;
   private tinta = new THREE.Vector3();
 
   constructor(public camera: THREE.PerspectiveCamera) {}
 
   roteste(dx: number, dy: number) {
-    this.unghi -= dx * SENSIBILITATE;
-    this.inaltime = THREE.MathUtils.clamp(this.inaltime + dy * SENSIBILITATE, UNGHI_SUS_MIN, UNGHI_SUS_MAX);
+    this.unghi -= dx * this.sensibilitate;
+    this.inaltime = THREE.MathUtils.clamp(this.inaltime + dy * this.sensibilitate, UNGHI_SUS_MIN, UNGHI_SUS_MAX);
   }
 
   /** Mută camera imediat (fără alunecare), ex. după ce personajul revine la checkpoint */

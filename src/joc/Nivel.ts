@@ -15,6 +15,8 @@ import type { DefinitieNivel } from '../nivele/tipuri';
 export interface Evenimente {
   steagNou: boolean;
   secretNou: boolean;
+  /** Textul unui indiciu, dacă tocmai a trecut pe lângă unul */
+  indiciu: string | null;
   monedeNoi: number;
   final: boolean;
 }
@@ -57,10 +59,21 @@ export class Nivel {
   }
 
   get totalMonede() { return this.monede.length; }
+  /** Câte monede trebuie pentru 3 stele (la nivelul cu două drumuri nu se pot lua toate deodată) */
+  get tintaMonede() { return this.def.monedePentru3Stele ?? this.monede.length; }
+  private indiciiAratate = new Set<number>();
 
   /** Verifică ce a atins personajul în acest cadru */
   verifica(poz: THREE.Vector3, timp: number): Evenimente {
-    const ev: Evenimente = { steagNou: false, secretNou: false, monedeNoi: 0, final: false };
+    const ev: Evenimente = { steagNou: false, secretNou: false, indiciu: null, monedeNoi: 0, final: false };
+    for (const [i, ind] of (this.def.indicii ?? []).entries()) {
+      if (this.indiciiAratate.has(i)) continue;
+      const dx = poz.x - ind.poz[0], dz = poz.z - ind.poz[2];
+      if (dx * dx + dz * dz < ind.raza * ind.raza && Math.abs(poz.y - ind.poz[1]) < 2) {
+        this.indiciiAratate.add(i);
+        ev.indiciu = ind.text;
+      }
+    }
     if (this.steaSecreta?.atinsa(poz)) { this.steaSecreta.ia(timp); ev.secretNou = true; }
     for (const m of this.monede) {
       if (!m.luata && m.atinsa(poz)) { m.ia(timp); this.monedeLuate++; ev.monedeNoi++; }

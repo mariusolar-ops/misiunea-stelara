@@ -10,14 +10,15 @@ import { nivelSecret } from './nivelSecret';
 import { nivel6 } from './nivel6';
 import { nivel7 } from './nivel7';
 import { nivel8 } from './nivel8';
+import { nivel9 } from './nivel9';
 
-export const NIVELE = [nivel1, nivel2, nivel3, nivel4, nivel5, nivelSecret, nivel6, nivel7, nivel8];
+export const NIVELE = [nivel1, nivel2, nivel3, nivel4, nivel5, nivelSecret, nivel6, nivel7, nivel8, nivel9];
 
 /** Poziția nivelului secret în listă (apare doar după ce găsești toate stelele secrete) */
 export const INDEX_SECRET = 5;
 
 /** Ordinea în care se joacă nivelurile normale (pozițiile din NIVELE) */
-export const ORDINE_NORMALA = [0, 1, 2, 3, 4, 6, 7, 8];
+export const ORDINE_NORMALA = [0, 1, 2, 3, 4, 6, 7, 8, 9];
 
 /** Câte niveluri „normale” sunt (fără cel secret) */
 export const NR_NIVELE_NORMALE = ORDINE_NORMALA.length;
