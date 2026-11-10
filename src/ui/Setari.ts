@@ -3,6 +3,7 @@
 import { salveaza, type Progres, type Setari } from '../joc/Salvare';
 import { seteazaVolumEfecte, sunete } from '../audio/Sunete';
 import { seteazaMuzica, seteazaVolumMuzica } from '../audio/Muzica';
+import { t, LIMBI, seteazaLimba } from '../i18n';
 
 const container = document.getElementById('meniu')!;
 
@@ -14,6 +15,7 @@ export function aplicaSetari(s: Setari) {
   const b = document.body.classList;
   b.toggle('joystick-dreapta', s.joystick === 'dreapta');
   b.remove('butoane-mici', 'butoane-mari');
+  seteazaLimba(s.limba);
   if (s.marimeButoane !== 'normale') b.add(`butoane-${s.marimeButoane}`);
 }
 
@@ -31,21 +33,22 @@ export class EcranSetari {
       lista.map(([v, text]) => `<button class="optiune ${s[cheie] === v ? 'aleasa' : ''}" data-cheie="${cheie}" data-valoare="${v}">${text}</button>`).join('');
 
     container.innerHTML = `
-      <h2>⚙️ Setări</h2>
+      <h2>⚙️ ${t('Setări')}</h2>
       <div class="setari">
-        <label class="rand-setare"><span>🔊 Volum efecte</span>
+        <label class="rand-setare"><span>🔊 ${t('Volum efecte')}</span>
           <input type="range" min="0" max="100" step="5" value="${s.volumEfecte}" data-volum="volumEfecte" /><b>${s.volumEfecte}%</b></label>
-        <label class="rand-setare"><span>🎵 Volum muzică</span>
+        <label class="rand-setare"><span>🎵 ${t('Volum muzică')}</span>
           <input type="range" min="0" max="100" step="5" value="${s.volumMuzica}" data-volum="volumMuzica" /><b>${s.volumMuzica}%</b></label>
-        <div class="rand-setare"><span>🎶 Muzică</span><div class="bule">${optiuni('muzica', [[true, 'Pornită'], [false, 'Oprită']])}</div></div>
-        <div class="rand-setare"><span>🕹️ Joystick</span><div class="bule">${optiuni('joystick', [['stanga', '⬅️ În stânga'], ['dreapta', 'În dreapta ➡️']])}</div></div>
-        <div class="rand-setare"><span>🔘 Butoane</span><div class="bule">${optiuni('marimeButoane', [['mici', 'Mici'], ['normale', 'Normale'], ['mari', 'Mari']])}</div></div>
-        <div class="rand-setare"><span>🎥 Cameră</span><div class="bule">${optiuni('camera', [['lenta', 'Lentă'], ['normala', 'Normală'], ['rapida', 'Rapidă']])}</div></div>
+        <div class="rand-setare"><span>🎶 ${t('Muzică')}</span><div class="bule">${optiuni('muzica', [[true, t('Pornită')], [false, t('Oprită')]])}</div></div>
+        <div class="rand-setare"><span>🕹️ Joystick</span><div class="bule">${optiuni('joystick', [['stanga', '⬅️ ' + t('În stânga')], ['dreapta', t('În dreapta') + ' ➡️']])}</div></div>
+        <div class="rand-setare"><span>🔘 ${t('Butoane')}</span><div class="bule">${optiuni('marimeButoane', [['mici', t('Mici')], ['normale', t('Normale')], ['mari', t('Mari')]])}</div></div>
+        <div class="rand-setare"><span>🎥 ${t('Cameră')}</span><div class="bule">${optiuni('camera', [['lenta', t('Lentă')], ['normala', t('Normală')], ['rapida', t('Rapidă')]])}</div>
+        <div class="rand-setare"><span>🌍 ${t('Limbă')}</span><div class="bule">${optiuni('limba', LIMBI.map((l) => [l.cod, `${l.steag} ${l.nume}`]))}</div></div></div>
       </div>`;
 
     const inapoi = document.createElement('button');
     inapoi.className = 'mic-buton inapoi';
-    inapoi.textContent = '‹ Înapoi';
+    inapoi.textContent = '‹ ' + t('Înapoi');
     inapoi.addEventListener('click', () => { sunete.click(); this.laIesire(); });
     container.append(inapoi);
 

@@ -18,15 +18,15 @@
 
     <!-- Interfața din timpul jocului -->
     <div id="interfata" class="ascuns">
-      <button id="buton-pauza" aria-label="Pauză"><span></span><span></span></button>
-      <button id="buton-sunet" class="buton-sunet" aria-label="Sunet">🔊</button>
+      <button id="buton-pauza" aria-label="Pauză" data-t-aria="Pauză"><span></span><span></span></button>
+      <button id="buton-sunet" class="buton-sunet" aria-label="Sunet" data-t-aria="Sunet">🔊</button>
       <div id="hud">
         <div id="hud-monede"><span class="moneda-mica"></span><span id="nr-monede">0/0</span></div>
         <div id="hud-timp">0:00</div>
         <div id="hud-x2" class="ascuns">🔥 x2</div>
       </div>
       <div id="joystick"><div id="joystick-buton"></div></div>
-      <button id="buton-sari" aria-label="Sari">SARI</button>
+      <button id="buton-sari" aria-label="Sari" data-t="SARI">SARI</button>
       <!-- bara de energie pentru zbor (apare doar dacă puterea Zbor e pornită) -->
       <div id="energie" class="ascuns"><div id="energie-plin"></div></div>
       <div id="mesaj"></div>
@@ -44,14 +44,14 @@
         <p id="final-mesaj"></p>
         <div id="final-stele"></div>
         <div class="rand-rezultate">
-          <div><span class="eticheta">Timp</span><span id="final-timp"></span></div>
-          <div><span class="eticheta">Monede</span><span id="final-monede"></span></div>
+          <div><span class="eticheta" data-t="Timp">Timp</span><span id="final-timp"></span></div>
+          <div><span class="eticheta" data-t="Monede">Monede</span><span id="final-monede"></span></div>
         </div>
         <p id="final-record"></p>
         <p id="final-castig"></p>
         <div class="rand-butoane">
-          <button id="buton-meniu-final" class="mic-buton">Meniu</button>
-          <button id="buton-din-nou" class="mic-buton">Din nou</button>
+          <button id="buton-meniu-final" class="mic-buton" data-t="Meniu">Meniu</button>
+          <button id="buton-din-nou" class="mic-buton" data-t="Din nou">Din nou</button>
           <button id="buton-urmator" class="mare">Nivelul următor</button>
         </div>
       </div>
@@ -60,7 +60,7 @@
     <!-- Apare când telefonul e ținut vertical -->
     <div id="roteste">
       <div class="telefon"></div>
-      <p>Întoarce telefonul pe orizontală</p>
+      <p data-t="Întoarce telefonul pe orizontală">Întoarce telefonul pe orizontală</p>
     </div>
 
     <script type="module" src="/src/main.ts"></script>

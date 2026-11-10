@@ -27,11 +27,11 @@ Actualizările vin singure: când telefonul are internet și deschizi jocul, ia 
 
 ## Ce conține
 
-- 9 niveluri: Baza de pe Lună, Inelul de asteroizi, Stația spațială, Luna vulcanică, Lângă gaura neagră,
-  Laboratorul cu lasere, Planeta de gheață, Fortăreața robotului, Răscrucea cometei (cu două drumuri)
-  + nivelul secret
-- 5 stele secrete mov (câte una ascunsă în fiecare nivel). Toate 5 deblochează accesoriul secret
-  „Aripi de stea” și nivelul secret „Nebuloasa secretă”
+- 11 niveluri: Baza de pe Lună, Inelul de asteroizi, Stația spațială, Luna vulcanică, Lângă gaura neagră,
+  Laboratorul cu lasere, Planeta de gheață, Fortăreața robotului, Răscrucea cometei (cu două drumuri),
+  Asteroidul cu gravitație mică, Turnul spre stele + 2 niveluri secrete (Nebuloasa secretă, Templul de aur)
+- 5 stele secrete mov (nivelurile 1–5) deblochează „Aripi de stea” și Nebuloasa secretă;
+  4 stele de aur (nivelurile 6–9) deblochează Templul de aur
 - Clasament (total stele + cel mai bun timp pe fiecare nivel) cu prietenii adăugați prin cod
 - Platforme care se mișcă, blocuri care dispar, lavă, trambuline, benzi rulante, gheață
 - Obstacole: lasere (fixe, care clipesc, care se mișcă, rotative), pendule, curenți de aer, cristale
@@ -42,16 +42,20 @@ Actualizările vin singure: când telefonul are internet și deschizi jocul, ia 
   (se pot opri oricând, pentru joc „greu”)
 - Cufere surpriză (100 de monede din joc): urme în spatele personajului, sunete de săritură, efecte la aterizare
 - Muzică spațială compusă din cod și ecran de Setări (volum, muzică, joystick stânga/dreapta, mărime butoane, cameră)
+- Serie zilnică (monede în fiecare zi, cufăr gratis în ziua a 7-a) și titluri pentru realizări
+- Jocul e în 5 limbi: română, engleză, franceză, spaniolă, germană (Setări → Limbă)
 - Eveniment „Monede x2” în primele 15 minute din fiecare oră (după ceasul telefonului)
 - Sunete generate din cod (Web Audio), cu buton de sunet pornit/oprit
 - Tot ce se vede e desenat din cod: nicio imagine sau model descărcat
 
 ## Pentru cine modifică jocul
 
-- `src/nivele/` – fiecare nivel e în fișierul lui (`nivel1.ts` … `nivel9.ts`, `nivelSecret.ts`).
+- `src/nivele/` – fiecare nivel e în fișierul lui (`nivel1.ts` … `nivel11.ts`, `nivelSecret.ts`).
   Pentru un nivel nou: copiază un fișier, schimbă platformele și adaugă-l în `src/nivele/index.ts`
   (la SFÂRȘITUL listei NIVELE, apoi în ORDINE_NORMALA – așa progresul salvat rămâne corect).
 - `src/lume/obstacole/` – lasere, pendule, curenți de aer, cristale
+- `src/i18n/` – traducerile; un text nou se scrie în cod cu `t('Text în română')`
+  și se adaugă un rând în `src/i18n/traduceri.ts`
 - `src/lume/` – platforme, steaguri, monede, decor
 - `src/joc/` – personajul, fizica, camera, salvarea, accesoriile
 - `src/ui/` – meniuri, ecrane, interfața

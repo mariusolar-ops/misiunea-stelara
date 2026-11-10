@@ -2,7 +2,6 @@
 // Titlul ales apare lângă numele tău în meniu, la final și în clasamentul prietenilor.
 import type { Progres } from './Salvare';
 import { ORDINE_NORMALA, SECRETE } from '../nivele';
-import { EFECTE } from './Efecte';
 
 export interface Titlu {
   id: string;
@@ -23,7 +22,7 @@ export const TITLURI: Titlu[] = [
   { id: 'vanator', nume: 'Vânător de stele', emoji: '🔮', cum: 'Găsește toate stelele mov', areTitlul: (p) => toateStelele(p, 0) },
   { id: 'auriu', nume: 'Căutător de aur', emoji: '🌟', cum: 'Găsește toate stelele de aur', areTitlul: (p) => toateStelele(p, 1) },
   { id: 'perfect', nume: 'Perfecționist', emoji: '💎', cum: 'Ia 3 stele la 5 niveluri', areTitlul: (p) => Object.values(p.nivele).filter((r) => r.stele >= 3).length >= 5 },
-  { id: 'colectionar', nume: 'Colecționar', emoji: '🎁', cum: `Adună 10 efecte din cufere (din ${EFECTE.length})`, areTitlul: (p) => p.efecte.detinute.length >= 10 },
+  { id: 'colectionar', nume: 'Colecționar', emoji: '🎁', cum: 'Adună 10 efecte din cufere', areTitlul: (p) => p.efecte.detinute.length >= 10 },
   { id: 'fidel', nume: 'Prieten fidel', emoji: '🔥', cum: 'Intră în joc 7 zile la rând', areTitlul: (p) => p.zilnic.serie >= 7 },
 ];
 

@@ -1,5 +1,6 @@
 // Evenimentul „Monede x2”: în primele 15 minute din fiecare oră, monedele strânse valorează dublu.
 // Merge după ceasul telefonului, deci și fără internet.
+import { t } from '../i18n';
 
 const DURATA_MINUTE = 15;
 
@@ -19,8 +20,8 @@ export function textEveniment(acum = new Date()) {
   const s = secundePanaLaSchimbare(acum);
   if (esteEveniment(acum)) {
     const m = Math.floor(s / 60), r = s % 60;
-    return `🔥 Monede x2! Încă ${m}:${r.toString().padStart(2, '0')}`;
+    return '🔥 ' + t('Monede x2! Încă {timp}', { timp: `${m}:${r.toString().padStart(2, '0')}` });
   }
   const m = Math.ceil(s / 60);
-  return `⏰ Monede x2 peste ${m} min`;
+  return '⏰ ' + t('Monede x2 peste {m} min', { m });
 }

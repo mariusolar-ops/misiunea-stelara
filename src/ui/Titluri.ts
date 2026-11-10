@@ -3,6 +3,7 @@
 import { salveaza, type Progres } from '../joc/Salvare';
 import { TITLURI, type Titlu } from '../joc/Titluri';
 import { sunete } from '../audio/Sunete';
+import { t } from '../i18n';
 
 const container = document.getElementById('meniu')!;
 
@@ -11,22 +12,22 @@ export class EcranTitluri {
 
   arata() {
     const p = this.progres;
-    container.innerHTML = `<h2>🏅 Titluri</h2><p class="sfat">Atinge un titlu câștigat ca să apară lângă numele tău.</p>`;
+    container.innerHTML = `<h2>🏅 ${t('Titluri')}</h2><p class="sfat">${t('Atinge un titlu câștigat ca să apară lângă numele tău.')}</p>`;
     const grila = document.createElement('div');
     grila.className = 'grila-titluri';
-    for (const t of TITLURI) {
-      const are = p.titluri.includes(t.id);
+    for (const ti of TITLURI) {
+      const are = p.titluri.includes(ti.id);
       const b = document.createElement('button');
-      b.className = 'card-titlu' + (are ? '' : ' blocat') + (p.titluAles === t.id ? ' ales' : '');
+      b.className = 'card-titlu' + (are ? '' : ' blocat') + (p.titluAles === ti.id ? ' ales' : '');
       b.disabled = !are;
-      b.innerHTML = `<span class="emoji">${are ? t.emoji : '🔒'}</span><span class="nume">${t.nume}</span><span class="cum">${are ? (p.titluAles === t.id ? 'Ales ✓' : 'Câștigat') : t.cum}</span>`;
-      b.addEventListener('click', () => { p.titluAles = t.id; salveaza(p); sunete.click(); this.arata(); });
+      b.innerHTML = `<span class="emoji">${are ? ti.emoji : '🔒'}</span><span class="nume">${t(ti.nume)}</span><span class="cum">${are ? (p.titluAles === ti.id ? t('Ales') + ' ✓' : t('Câștigat')) : t(ti.cum)}</span>`;
+      b.addEventListener('click', () => { p.titluAles = ti.id; salveaza(p); sunete.click(); this.arata(); });
       grila.append(b);
     }
     container.append(grila);
     const inapoi = document.createElement('button');
     inapoi.className = 'mic-buton inapoi';
-    inapoi.textContent = '‹ Înapoi';
+    inapoi.textContent = '‹ ' + t('Înapoi');
     inapoi.addEventListener('click', () => { sunete.click(); this.laIesire(); });
     container.append(inapoi);
   }
@@ -38,16 +39,16 @@ export function anuntaTitluri(titluri: Titlu[]) {
   if (titluri.length > 2) {
     const el = document.createElement('div');
     el.className = 'anunt-titlu';
-    el.innerHTML = `<span class="emoji">🏅</span><div><small>${titluri.map((t) => t.emoji).join(' ')}</small><b>Ai câștigat ${titluri.length} titluri noi!</b></div>`;
+    el.innerHTML = `<span class="emoji">🏅</span><div><small>${titluri.map((t) => t.emoji).join(' ')}</small><b>${t('Ai câștigat {n} titluri noi!', { n: titluri.length })}</b></div>`;
     document.body.append(el);
     sunete.secret();
     setTimeout(() => el.remove(), 4000);
     return;
   }
-  titluri.forEach((t, i) => setTimeout(() => {
+  titluri.forEach((ti, i) => setTimeout(() => {
     const el = document.createElement('div');
     el.className = 'anunt-titlu';
-    el.innerHTML = `<span class="emoji">${t.emoji}</span><div><small>🏅 Titlu nou!</small><b>${t.nume}</b></div>`;
+    el.innerHTML = `<span class="emoji">${ti.emoji}</span><div><small>🏅 ${t('Titlu nou!')}</small><b>${t(ti.nume)}</b></div>`;
     document.body.append(el);
     sunete.secret();
     setTimeout(() => el.remove(), 3500);

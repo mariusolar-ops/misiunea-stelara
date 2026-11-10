@@ -10,6 +10,7 @@ import { PUTERI } from '../joc/Puteri';
 import { sunete } from '../audio/Sunete';
 import { EFECTE, PRET_CUFAR, NUME_CATEGORII, deschideCufar, type CategorieEfect } from '../joc/Efecte';
 import { arataCufar } from './AnimatieCufar';
+import { t } from '../i18n';
 
 const container = document.getElementById('meniu')!;
 
@@ -46,12 +47,12 @@ export class Personalizare {
     container.innerHTML = `
       <div class="panou">
         <div class="antet">
-          <h2>Personalizează</h2>
+          <h2>${t('Personalizează')}</h2>
           <div class="portofel"><span class="moneda-mica"></span>${p.portofel}</div>
         </div>
-        <div class="taburi">${TABURI.map(([id, t]) => `<button data-tab="${id}" class="${this.tab === id ? 'activ' : ''}">${t}</button>`).join('')}</div>
+        <div class="taburi">${TABURI.map(([id, text]) => `<button data-tab="${id}" class="${this.tab === id ? 'activ' : ''}">${text.split(' ')[0]} ${t(text.split(' ').slice(1).join(' '))}</button>`).join('')}</div>
         <div class="continut"></div>
-        <button class="mare gata">Gata</button>
+        <button class="mare gata">${t('Gata')}</button>
       </div>`;
     container.querySelectorAll<HTMLButtonElement>('.taburi button').forEach((b) =>
       b.addEventListener('click', () => { this.tab = b.dataset.tab as Tab; this.scroll = 0; sunete.click(); this.arata(); }));
@@ -77,7 +78,7 @@ export class Personalizare {
   private rand(eticheta: string, ...copii: HTMLElement[]) {
     const r = document.createElement('div');
     r.className = 'rand-culori';
-    r.innerHTML = `<span class="eticheta-culoare">${eticheta}</span>`;
+    r.innerHTML = `<span class="eticheta-culoare">${t(eticheta)}</span>`;
     const c = document.createElement('div');
     c.className = 'bule';
     c.append(...copii);
@@ -91,7 +92,7 @@ export class Personalizare {
       const b = document.createElement('button');
       b.className = 'bula' + (c === curenta ? ' aleasa' : '');
       b.style.background = hex(c);
-      b.setAttribute('aria-label', eticheta);
+      b.setAttribute('aria-label', t(eticheta));
       b.addEventListener('click', () => { alege(c); sunete.click(); this.salveazaSiAplica(); });
       return b;
     }));
@@ -102,7 +103,7 @@ export class Personalizare {
     return this.rand(eticheta, ...optiuni.map(([v, text]) => {
       const b = document.createElement('button');
       b.className = 'optiune' + (v === curenta ? ' aleasa' : '');
-      b.textContent = text;
+      b.textContent = t(text);
       b.addEventListener('click', () => { alege(v); sunete.click(); this.salveazaSiAplica(); });
       return b;
     }));
@@ -137,13 +138,13 @@ export class Personalizare {
     );
     const sfat = document.createElement('p');
     sfat.className = 'sfat';
-    sfat.textContent = 'Culorile pentru dungi, stea, fulger și funde le alegi la „Culori” → „Detalii”.';
+    sfat.textContent = t('Culorile pentru dungi, stea, fulger și funde le alegi la „Culori” → „Detalii”.');
     el.append(sfat);
   }
 
   private animal(el: HTMLElement) {
     const p = this.progres;
-    el.append(this.randOptiuni('Animal', ANIMALE.map((a) => [a.tip, `${a.emoji} ${a.nume}`]), p.animal, (v) => {
+    el.append(this.randOptiuni('Animal', ANIMALE.map((a) => [a.tip, `${a.emoji} ${t(a.nume)}`]), p.animal, (v) => {
       p.animal = v;
       p.culoareAnimal = ANIMALE.find((a) => a.tip === v)!.culoare; // culoarea lui obișnuită
     }));
@@ -163,11 +164,11 @@ export class Personalizare {
       card.className = 'card-accesoriu' + (purtat ? ' purtat' : '') + (a.secret ? ' secret' : '');
       if (a.secret && !cumparat) {
         // accesoriul secret: nu se vinde, se câștigă cu toate stelele secrete
-        card.innerHTML = `<span class="emoji">❓</span><span class="nume">Secret</span><span class="indiciu">Găsește toate stelele mov ascunse</span>`;
+        card.innerHTML = `<span class="emoji">❓</span><span class="nume">${t('Secret')}</span><span class="indiciu">${t('Găsește toate stelele mov ascunse')}</span>`;
         grila.append(card);
         continue;
       }
-      card.innerHTML = `<span class="emoji">${a.emoji}</span><span class="nume">${a.nume}</span>`;
+      card.innerHTML = `<span class="emoji">${a.emoji}</span><span class="nume">${t(a.nume)}</span>`;
       const b = document.createElement('button');
       if (!cumparat) {
         b.innerHTML = `<span class="moneda-mica"></span> ${a.pret}`;
@@ -182,7 +183,7 @@ export class Personalizare {
           this.salveazaSiAplica();
         });
       } else {
-        b.textContent = purtat ? 'Scoate' : 'Pune';
+        b.textContent = purtat ? t('Scoate') : t('Pune');
         b.className = purtat ? 'scoate' : 'pune';
         b.addEventListener('click', () => {
           if (purtat) delete p.echipate[a.slot]; else p.echipate[a.slot] = a.id;
@@ -205,7 +206,7 @@ export class Personalizare {
       const pornita = p.puteriActive.includes(pu.id);
       const card = document.createElement('div');
       card.className = 'card-accesoriu putere' + (pornita ? ' purtat' : '');
-      card.innerHTML = `<span class="emoji">${pu.emoji}</span><span class="nume">${pu.nume}</span><span class="indiciu">${pu.descriere}</span>`;
+      card.innerHTML = `<span class="emoji">${pu.emoji}</span><span class="nume">${t(pu.nume)}</span><span class="indiciu">${t(pu.descriere)}</span>`;
       const b = document.createElement('button');
       if (!cumparat) {
         b.innerHTML = `<span class="moneda-mica"></span> ${pu.pret}`;
@@ -220,7 +221,7 @@ export class Personalizare {
           this.salveazaSiAplica();
         });
       } else {
-        b.textContent = pornita ? 'Pornită ✓' : 'Oprită';
+        b.textContent = pornita ? t('Pornită') + ' ✓' : t('Oprită');
         b.className = pornita ? 'pune' : 'scoate';
         b.addEventListener('click', () => {
           p.puteriActive = pornita ? p.puteriActive.filter((x) => x !== pu.id) : [...p.puteriActive, pu.id];
@@ -234,7 +235,7 @@ export class Personalizare {
     el.append(grila);
     const sfat = document.createElement('p');
     sfat.className = 'sfat';
-    sfat.textContent = 'Poți opri puterile oricând, dacă vrei să joci mai greu.';
+    sfat.textContent = t('Poți opri puterile oricând, dacă vrei să joci mai greu.');
     el.append(sfat);
   }
 
@@ -246,10 +247,10 @@ export class Personalizare {
     const zona = document.createElement('div');
     zona.className = 'zona-cufar';
     zona.innerHTML = `<span class="cufar-mic">🎁</span>
-      <div class="text-cufar"><b>Cufăr surpriză</b><span>${ramase > 0 ? `Mai ai ${ramase} efecte de descoperit` : 'Le ai pe toate! 🏆'}</span></div>`;
+      <div class="text-cufar"><b>${t('Cufăr surpriză')}</b><span>${ramase > 0 ? t('Mai ai {n} efecte de descoperit', { n: ramase }) : t('Le ai pe toate!') + ' 🏆'}</span></div>`;
     const b = document.createElement('button');
     b.className = 'cumpara';
-    b.innerHTML = ramase > 0 ? `Deschide <span class="moneda-mica"></span> ${PRET_CUFAR}` : 'Gata!';
+    b.innerHTML = ramase > 0 ? `${t('Deschide')} <span class="moneda-mica"></span> ${PRET_CUFAR}` : t('Gata!');
     b.disabled = ramase === 0 || p.portofel < PRET_CUFAR;
     b.addEventListener('click', () => {
       if (p.portofel < PRET_CUFAR) return;
@@ -268,14 +269,14 @@ export class Personalizare {
       const optiuni: HTMLElement[] = [];
       const fara = document.createElement('button');
       fara.className = 'optiune' + (ef[cat] === null ? ' aleasa' : '');
-      fara.textContent = cat === 'saritura' || cat === 'pasi' ? 'Obișnuit' : 'Fără';
+      fara.textContent = cat === 'saritura' || cat === 'pasi' ? t('Obișnuit') : t('Fără');
       fara.addEventListener('click', () => { ef[cat] = null; sunete.click(); this.salveazaSiAplica(); });
       optiuni.push(fara);
       for (const e of ale) {
         const o = document.createElement('button');
         const are = ef.detinute.includes(e.id);
         o.className = 'optiune' + (ef[cat] === e.id ? ' aleasa' : '') + (are ? '' : ' necunoscut');
-        o.textContent = are ? `${e.emoji} ${e.nume}` : '❓';
+        o.textContent = are ? `${e.emoji} ${t(e.nume)}` : '❓';
         o.disabled = !are;
         o.addEventListener('click', () => {
           ef[cat] = e.id;

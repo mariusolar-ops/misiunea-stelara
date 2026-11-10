@@ -27,6 +27,7 @@ import { pornesteAtingere } from '../control/Atingere';
 import { Hud } from '../ui/Hud';
 import { Meniu } from '../ui/Meniu';
 import { NIVELE, NR_NIVELE_NORMALE, SECRETE, ORDINE_NORMALA, numarAfisat, urmatorulNormal, grupaSecret, secretDeschis, esteNivelSecret } from '../nivele';
+import { t } from '../i18n';
 
 const PAS_FIZICA = 1 / 120;   // fizica rulează în pași mici, ca să nu treacă prin platforme
 const INALTIME_CADERE = -25;  // sub înălțimea asta personajul „cade” și revine la steag
@@ -131,7 +132,7 @@ export class Joc {
     this.stare = 'joaca';
     this.eraEveniment = esteEveniment();
     this.hud.seteazaEveniment(this.eraEveniment);
-    this.hud.arataMesaj(this.eraEveniment ? '🔥 Eveniment: monede x2!' : `Nivelul ${numarAfisat(index)}: ${NIVELE[index].nume}`, 2.5);
+    this.hud.arataMesaj(this.eraEveniment ? '🔥 ' + t('Eveniment: monede x2!') : t('Nivelul {n}: {nume}', { n: numarAfisat(index), nume: t(NIVELE[index].nume) }), 2.5);
   }
 
   /** Anunță titlurile nou câștigate (dacă sunt) */
@@ -239,9 +240,9 @@ export class Joc {
     if (gasite === g.nivele.length) {
       // surpriza: nivelul secret (și, la stelele mov, accesoriul secret)
       if (g.index === SECRETE[0].index && !p.cumparate.includes('aripi')) p.cumparate.push('aripi');
-      this.hud.arataMesaj(`Toate stelele! Ai deblocat un nivel secret! ${g.emoji}`, 4);
+      this.hud.arataMesaj(t('Toate stelele! Ai deblocat un nivel secret!') + ' ' + g.emoji, 4);
     } else {
-      this.hud.arataMesaj(`${g.numeStea} găsită! (${gasite}/${g.nivele.length})`, 2.5);
+      this.hud.arataMesaj(t(g.numeStea + ' găsită!') + ` (${gasite}/${g.nivele.length})`, 2.5);
     }
     salveaza(p); // o salvăm imediat, chiar dacă nu termini nivelul
   }
@@ -262,15 +263,15 @@ export class Joc {
     const stelePeGrupe = SECRETE.map((x) => `${x.emoji} ${x.nivele.filter((n) => this.progres.secrete.includes(n)).length}/${x.nivele.length}`).join('  ');
     // întâi sărbătorim: confetti + „Nivel terminat!”, apoi (după o clipă) apare ecranul de final
     confettiFinal(this.particule, this.jucator.poz);
-    this.hud.arataMesaj('🎉 Nivel terminat! 🎉', 1.4);
+    this.hud.arataMesaj('🎉 ' + t('Nivel terminat!') + ' 🎉', 1.4);
     const final = {
       nume: nivel.def.nume, timp: this.cronometru, monede: nivel.monedeLuate, total: nivel.tintaMonede,
       stele, record, castig, dublu, numeJucator: this.progres.nume,
       ultimul: this.urmatorul < 0,
-      textUrmator: esteNivelSecret(this.urmatorul) ? `Nivelul secret ${numarAfisat(this.urmatorul)}` : 'Nivelul următor',
+      textUrmator: esteNivelSecret(this.urmatorul) ? `${t('Nivelul secret')} ${numarAfisat(this.urmatorul)}` : t('Nivelul următor'),
       nota: ultimulNormal && secreteDeschise.length < SECRETE.length
-        ? `Ai terminat toate nivelurile! Dar ai găsit toate stelele secrete? ${stelePeGrupe}`
-        : esteNivelSecret(this.indexNivel) ? `Ai terminat un nivel secret! Ești un adevărat explorator! ${numarAfisat(this.indexNivel)}` : undefined,
+        ? `${t('Ai terminat toate nivelurile! Dar ai găsit toate stelele secrete?')} ${stelePeGrupe}`
+        : esteNivelSecret(this.indexNivel) ? `${t('Ai terminat un nivel secret! Ești un adevărat explorator!')} ${numarAfisat(this.indexNivel)}` : undefined,
     };
     clearTimeout(this.timerFinal);
     this.timerFinal = window.setTimeout(() => {
@@ -378,33 +379,33 @@ export class Joc {
         if (esteEveniment() && !this.eraEveniment) {
           this.eraEveniment = true;
           this.hud.seteazaEveniment(true);
-          this.hud.arataMesaj('🔥 A început evenimentul: monede x2!', 2.5);
+          this.hud.arataMesaj('🔥 ' + t('A început evenimentul: monede x2!'), 2.5);
         }
       }
 
       // ce a atins personajul?
       const ev = nivel.verifica(this.jucator.poz, this.timp);
       if (ev.monedeNoi) { this.hud.seteazaMonede(nivel.monedeLuate, nivel.tintaMonede, true); sunete.moneda(); }
-      if (ev.steagNou) { this.hud.arataMesaj('Steag atins!'); sunete.steag(); }
+      if (ev.steagNou) { this.hud.arataMesaj(t('Steag atins!')); sunete.steag(); }
       if (ev.secretNou) this.gasesteSecret();
-      if (ev.indiciu) this.hud.arataMesaj(ev.indiciu, 3);
+      if (ev.indiciu) this.hud.arataMesaj(t(ev.indiciu), 3);
       if (ev.final) { this.terminaNivel(); sunete.final(); }
 
-      const unde = nivel.steaguri.some((s) => s.activ) ? 'la steag' : 'la start';
+      const laSteag = nivel.steaguri.some((s) => s.activ);
       if (peLava) {
-        this.hud.arataMesaj(`Au, lavă fierbinte! Înapoi ${unde}.`);
+        this.hud.arataMesaj(t(laSteag ? 'Au, lavă fierbinte! Înapoi la steag.' : 'Au, lavă fierbinte! Înapoi la start.'));
         sunete.lava();
         this.revino();
       } else if (atinsDe === 'laser') {
-        this.hud.arataMesaj(`Zap! Laserul te-a trimis înapoi ${unde}.`);
+        this.hud.arataMesaj(t(laSteag ? 'Zap! Laserul te-a trimis înapoi la steag.' : 'Zap! Laserul te-a trimis înapoi la start.'));
         sunete.laser();
         this.revino();
       } else if (atinsDe === 'cristal') {
-        this.hud.arataMesaj(`Au, cristale ascuțite! Înapoi ${unde}.`);
+        this.hud.arataMesaj(t(laSteag ? 'Au, cristale ascuțite! Înapoi la steag.' : 'Au, cristale ascuțite! Înapoi la start.'));
         sunete.lava();
         this.revino();
       } else if (this.jucator.poz.y < INALTIME_CADERE) {
-        this.hud.arataMesaj(`Ai căzut! Înapoi ${unde}.`);
+        this.hud.arataMesaj(t(laSteag ? 'Ai căzut! Înapoi la steag.' : 'Ai căzut! Înapoi la start.'));
         sunete.cadere();
         this.revino();
       }

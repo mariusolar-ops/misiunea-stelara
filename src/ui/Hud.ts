@@ -1,4 +1,5 @@
 // Interfața de deasupra jocului: monede, cronometru, mesaje și ecranul de final.
+import { t } from '../i18n';
 
 const el = (id: string) => document.getElementById(id)!;
 
@@ -41,20 +42,20 @@ export class Hud {
   /** Ecranul „Felicitări!”, cu stele (1–3), timp, monede și butoanele potrivite */
   arataFinal(o: { nume: string; timp: number; monede: number; total: number; stele: number; record: boolean; ultimul: boolean; textUrmator?: string; nota?: string; numeJucator?: string; castig?: number; dublu?: boolean }) {
     const n = o.numeJucator || 'Mihai';
-    el('final-titlu').textContent = o.ultimul ? `Bravo, ${n}!` : `Felicitări, ${n}!`;
+    el('final-titlu').textContent = o.ultimul ? t('Bravo, {nume}!', { nume: n }) : t('Felicitări, {nume}!', { nume: n });
     el('final-mesaj').textContent = mesajLauda(o.stele, o.record);
-    el('final-castig').textContent = o.castig ? `+${o.castig} monede${o.dublu ? ' (🔥 x2!)' : ''}` : '';
+    el('final-castig').textContent = o.castig ? t('+{n} monede', { n: o.castig }) + (o.dublu ? ' (🔥 x2!)' : '') : '';
     el('final-nivel').textContent = o.ultimul
-      ? 'Ai terminat toate nivelurile! 🚀'
-      : `Ai terminat „${o.nume}”`;
+      ? t('Ai terminat toate nivelurile!') + ' 🚀'
+      : t('Ai terminat „{nume}”', { nume: t(o.nume) });
     if (o.nota) el('final-nivel').textContent = o.nota;
     el('final-stele').innerHTML = [1, 2, 3]
       .map((i) => `<span class="stea${i <= o.stele ? ' plina' : ''}">★</span>`).join('');
     el('final-timp').textContent = formatTimp(o.timp);
     el('final-monede').textContent = `${o.monede}/${o.total}`;
-    el('final-record').textContent = o.record ? 'Record nou de timp!' : '';
+    el('final-record').textContent = o.record ? t('Record nou de timp!') : '';
     el('buton-urmator').classList.toggle('ascuns', o.ultimul);
-    el('buton-urmator').textContent = o.textUrmator ?? 'Nivelul următor';
+    el('buton-urmator').textContent = o.textUrmator ?? t('Nivelul următor');
     this.ecranFinal.classList.add('vizibil');
   }
 
@@ -80,5 +81,5 @@ function mesajLauda(stele: number, record: boolean) {
     ? ['Perfect! Toate monedele! 🌟', 'Ești un campion al galaxiei!', 'Nimic nu-ți scapă!']
     : record ? ['Record nou! Ești tot mai rapid! ⚡']
       : ['Super săritură!', 'Ești un adevărat cosmonaut! 🚀', 'Galaxia e mândră de tine!', 'Bravo, nimic nu te oprește!', 'Încă o misiune reușită!'];
-  return lista[Math.floor(Math.random() * lista.length)];
+  return t(lista[Math.floor(Math.random() * lista.length)]);
 }

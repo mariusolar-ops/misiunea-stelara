@@ -2,6 +2,7 @@
 import { CULORI_IMPLICITE, ASPECT_IMPLICIT, type CuloriPersonaj, type AspectPersonaj } from './Personaj';
 import type { TipAnimal } from './Animal';
 import { EFECTE_IMPLICITE, type StareEfecte } from './Efecte';
+import { limbaTelefonului, type Limba } from '../i18n';
 import type { Slot } from './Accesorii';
 
 // Dacă browserul nu permite salvarea (ex. mod incognito), jocul merge oricum, doar nu ține minte.
@@ -61,10 +62,13 @@ export interface Setari {
   joystick: 'stanga' | 'dreapta';
   marimeButoane: 'mici' | 'normale' | 'mari';
   camera: 'lenta' | 'normala' | 'rapida';
+  /** Limba jocului */
+  limba: Limba;
 }
 
 export const SETARI_IMPLICITE: Setari = {
   volumEfecte: 80, volumMuzica: 50, muzica: true, joystick: 'stanga', marimeButoane: 'normale', camera: 'normala',
+  limba: limbaTelefonului(),
 };
 
 /** Un prieten din clasament: numele lui, cel mai bun timp și stelele pe fiecare nivel */
