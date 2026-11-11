@@ -482,3 +482,5 @@ body.butoane-mici #buton-sari.apasat { transform: scale(0.8) translateY(4px); }
   font-size: 34px; background: #8a6cff; border: 3px solid #fff5; box-shadow: 0 5px 0 #5a3cbf; pointer-events: auto; touch-action: none;
 }
 body.joystick-dreapta #buton-teleport { right: auto; left: calc(max(32px, env(safe-area-inset-left)) + 135px); }
+/* mesajele lungi trec pe două rânduri în loc să iasă din ecran */
+#mesaj { white-space: normal; width: max-content; max-width: 90vw; text-align: center; line-height: 1.15; }

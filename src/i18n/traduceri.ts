@@ -427,4 +427,8 @@ export const TRADUCERI: Record<string, [string, string, string, string]> = {
   "Zăpadă care scârțâie": ["Crunchy snow", "Neige qui craque", "Nieve crujiente", "Knirschender Schnee"],
   "Te-a prins extraterestrul! Înapoi la steag.": ["The alien caught you! Back to the flag.", "L’extraterrestre t’a attrapé ! Retour au drapeau.", "¡El extraterrestre te atrapó! Vuelves a la bandera.", "Das Alien hat dich erwischt! Zurück zur Flagge."],
   "Te-a prins extraterestrul! Înapoi la start.": ["The alien caught you! Back to the start.", "L’extraterrestre t’a attrapé ! Retour au départ.", "¡El extraterrestre te atrapó! Vuelves al inicio.", "Das Alien hat dich erwischt! Zurück zum Start."],
+
+  // --- nivelurile automate ---
+  "Fabrica de bomboane": ["Candy Factory", "Usine à bonbons", "Fábrica de caramelos", "Bonbonfabrik"],
+  "Atenție: ciocolata se topește!": ["Careful: the chocolate melts!", "Attention : le chocolat fond !", "¡Cuidado: el chocolate se derrite!", "Vorsicht: Die Schokolade schmilzt!"],
 };

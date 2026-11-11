@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -46,6 +46,7 @@ function decorTema(tema: Tema): Decor {
     case 'ocean': return decorOcean();
     case 'curcubeu': return decorCurcubeu();
     case 'ozn': return decorOzn();
+    case 'bomboane': return decorBomboane();
   }
 }
 
@@ -569,5 +570,59 @@ function decorOzn(): Decor {
       f.position.set(Math.cos(u) * (90 + i * 10), 30 + (i % 3) * 15 + Math.sin(timp + i) * 2, Math.sin(u) * (90 + i * 10) - 50);
       f.rotation.y = timp;
     }),
+  };
+}
+
+function decorBomboane(): Decor {
+  // Acadele uriașe, bastoane de bomboane cu dungi și jeleuri care plutesc
+  const grup = new THREE.Group();
+  const acadele: THREE.Group[] = [];
+  const culori = [0xff5fa8, 0x2ee6d6, 0xffd23f, 0x8a6cff];
+  for (let i = 0; i < 6; i++) {
+    const a = new THREE.Group();
+    const bat = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 40, 8), new THREE.MeshLambertMaterial({ color: 0xffffff }));
+    bat.position.y = -20;
+    a.add(bat);
+    for (let k = 0; k < 3; k++) {
+      const inel = new THREE.Mesh(new THREE.TorusGeometry(3 + k * 3, 1.6, 6, 24), new THREE.MeshLambertMaterial({ color: k % 2 ? 0xffffff : culori[i % 4] }));
+      a.add(inel);
+    }
+    const u = (i / 6) * Math.PI * 2;
+    a.position.set(Math.cos(u) * 70, 10 + (i % 3) * 8, Math.sin(u) * 70 - 50);
+    acadele.push(a);
+    grup.add(a);
+  }
+  // bastoane de bomboane: cuburi roșii și albe pe rând, cu „cârligul” sus
+  for (let i = 0; i < 4; i++) {
+    const b = new THREE.Group();
+    for (let k = 0; k < 10; k++) {
+      const c = new THREE.Mesh(new THREE.BoxGeometry(2, 3, 2), new THREE.MeshLambertMaterial({ color: k % 2 ? 0xffffff : 0xe82a2a }));
+      c.position.y = k * 3 - 30;
+      b.add(c);
+    }
+    for (let k = 0; k < 3; k++) {
+      const c = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshLambertMaterial({ color: k % 2 ? 0xe82a2a : 0xffffff }));
+      c.position.set(k * 2, 1 + (k === 2 ? -2 : 0), 0);
+      b.add(c);
+    }
+    b.position.set(-90 + i * 60, 0, -150 - (i % 2) * 40);
+    grup.add(b);
+  }
+  // jeleuri care plutesc (o singură bucată)
+  const n = 30;
+  const jeleuri = new THREE.InstancedMesh(new THREE.CylinderGeometry(1, 1.4, 1.6, 8), new THREE.MeshLambertMaterial({ color: 0xffffff }), n);
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), c = new THREE.Color();
+  for (let i = 0; i < n; i++) {
+    const u = Math.random() * Math.PI * 2, r = 40 + Math.random() * 80;
+    p.set(Math.cos(u) * r, -20 + Math.random() * 50, Math.sin(u) * r - 50);
+    q.setFromEuler(new THREE.Euler(Math.random(), Math.random() * 3, Math.random()));
+    s.setScalar(1.5 + Math.random() * 2);
+    jeleuri.setMatrixAt(i, m.compose(p, q, s));
+    jeleuri.setColorAt(i, c.setHSL(Math.random(), 0.8, 0.6));
+  }
+  grup.add(jeleuri);
+  return {
+    obiect: grup, fundal: 0x3a1a3a,
+    anima: (timp) => { acadele.forEach((a, i) => { a.rotation.z = timp * 0.3 * (i % 2 ? 1 : -1); }); jeleuri.rotation.y = timp * 0.02; },
   };
 }
