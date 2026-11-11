@@ -380,4 +380,19 @@ export const TRADUCERI: Record<string, [string, string, string, string]> = {
   "Înghețată": ["Ice cream", "Glace", "Helado", "Eis"],
   "Înălțime": ["Height", "Hauteur", "Altura", "Höhe"],
   "Ștergi nivelul „{nume}”?": ["Delete the level “{nume}”?", "Supprimer le niveau « {nume} » ?", "¿Borrar el nivel «{nume}»?", "Level „{nume}“ löschen?"],
+
+  // --- modul developer ---
+  "Mod developer": ["Developer mode", "Mode développeur", "Modo desarrollador", "Entwicklermodus"],
+  "Deblochează tot": ["Unlock everything", "Tout débloquer", "Desbloquear todo", "Alles freischalten"],
+  "monede": ["coins", "pièces", "monedas", "Münzen"],
+  "Zbor nelimitat": ["Unlimited flight", "Vol illimité", "Vuelo ilimitado", "Unbegrenztes Fliegen"],
+  "Invincibil": ["Invincible", "Invincible", "Invencible", "Unbesiegbar"],
+  "Oprește modul developer": ["Turn off developer mode", "Désactiver le mode développeur", "Desactivar modo desarrollador", "Entwicklermodus aus"],
+  "Cod secret": ["Secret code", "Code secret", "Código secreto", "Geheimcode"],
+  "Intră": ["Enter", "Entrer", "Entrar", "Rein"],
+  "Bun venit, developer!": ["Welcome, developer!", "Bienvenue, développeur !", "¡Bienvenido, desarrollador!", "Willkommen, Entwickler!"],
+  "Cod greșit!": ["Wrong code!", "Mauvais code !", "¡Código incorrecto!", "Falscher Code!"],
+  "Toate nivelurile sunt deschise!": ["All levels are unlocked!", "Tous les niveaux sont débloqués !", "¡Todos los niveles están desbloqueados!", "Alle Level sind freigeschaltet!"],
+  "Developer": ["Developer", "Développeur", "Desarrollador", "Entwickler"],
+  "Secret 🤫": ["Secret 🤫", "Secret 🤫", "Secreto 🤫", "Geheim 🤫"],
 };

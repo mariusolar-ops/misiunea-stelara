@@ -15,6 +15,7 @@ import { Personalizare } from '../ui/Personalizare';
 import { Clasament } from '../ui/Clasament';
 import { sunete, seteazaSunet } from '../audio/Sunete';
 import { Editor } from '../editor/Editor';
+import { EcranDeveloper } from '../ui/Developer';
 import { arataNiveleMele, salveazaNivelMeu } from '../editor/EcranNiveleMele';
 import type { NivelPropriu } from '../editor/NiveleMele';
 import type { DefinitieNivel } from '../nivele/tipuri';
@@ -101,6 +102,7 @@ export class Joc {
       continua: () => this.continua(),
       reincepe: () => this.joacaNivel(this.indexNivel),
       construieste: () => this.arataNiveleMele(),
+      developer: () => new EcranDeveloper(this.progres, () => { this.aplicaAspect(); this.verificaTitluri(); }, () => this.arataMeniu()).arata(),
       esteNivelPropriu: () => this.indexNivel === -1 && !!this.nivelPropriu,
       inapoiLaConstructor: () => { if (this.nivelPropriu) this.deschideEditor(this.nivelPropriu); },
       personalizeaza: () => this.personalizeaza(),
@@ -179,6 +181,11 @@ export class Joc {
     });
   }
 
+  /** Developer invincibil: lava, laserele și cristalele nu te mai trimit înapoi */
+  private devInvincibil() {
+    return this.progres.dev.activ && this.progres.dev.invincibil;
+  }
+
   private inchideEditor() {
     this.editor?.inchide();
     this.editor = null;
@@ -226,6 +233,7 @@ export class Joc {
     this.animal.schimba(p.animal, p.culoareAnimal);
     this.animal.teleporteaza(this.jucator.poz, this.jucator.directie);
     this.jucator.puteri = puteriDin(p.puteriActive);
+    if (p.dev.activ && p.dev.zborInfinit) this.jucator.puteri.zbor = true;
     for (const slot of SLOTURI) {
       const a = cautaAccesoriu(p.echipate[slot]);
       this.jucator.personaj.puneAccesoriu(slot, a ? a.construieste() : null);
@@ -487,7 +495,7 @@ export class Joc {
         if (efect === 'lava') peLava = true;
         // obstacolele (lasere, pendule, curenți, cristale)
         const ob = nivel.actualizeazaObstacole(this.jucator, this.timp, PAS_FIZICA);
-        if (ob === 'laser' || ob === 'cristal') atinsDe = ob;
+        if ((ob === 'laser' || ob === 'cristal') && !this.devInvincibil()) atinsDe = ob;
         else if (ob === 'portal-bun' || ob === 'portal-gresit') portal = ob;
         else if (ob === 'lovitura') sunete.lovitura();
         else if (ob === 'vant') sunete.vant();
@@ -525,6 +533,9 @@ export class Joc {
       if (ev.final) { this.terminaNivel(); sunete.final(); }
 
       const laSteag = nivel.steaguri.some((s) => s.activ);
+      if (this.devInvincibil()) peLava = false;
+      // zbor nelimitat (developer): energia nu se termină
+      if (this.progres.dev.activ && this.progres.dev.zborInfinit) this.jucator.energie = ENERGIE_ZBOR;
       if (peLava) {
         this.hud.arataMesaj(t(laSteag ? 'Au, lavă fierbinte! Înapoi la steag.' : 'Au, lavă fierbinte! Înapoi la start.'));
         sunete.lava();
@@ -568,7 +579,7 @@ export class Joc {
     this.cadre++;
     this.timpFps += dt;
     if (this.timpFps >= 1) {
-      if (this.aratFps) this.elFps.textContent = `${Math.round(this.cadre / this.timpFps)} FPS`;
+      if (this.aratFps || (this.progres.dev.activ && this.progres.dev.fps)) this.elFps.textContent = `${Math.round(this.cadre / this.timpFps)} FPS`;
       this.cadre = 0;
       this.timpFps = 0;
     }

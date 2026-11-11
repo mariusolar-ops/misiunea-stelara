@@ -21,6 +21,7 @@ export interface ActiuniMeniu {
   setari(inapoi: () => void): void;
   titluri(inapoi: () => void): void;
   construieste(): void;
+  developer(): void;
   esteNivelPropriu(): boolean;
   inapoiLaConstructor(): void;
 }
@@ -48,12 +49,20 @@ export class Meniu {
 
   arataPrincipal(p: Progres) {
     container.innerHTML = `
-      <h1>Mihai:<span>${t('Misiunea Stelară')}</span></h1>
+      <h1><span class="titlu-mic">Mihai:</span><span>${t('Misiunea Stelară')}</span></h1>
       ${cautaTitlu(p.titluAles) ? `<div class="titlu-meniu">${cautaTitlu(p.titluAles)!.emoji} ${p.nume} – ${t(cautaTitlu(p.titluAles)!.nume)}</div>` : ''}
       <div class="rand-butoane">
         <div class="portofel"><span class="moneda-mica"></span>${p.portofel}</div>
         <div class="eveniment ${esteEveniment() ? 'activ' : ''}">${textEveniment()}</div>
       </div>`;
+    // ușa secretă: 5 atingeri la rând pe „Mihai:” deschid modul developer
+    let atingeri = 0, ultima = 0;
+    container.querySelector('.titlu-mic')!.addEventListener('click', () => {
+      const acum = performance.now();
+      atingeri = acum - ultima < 800 ? atingeri + 1 : 1;
+      ultima = acum;
+      if (atingeri >= 5) { atingeri = 0; this.actiuni.developer(); }
+    });
     const coloana = document.createElement('div');
     coloana.className = 'coloana-butoane';
     // „Joacă” pornește primul nivel neterminat (sau ultimul, dacă le-ai terminat pe toate)

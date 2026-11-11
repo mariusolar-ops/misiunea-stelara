@@ -468,3 +468,10 @@ body.butoane-mici #buton-sari.apasat { transform: scale(0.8) translateY(4px); }
 #editor .numar-obiecte { flex-shrink: 0; font-size: 13px; opacity: 0.8; padding: 0 8px; }
 #editor .mesaj-editor { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); font-size: 22px; font-weight: 900; text-shadow: 0 3px 10px #000a; opacity: 0; transition: opacity .3s; white-space: nowrap; }
 #editor .mesaj-editor.vizibil { opacity: 1; }
+#meniu h1 .titlu-mic { display: inline-block; font-size: 26px; color: #fff; text-shadow: none; pointer-events: auto; padding: 4px 10px; }
+.panou-dev { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+.panou-dev .grila-dev { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: min(760px, 92vw); }
+.panou-dev .grila-dev .mic-buton { font-size: 16px; padding: 12px 8px; }
+.panou-dev .grila-dev .mic-buton.pornit { background: var(--turcoaz); color: var(--fundal); }
+.panou-dev input { font-size: 22px; padding: 8px 14px; border-radius: 12px; border: 2px solid var(--turcoaz); background: #0b0f2e; color: #fff; text-align: center; letter-spacing: 3px; user-select: text; -webkit-user-select: text; pointer-events: auto; }
+.mesaj-dev { color: #ffd23f; font-weight: 800; min-height: 22px; }

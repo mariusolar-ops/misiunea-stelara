@@ -54,6 +54,8 @@ export interface Progres {
   titluAles: string | null;
   /** Realizări speciale (ex. „portale-perfect” = nivelul cu portale fără nicio greșeală) */
   realizari: string[];
+  /** Modul developer (deschis cu codul secret) */
+  dev: { activ: boolean; zborInfinit: boolean; invincibil: boolean; fps: boolean };
 }
 
 export interface Setari {
@@ -91,6 +93,7 @@ function progresNou(): Progres {
     secrete: [], nume: 'Mihai', prieteni: [],
     efecte: { ...EFECTE_IMPLICITE, detinute: [] }, setari: { ...SETARI_IMPLICITE },
     zilnic: { ultimaZi: null, serie: 0 }, titluri: [], titluAles: null, realizari: [],
+    dev: { activ: false, zborInfinit: false, invincibil: false, fps: false },
   };
 }
 
@@ -105,6 +108,7 @@ export function incarca(): Progres {
       culori: { ...nou.culori, ...citit.culori }, aspect: { ...nou.aspect, ...citit.aspect },
       efecte: { ...nou.efecte, ...citit.efecte }, setari: { ...nou.setari, ...citit.setari },
       zilnic: { ...nou.zilnic, ...citit.zilnic },
+      dev: { ...nou.dev, ...citit.dev },
     };
     // din versiunea veche: culoarea cățelului se numea altfel
     if (typeof citit.culoareCatel === 'number' && citit.culoareAnimal === undefined) p.culoareAnimal = citit.culoareCatel;

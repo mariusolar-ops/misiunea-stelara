@@ -25,6 +25,7 @@ export const TITLURI: Titlu[] = [
   { id: 'perfect', nume: 'Perfecționist', emoji: '💎', cum: 'Ia 3 stele la 5 niveluri', areTitlul: (p) => Object.values(p.nivele).filter((r) => r.stele >= 3).length >= 5 },
   { id: 'colectionar', nume: 'Colecționar', emoji: '🎁', cum: 'Adună 10 efecte din cufere', areTitlul: (p) => p.efecte.detinute.length >= 10 },
   { id: 'fidel', nume: 'Prieten fidel', emoji: '🔥', cum: 'Intră în joc 7 zile la rând', areTitlul: (p) => p.zilnic.serie >= 7 },
+  { id: 'developer', nume: 'Developer', emoji: '👨‍💻', cum: 'Secret 🤫', areTitlul: (p) => p.dev.activ },
   { id: 'bogat', nume: 'Bogatul anului', emoji: '💰', cum: 'Adună toate accesoriile și toate efectele din cufere', areTitlul: (p) => areTotul(p) },
 ];
 
