@@ -2,10 +2,11 @@
 // Toate sunt făcute din cuburi colorate. Se cumpără cu monedele strânse în joc
 // (NU cu bani adevărați).
 import * as THREE from 'three';
+import { ACCESORII_NOI } from './AccesoriiNoi';
 
 /** Unde se pune un accesoriu: pe cap, pe față sau în spate */
-export type Slot = 'cap' | 'fata' | 'spate' | 'umar';
-export const SLOTURI: Slot[] = ['cap', 'fata', 'spate', 'umar'];
+export type Slot = 'cap' | 'fata' | 'spate' | 'umar' | 'corp' | 'mana';
+export const SLOTURI: Slot[] = ['cap', 'fata', 'spate', 'umar', 'corp', 'mana'];
 
 export interface Accesoriu {
   id: string;
@@ -234,6 +235,9 @@ export const CATALOG: Accesoriu[] = [
     },
   },
 ];
+
+// accesoriile noi stau în fișierul lor și se adaugă la sfârșitul catalogului
+CATALOG.push(...ACCESORII_NOI);
 
 export function cautaAccesoriu(id: string | undefined) {
   return CATALOG.find((a) => a.id === id);

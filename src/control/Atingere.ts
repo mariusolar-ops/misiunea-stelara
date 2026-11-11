@@ -57,8 +57,8 @@ export function pornesteAtingere(intrari: Intrari) {
 
   window.addEventListener('pointerdown', (e) => {
     // butoanele și panoul de personalizare se ocupă singure
-    if ((e.target as HTMLElement).closest('button, input, label, .panou, .clasament, .setari')) return;
-    if (degetJoystick === null && e.pointerType !== 'mouse' && eInZonaJoystick(e.clientX, e.clientY)) {
+    if ((e.target as HTMLElement).closest('button, input, label, .panou, .clasament, .setari, .bara-sus, .bara-jos')) return;
+    if (degetJoystick === null && e.pointerType !== 'mouse' && !document.body.classList.contains('mod-editor') && eInZonaJoystick(e.clientX, e.clientY)) {
       degetJoystick = e.pointerId;
       const r = baza.getBoundingClientRect();
       centruJoystick = { x: r.left + r.width / 2, y: r.top + r.height / 2 };

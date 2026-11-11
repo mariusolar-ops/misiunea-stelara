@@ -20,6 +20,9 @@ export interface ActiuniMeniu {
   /** Deschide setările; „inapoi” e ecranul la care revii după */
   setari(inapoi: () => void): void;
   titluri(inapoi: () => void): void;
+  construieste(): void;
+  esteNivelPropriu(): boolean;
+  inapoiLaConstructor(): void;
 }
 
 const container = document.getElementById('meniu')!;
@@ -65,6 +68,7 @@ export class Meniu {
       buton(t('Alege nivelul'), 'mic-buton', () => this.arataNivele(p)),
       buton(t('Personalizează'), 'mic-buton', () => this.actiuni.personalizeaza()),
       buton('🏆 ' + t('Clasament'), 'mic-buton', () => this.actiuni.clasament()),
+      buton('🛠️ ' + t('Construiește'), 'mic-buton', () => this.actiuni.construieste()),
     );
     coloana.append(rand);
     container.append(coloana);
@@ -145,6 +149,7 @@ export class Meniu {
       buton(t('Continuă'), 'mare', () => this.actiuni.continua()),
       buton(t('Începe nivelul din nou'), 'mic-buton', () => this.actiuni.reincepe()),
       buton('⚙️ ' + t('Setări'), 'mic-buton', () => this.actiuni.setari(() => this.arataPauza(p))),
+      ...(this.actiuni.esteNivelPropriu() ? [buton('🛠️ ' + t('Înapoi la constructor'), 'mic-buton', () => this.actiuni.inapoiLaConstructor())] : []),
       buton(t('Meniul principal'), 'mic-buton', () => this.arataPrincipal(p)),
     );
     container.append(coloana);

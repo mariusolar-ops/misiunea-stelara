@@ -45,6 +45,7 @@ Actualizările vin singure: când telefonul are internet și deschizi jocul, ia 
 - Cufere surpriză (100 de monede din joc): urme în spatele personajului, sunete de săritură, efecte la aterizare
 - Muzică spațială compusă din cod și ecran de Setări (volum, muzică, joystick stânga/dreapta, mărime butoane, cameră)
 - Recompensa supremă (toate accesoriile + toate efectele): costum de aur, titlul „Bogatul anului”, pisica Kiwi
+- Constructor de niveluri (🛠️ Construiește): nivelurile tale stau doar pe telefon, nu se pot posta
 - Serie zilnică (monede în fiecare zi, cufăr gratis în ziua a 7-a) și titluri pentru realizări
 - Jocul e în 5 limbi: română, engleză, franceză, spaniolă, germană (Setări → Limbă)
 - Eveniment „Monede x2” în primele 15 minute din fiecare oră (după ceasul telefonului)

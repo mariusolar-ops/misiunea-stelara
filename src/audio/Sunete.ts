@@ -95,5 +95,6 @@ export const sunete = {
     [523, 659, 784, 1047, 1319].forEach((f, i) => bip('square', f, f, 0.18, 1.0 + i * 0.08, 0.3));
   },
   artificiu: () => { bip('triangle', 200, 1400, 0.25, 0, 0.25); bip('square', 1800, 600, 0.3, 0.22, 0.12); },
+  minge: () => bip('sine', 140, 70, 0.08, 0, 0.35),
   click: () => bip('triangle', 700, 500, 0.05, 0, 0.4),
 };

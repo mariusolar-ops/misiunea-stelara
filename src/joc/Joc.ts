@@ -14,6 +14,11 @@ import { cautaAccesoriu, SLOTURI } from './Accesorii';
 import { Personalizare } from '../ui/Personalizare';
 import { Clasament } from '../ui/Clasament';
 import { sunete, seteazaSunet } from '../audio/Sunete';
+import { Editor } from '../editor/Editor';
+import { arataNiveleMele, salveazaNivelMeu } from '../editor/EcranNiveleMele';
+import type { NivelPropriu } from '../editor/NiveleMele';
+import type { DefinitieNivel } from '../nivele/tipuri';
+import { calculeazaStele } from './Salvare';
 import { pornesteMuzica } from '../audio/Muzica';
 import { Particule } from '../lume/Particule';
 import { emiteUrma, efectAterizare, confettiFinal } from './Efecte';
@@ -34,7 +39,7 @@ const PAS_FIZICA = 1 / 120;   // fizica rulează în pași mici, ca să nu treac
 const INALTIME_CADERE = -25;  // sub înălțimea asta personajul „cade” și revine la steag
 
 /** În ce „moment” e jocul: în meniu, jucând, pe pauză sau la ecranul de final */
-type Stare = 'meniu' | 'joaca' | 'pauza' | 'final' | 'personalizare';
+type Stare = 'meniu' | 'joaca' | 'pauza' | 'final' | 'personalizare' | 'editor';
 
 export class Joc {
   private intrari = new Intrari();
@@ -52,6 +57,10 @@ export class Joc {
   private ultimulArtificiu = 0;
   /** Câte portale greșite a ales în tura asta (la nivelul cu portale) */
   private greseliPortale = 0;
+  /** Constructorul de niveluri: nivelul la care lucrezi și definiția lui jucabilă (index -1) */
+  private editor: Editor | null = null;
+  private nivelPropriu: NivelPropriu | null = null;
+  private defPropriu: DefinitieNivel | null = null;
   private pasStang = true;
   private timerFinal = 0;
   /** Era eveniment x2 când a început nivelul? (dacă da, primește dublu chiar dacă se termină între timp) */
@@ -82,6 +91,7 @@ export class Joc {
     this.grafica = creeazaScena(canvas);
     this.jucator = new Jucator(this.grafica.scena);
     this.animal = new Animal(this.grafica.scena);
+    this.animal.laSaritura = () => { if (this.stare === 'joaca') sunete.minge(); };
     this.particule = new Particule(this.grafica.scena);
     this.camera = new CameraUrmarire(this.grafica.camera);
     pornesteAtingere(this.intrari);
@@ -90,6 +100,9 @@ export class Joc {
       joacaNivel: (i) => this.joacaNivel(i),
       continua: () => this.continua(),
       reincepe: () => this.joacaNivel(this.indexNivel),
+      construieste: () => this.arataNiveleMele(),
+      esteNivelPropriu: () => this.indexNivel === -1 && !!this.nivelPropriu,
+      inapoiLaConstructor: () => { if (this.nivelPropriu) this.deschideEditor(this.nivelPropriu); },
       personalizeaza: () => this.personalizeaza(),
       comutaSunet: () => this.comutaSunet(),
       titluri: (inapoi) => new EcranTitluri(this.progres, inapoi).arata(),
@@ -109,7 +122,11 @@ export class Joc {
     document.getElementById('buton-pauza')!.addEventListener('click', () => this.pauza());
     document.getElementById('buton-din-nou')!.addEventListener('click', () => this.joacaNivel(this.indexNivel));
     document.getElementById('buton-urmator')!.addEventListener('click', () => this.joacaNivel(this.urmatorul));
-    document.getElementById('buton-meniu-final')!.addEventListener('click', () => this.arataMeniu());
+    document.getElementById('buton-meniu-final')!.addEventListener('click', () => {
+      // după un nivel construit de tine, „Meniu” te duce înapoi în constructor
+      if (this.indexNivel === -1 && this.nivelPropriu) this.deschideEditor(this.nivelPropriu);
+      else this.arataMeniu();
+    });
     // Dacă ieși din aplicație în timpul jocului, punem pauză singuri
     document.addEventListener('visibilitychange', () => { if (document.hidden) this.pauza(); });
 
@@ -119,6 +136,8 @@ export class Joc {
   }
 
   arataMeniu() {
+    this.inchideEditor();
+    if (this.indexNivel === -1) this.incarcaNivel(0); // în spatele meniului: un nivel adevărat
     this.stare = 'meniu';
     this.hud.ascundeFinal();
     this.elInterfata.classList.add('ascuns');
@@ -130,8 +149,43 @@ export class Joc {
     if (this.stare === 'meniu') this.meniu.arataPrincipal(this.progres);
   }
 
+  /** „Nivelurile mele” (constructorul de niveluri) */
+  arataNiveleMele() {
+    this.inchideEditor();
+    this.stare = 'meniu';
+    this.hud.ascundeFinal();
+    this.elInterfata.classList.add('ascuns');
+    arataNiveleMele({
+      editeaza: (n) => this.deschideEditor(n),
+      joaca: (def, n) => { this.nivelPropriu = n; this.defPropriu = def; this.joacaNivel(-1); },
+      inapoi: () => this.arataMeniu(),
+    });
+  }
+
+  private deschideEditor(n: NivelPropriu) {
+    this.inchideEditor();
+    this.nivelPropriu = n;
+    this.meniu.ascunde();
+    this.hud.ascundeFinal();
+    this.elInterfata.classList.add('ascuns');
+    this.stare = 'editor';
+    this.editor = new Editor(n, {
+      scena: this.grafica.scena,
+      camera: this.grafica.camera,
+      arataPreviz: (def) => { this.defPropriu = def; this.incarcaNivel(-1); },
+      testeaza: (def) => { this.inchideEditor(); this.defPropriu = def; this.joacaNivel(-1); },
+      salveaza: (x) => salveazaNivelMeu(x),
+      iesire: () => this.arataNiveleMele(),
+    });
+  }
+
+  private inchideEditor() {
+    this.editor?.inchide();
+    this.editor = null;
+  }
+
   joacaNivel(index: number) {
-    if (index < 0 || index >= NIVELE.length) return;
+    if (index === -1 ? !this.defPropriu : index < 0 || index >= NIVELE.length) return;
     this.incarcaNivel(index);
     this.meniu.ascunde();
     this.hud.ascundeFinal();
@@ -139,7 +193,7 @@ export class Joc {
     this.stare = 'joaca';
     this.eraEveniment = esteEveniment();
     this.hud.seteazaEveniment(this.eraEveniment);
-    this.hud.arataMesaj(this.eraEveniment ? '🔥 ' + t('Eveniment: monede x2!') : t('Nivelul {n}: {nume}', { n: numarAfisat(index), nume: t(NIVELE[index].nume) }), 2.5);
+    this.hud.arataMesaj(this.eraEveniment ? '🔥 ' + t('Eveniment: monede x2!') : (index === -1 ? '🛠️ ' + this.defPropriu!.nume : t('Nivelul {n}: {nume}', { n: numarAfisat(index), nume: t(NIVELE[index].nume) })), 2.5);
   }
 
   /** Anunță titlurile nou câștigate (dacă sunt) */
@@ -220,13 +274,14 @@ export class Joc {
   private incarcaNivel(index: number) {
     if (this.nivel) this.grafica.scena.remove(this.nivel.grup);
     this.indexNivel = index;
-    this.nivel = new Nivel(NIVELE[index], this.progres.secrete.includes(index), grupaSecret(index)?.culoare);
+    const def = index === -1 ? this.defPropriu! : NIVELE[index];
+    this.nivel = new Nivel(def, this.progres.secrete.includes(index), grupaSecret(index)?.culoare);
     this.grafica.scena.add(this.nivel.grup);
-    this.jucator.gravitatie = NIVELE[index].gravitatie ?? 1;
+    this.jucator.gravitatie = def.gravitatie ?? 1;
     this.greseliPortale = 0;
     // camera de început a nivelului (ex. mai de sus la labirint)
-    this.camera.inaltime = NIVELE[index].camera?.inaltime ?? 0.38;
-    this.camera.distanta = NIVELE[index].camera?.distanta ?? 8;
+    this.camera.inaltime = def.camera?.inaltime ?? 0.38;
+    this.camera.distanta = def.camera?.distanta ?? 8;
     (this.grafica.scena.background as THREE.Color).set(this.nivel.decor.fundal);
     this.cronometru = 0;
     this.hud.seteazaTimp(0);
@@ -265,6 +320,7 @@ export class Joc {
   private terminaNivel() {
     const nivel = this.nivel!;
     this.stare = 'final';
+    if (this.indexNivel === -1) { this.terminaNivelPropriu(); return; }
     const dublu = this.eraEveniment || esteEveniment();
     let portalePerfect = false;
     if (nivel.def.nivelPortale && this.greseliPortale === 0 && !this.progres.realizari.includes('portale-perfect')) {
@@ -299,6 +355,24 @@ export class Joc {
     this.timerFinal = window.setTimeout(() => {
       if (this.stare === 'final') this.hud.arataFinal(final);
       this.verificaTitluri();
+    }, 2300);
+  }
+
+  /** Final pentru un nivel construit de tine: sărbătoare, dar monedele nu intră în portofel */
+  private terminaNivelPropriu() {
+    const nivel = this.nivel!;
+    confettiFinal(this.particule, this.jucator.poz);
+    this.hud.arataMesaj('🎉 ' + t('Nivel terminat!') + ' 🎉', 1.4);
+    this.timpFinal = this.timp;
+    this.ultimulArtificiu = this.timp;
+    clearTimeout(this.timerFinal);
+    this.timerFinal = window.setTimeout(() => {
+      if (this.stare !== 'final') return;
+      this.hud.arataFinal({
+        nume: nivel.def.nume, timp: this.cronometru, monede: nivel.monedeLuate, total: nivel.tintaMonede,
+        stele: calculeazaStele(nivel.monedeLuate, nivel.tintaMonede), record: false, numeJucator: this.progres.nume,
+        ultimul: true, nota: '🛠️ ' + t('Nivelul tău e gata! (monedele din nivelurile tale nu intră în portofel)'),
+      });
     }, 2300);
   }
 
@@ -475,8 +549,8 @@ export class Joc {
         sunete.cadere();
         this.revino();
       }
-    } else if (this.stare === 'meniu') {
-      // platformele și obstacolele se mișcă și în spatele meniului
+    } else if (this.stare === 'meniu' || this.stare === 'editor') {
+      // platformele și obstacolele se mișcă și în spatele meniului (și în constructor)
       nivel.actualizeaza(dt, this.timp);
       nivel.actualizeazaObstacole({ poz: new THREE.Vector3(0, -999, 0), viteza: new THREE.Vector3() }, this.timp, dt);
     }
@@ -486,7 +560,8 @@ export class Joc {
     this.jucator.deseneaza(dt, nivel.platforme);
     if (this.stare === 'final') this.sarbatoare(dt);
     this.animal.actualizeaza(dt, this.jucator.poz, this.jucator.directie, this.timp);
-    this.camera.actualizeaza(this.jucator.poz, dt);
+    if (this.stare === 'editor') this.editor?.cadru(rot);
+    else this.camera.actualizeaza(this.jucator.poz, dt);
     this.grafica.renderer.render(this.grafica.scena, this.grafica.camera);
 
     // contor de cadre pe secundă (ca să vedem dacă merge fluid)

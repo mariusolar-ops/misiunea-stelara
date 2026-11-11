@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 
 export type TipAnimal = 'caine' | 'pisica' | 'iepure' | 'capra' | 'zebra'
-  | 'cal' | 'magar' | 'gaina' | 'soparla' | 'porc' | 'tigru' | 'girafa' | 'crocodil' | 'porumbel' | 'pinguin' | 'flamingo' | 'kiwi';
+  | 'cal' | 'magar' | 'gaina' | 'soparla' | 'porc' | 'tigru' | 'girafa' | 'crocodil' | 'porumbel' | 'pinguin' | 'flamingo' | 'kiwi' | 'minge';
 
 export interface InfoAnimal {
   tip: TipAnimal;
@@ -36,6 +36,7 @@ export const ANIMALE: InfoAnimal[] = [
   { tip: 'porumbel', nume: 'Porumbel', emoji: '🕊️', culoare: 0x9aa0b0, recolorabil: false },
   { tip: 'pinguin', nume: 'Pinguin', emoji: '🐧', culoare: 0x1c1c28, recolorabil: false },
   { tip: 'flamingo', nume: 'Flamingo', emoji: '🦩', culoare: 0xff7ab0, recolorabil: false },
+  { tip: 'minge', nume: 'Minge de baschet', emoji: '🏀', culoare: 0xf07a20, recolorabil: false },
   // pisica Kiwi: gri, cu coroană de aur – recompensa supremă
   { tip: 'kiwi', nume: 'Kiwi', emoji: '😺', culoare: 0x8a8f99, recolorabil: false, secret: true },
 ];
@@ -172,6 +173,9 @@ export class Animal {
   private model!: Model;
   private faza = 0;
   private directie = 0;
+  private atinsSol = false;
+  /** Se apelează când mingea atinge solul (pentru sunetul de „tup”) */
+  laSaritura?: () => void;
 
   constructor(scena: THREE.Scene, tip: TipAnimal = 'caine', culoare = 0xb8692a) {
     this.schimba(tip, culoare);
@@ -188,7 +192,7 @@ export class Animal {
       cal: () => noi.cal(culoare), magar: () => noi.magar(), gaina: () => noi.gaina(culoare),
       soparla: () => noi.soparla(), porc: () => noi.porc(), tigru: () => noi.tigru(),
       girafa: () => noi.girafa(), crocodil: () => noi.crocodil(), porumbel: () => noi.porumbel(),
-      pinguin: () => noi.pinguin(), flamingo: () => noi.flamingo(), kiwi: () => kiwi(),
+      pinguin: () => noi.pinguin(), flamingo: () => noi.flamingo(), kiwi: () => kiwi(), minge: () => noi.mingeBaschet(),
     };
     this.model = (retete[tip] ?? retete.caine)();
     this.obiect.add(this.model.grup);
@@ -240,6 +244,15 @@ export class Animal {
     this.model.coada.rotation.y = Math.sin(timp * 12) * 0.45; // dă din coadă
     // pinguinul se leagănă când merge; păsările și caii dau din cap
     if (this.model.legana) this.model.grup.rotation.z = Math.sin(this.faza) * 0.2 * k;
+    if (this.model.minge) {
+      // mingea sare tot timpul (ca driblingul) și se rostogolește când aleargă
+      const s = Math.abs(Math.sin(timp * 5));
+      this.model.minge.position.y = 0.3 + s * 0.9;
+      this.model.minge.scale.set(1 + (s < 0.15 ? 0.15 : 0), s < 0.15 ? 0.85 : 1, 1 + (s < 0.15 ? 0.15 : 0));
+      this.model.minge.rotation.x += viteza * dt * 2;
+      if (s < 0.08 && !this.atinsSol) { this.atinsSol = true; this.laSaritura?.(); }
+      if (s > 0.3) this.atinsSol = false;
+    }
     if (this.model.cap) this.model.cap.rotation.x = Math.sin(this.faza * 2) * 0.12 * k;
   }
 }

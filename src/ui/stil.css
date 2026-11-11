@@ -435,3 +435,36 @@ body.butoane-mici #buton-sari.apasat { transform: scale(0.8) translateY(4px); }
 .card-nivel.secret.portal { border-color: #8a6cff; background: linear-gradient(#2a1a6a, #120a3a); }
 .indiciu-aur { color: #ffd23f; }
 .nume-premiu { max-width: 70vw; }
+
+/* Nivelurile mele */
+.lista-nivele-mele { display: flex; gap: 10px; flex-wrap: nowrap; overflow-x: auto; max-width: 100%; padding: 4px 8px 10px; touch-action: pan-x; }
+.card-nivel-meu {
+  flex-shrink: 0; width: 170px; min-height: 130px; border-radius: 16px; padding: 10px; color: #fff; font-family: inherit;
+  background: linear-gradient(#2a3290, #1a2060); border: 3px solid var(--turcoaz);
+  display: flex; flex-direction: column; justify-content: space-between; gap: 6px; pointer-events: auto;
+}
+.card-nivel-meu b { font-size: 16px; }
+.card-nivel-meu span { font-size: 13px; opacity: 0.8; }
+.card-nivel-meu .rand-butoane .mic-buton { flex: 1; padding: 6px 4px; font-size: 18px; }
+.card-nivel-meu.nou { align-items: center; justify-content: center; font-size: 16px; font-weight: 800; border-style: dashed; }
+.card-nivel-meu .plus { font-size: 40px; opacity: 1; color: var(--turcoaz); }
+
+/* Constructorul */
+#editor { position: fixed; inset: 0; z-index: 4; pointer-events: none; }
+#editor .bara-sus, #editor .bara-jos { position: absolute; left: 0; right: 0; display: flex; gap: 6px; align-items: center; padding: 8px max(10px, env(safe-area-inset-right)) 8px max(10px, env(safe-area-inset-left)); pointer-events: auto; }
+#editor .bara-sus { top: 0; background: linear-gradient(rgba(11,15,46,.85), rgba(11,15,46,0)); }
+#editor .bara-jos { bottom: 0; overflow-x: auto; touch-action: pan-x; background: linear-gradient(rgba(11,15,46,0), rgba(11,15,46,.9)); }
+#editor .mic-buton { font-size: 16px; padding: 7px 10px; }
+#editor .mare { font-size: 18px; padding: 8px 16px; margin-left: auto; }
+#editor .nume-nivel { width: 150px; font-size: 15px; padding: 6px 8px; border-radius: 10px; border: 2px solid #3b4380; background: #0b0f2e; color: #fff; user-select: text; -webkit-user-select: text; }
+#editor .inaltime { display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 700; }
+#editor .inaltime b { color: var(--turcoaz); font-size: 18px; }
+#editor .unealta {
+  flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 74px; padding: 5px 6px;
+  border-radius: 12px; border: 2px solid transparent; background: #232a6a; color: #fff; font-size: 11px; font-weight: 700; font-family: inherit;
+}
+#editor .unealta span { font-size: 24px; }
+#editor .unealta.aleasa { border-color: var(--turcoaz); background: #1e5a63; }
+#editor .numar-obiecte { flex-shrink: 0; font-size: 13px; opacity: 0.8; padding: 0 8px; }
+#editor .mesaj-editor { position: absolute; top: 70px; left: 50%; transform: translateX(-50%); font-size: 22px; font-weight: 900; text-shadow: 0 3px 10px #000a; opacity: 0; transition: opacity .3s; white-space: nowrap; }
+#editor .mesaj-editor.vizibil { opacity: 1; }

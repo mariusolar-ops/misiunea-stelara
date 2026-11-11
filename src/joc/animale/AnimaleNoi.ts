@@ -237,3 +237,19 @@ export function flamingo(): Model {
   g.add(...picioare, cd);
   return { grup: g, picioare, coada: cd, cap, distanta: 1.6 };
 }
+
+/** Minge de baschet (ideea lui Mihai): portocalie, cu linii negre, sare tot timpul după tine */
+export function mingeBaschet(): Model {
+  const g = new THREE.Group();
+  const minge = new THREE.Group();
+  const port = 0xf07a20;
+  // o „sferă” din trei cuburi încrucișate, ca să pară rotundă
+  minge.add(cub(0.5, 0.5, 0.5, port, 0, 0, 0));
+  minge.add(cub(0.56, 0.4, 0.4, port, 0, 0, 0), cub(0.4, 0.56, 0.4, port, 0, 0, 0), cub(0.4, 0.4, 0.56, port, 0, 0, 0));
+  // liniile negre
+  minge.add(cub(0.58, 0.03, 0.58, NEGRU, 0, 0, 0), cub(0.03, 0.58, 0.58, NEGRU, 0, 0, 0), cub(0.58, 0.58, 0.03, NEGRU, 0, 0, 0));
+  minge.position.y = 0.3;
+  g.add(minge);
+  const cd = new THREE.Group(); // nu are coadă 🙂
+  return { grup: g, picioare: [], coada: cd, minge, distanta: 1.3 };
+}

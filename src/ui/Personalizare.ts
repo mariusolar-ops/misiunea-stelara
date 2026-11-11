@@ -115,7 +115,7 @@ export class Personalizare {
     const seteaza = (parte: keyof CuloriPersonaj) => (v: number) => { c[parte] = v; };
     el.append(
       this.randCulori('Tricou', HAINE, c.tricou, seteaza('tricou')),
-      this.randCulori(this.progres.aspect.pantaloni === 'fusta' ? 'Fustă' : 'Pantaloni', HAINE, c.pantaloni, seteaza('pantaloni')),
+      this.randCulori(this.progres.aspect.pantaloni === 'fusta' ? 'Fustă' : this.progres.aspect.pantaloni === 'rochie' ? 'Rochie' : 'Pantaloni', HAINE, c.pantaloni, seteaza('pantaloni')),
       this.randCulori('Detalii', HAINE, c.detalii, seteaza('detalii')),
       this.randCulori('Adidași', HAINE, c.pantofi, seteaza('pantofi')),
       this.randCulori('Păr', PAR, c.par, seteaza('par')),
@@ -134,8 +134,8 @@ export class Personalizare {
         if (v === 'baiat' && (a.coafura === 'lung' || a.coafura === 'codite')) a.coafura = 'scurt';
       }),
       this.randOptiuni('Coafură', [['scurt', 'Scurt'], ['lung', 'Lung'], ['coada', 'Coadă'], ['codite', 'Codițe'], ['creasta', 'Creastă']], a.coafura, seteaza('coafura')),
-      this.randOptiuni('Tricou', [['simplu', 'Simplu'], ['dungi', 'Dungi'], ['stea', 'Stea'], ['fulger', 'Fulger'], ['hanorac', 'Hanorac'], ['camasa', 'Cămașă']], a.tricou, seteaza('tricou')),
-      this.randOptiuni('Jos', [['lungi', 'Pantaloni lungi'], ['scurti', 'Pantaloni scurți'], ['fusta', 'Fustă']], a.pantaloni, seteaza('pantaloni')),
+      this.randOptiuni('Tricou', [['simplu', 'Simplu'], ['dungi', 'Dungi'], ['stea', 'Stea'], ['fulger', 'Fulger'], ['hanorac', 'Hanorac'], ['camasa', 'Cămașă'], ['maieu', 'Maieu'], ['geaca', 'Geacă']], a.tricou, seteaza('tricou')),
+      this.randOptiuni('Jos', [['lungi', 'Pantaloni lungi'], ['scurti', 'Pantaloni scurți'], ['blugi', 'Blugi'], ['fusta', 'Fustă'], ['rochie', 'Rochie']], a.pantaloni, seteaza('pantaloni')),
     );
     // costumul de aur (recompensa supremă)
     if (areTotul(this.progres)) {

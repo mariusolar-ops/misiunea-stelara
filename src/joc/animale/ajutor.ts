@@ -13,6 +13,8 @@ export interface Model {
   topaie?: boolean;
   /** Pinguinul se leagănă dintr-o parte în alta */
   legana?: boolean;
+  /** Mingea sare tot timpul și se rostogolește */
+  minge?: THREE.Object3D;
   /** Capul (păsările dau din cap când merg) */
   cap?: THREE.Object3D;
   /** Cât de departe stă în spatele personajului */

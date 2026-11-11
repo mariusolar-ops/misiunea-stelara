@@ -15,8 +15,8 @@ export interface CuloriPersonaj {
 
 export type Gen = 'baiat' | 'fata';
 export type Coafura = 'scurt' | 'lung' | 'coada' | 'codite' | 'creasta';
-export type ModelTricou = 'simplu' | 'dungi' | 'stea' | 'fulger' | 'hanorac' | 'camasa';
-export type ModelPantaloni = 'lungi' | 'scurti' | 'fusta';
+export type ModelTricou = 'simplu' | 'dungi' | 'stea' | 'fulger' | 'hanorac' | 'camasa' | 'maieu' | 'geaca';
+export type ModelPantaloni = 'lungi' | 'scurti' | 'fusta' | 'blugi' | 'rochie';
 
 export interface AspectPersonaj {
   gen: Gen;
@@ -63,7 +63,7 @@ export class Personaj {
   private piciorDr = new THREE.Group();
   private faza = 0; // pentru animația de mers
   /** Locurile unde se prind accesoriile */
-  private sloturi: Record<Slot, THREE.Group> = { cap: new THREE.Group(), fata: new THREE.Group(), spate: new THREE.Group(), umar: new THREE.Group() };
+  private sloturi: Record<Slot, THREE.Group> = { cap: new THREE.Group(), fata: new THREE.Group(), spate: new THREE.Group(), umar: new THREE.Group(), corp: new THREE.Group(), mana: new THREE.Group() };
 
   constructor(culori: CuloriPersonaj = CULORI_IMPLICITE, aspect: AspectPersonaj = ASPECT_IMPLICIT) {
     this.obiect.add(this.corpGrup);
@@ -98,8 +98,11 @@ export class Personaj {
     this.sloturi.fata.position.set(0, 1.68, 0);
     this.sloturi.spate.position.set(0, 1.05, a.tricou === 'hanorac' ? -0.27 : -0.21);
     this.sloturi.umar.position.set(-0.53, 1.42, 0);
+    this.sloturi.corp.position.set(0, 1.05, 0);
+    this.sloturi.mana.position.set(0, -0.66, 0.08);   // în palma dreaptă (se mișcă odată cu mâna)
+    this.manaDr.add(this.sloturi.mana);
     this.corpGrup.add(this.piciorSt, this.piciorDr, this.manaSt, this.manaDr,
-      this.sloturi.cap, this.sloturi.fata, this.sloturi.spate, this.sloturi.umar);
+      this.sloturi.cap, this.sloturi.fata, this.sloturi.spate, this.sloturi.umar, this.sloturi.corp);
     if (a.costumAur) {
       this.corpGrup.traverse((o) => {
         if (!(o instanceof THREE.Mesh)) return;
@@ -116,14 +119,33 @@ export class Personaj {
     for (const g of [this.piciorSt, this.piciorDr]) {
       if (a.pantaloni === 'lungi') {
         g.add(cub(0.34, 0.56, 0.38, c.pantaloni, 0, -0.28, 0));
+      } else if (a.pantaloni === 'blugi') {
+        // blugi: cusături deschise pe lateral și manșete întoarse jos
+        g.add(cub(0.34, 0.56, 0.38, c.pantaloni, 0, -0.28, 0));
+        g.add(cub(0.35, 0.5, 0.02, c.detalii, 0, -0.28, 0.0));
+        g.add(cub(0.37, 0.07, 0.41, mai_inchis(c.pantaloni, 1.25), 0, -0.52, 0));
       } else if (a.pantaloni === 'scurti') {
         g.add(cub(0.35, 0.26, 0.39, c.pantaloni, 0, -0.13, 0));
         g.add(cub(0.3, 0.3, 0.32, c.piele, 0, -0.41, 0));
       } else {
-        // sub fustă: picioarele (piele)
+        // sub fustă / rochie: picioarele (piele)
         g.add(cub(0.28, 0.56, 0.3, c.piele, 0, -0.28, 0));
       }
       g.add(cub(0.36, 0.15, 0.46, c.pantofi, 0, -0.625, 0.04)); // adidașii
+    }
+    if (a.pantaloni === 'blugi') {
+      // buzunarele din spate și cureaua
+      this.corpGrup.add(cub(0.82, 0.07, 0.44, 0x4a3420, 0, 0.72, 0));
+      this.corpGrup.add(cub(0.05, 0.05, 0.02, 0xffd23f, 0, 0.72, 0.225)); // catarama
+    }
+    if (a.pantaloni === 'rochie') {
+      // rochia: acoperă corpul (cu bretele) și are o fustă lungă, evazată
+      this.corpGrup.add(cub(0.82, 0.5, 0.44, c.pantaloni, 0, 0.95, 0));
+      this.corpGrup.add(cub(0.86, 0.18, 0.48, c.pantaloni, 0, 0.64, 0));
+      this.corpGrup.add(cub(0.98, 0.2, 0.58, c.pantaloni, 0, 0.47, 0));
+      this.corpGrup.add(cub(1.08, 0.16, 0.66, c.pantaloni, 0, 0.3, 0));
+      this.corpGrup.add(cub(1.1, 0.04, 0.68, c.detalii, 0, 0.22, 0));       // tivul
+      this.corpGrup.add(cub(0.86, 0.05, 0.47, c.detalii, 0, 0.73, 0));      // cordonul
     }
     if (a.pantaloni === 'fusta') {
       // fusta: două „etaje”, mai largă jos
@@ -159,6 +181,19 @@ export class Personaj {
         g.add(cub(0.03, 0.18, 0.02, c.detalii, -0.08, 1.24, fata + 0.005)); // șnururi
         g.add(cub(0.03, 0.18, 0.02, c.detalii, 0.08, 1.24, fata + 0.005));
         break;
+      case 'maieu':
+        // maieu: fără mâneci (vezi construiesteMaini), cu decolteu rotund
+        g.add(cub(0.3, 0.1, 0.02, c.piele, 0, 1.36, fata));
+        break;
+      case 'geaca':
+        // geacă: deschisă în față (se vede tricoul alb), fermoar, guler și buzunare
+        g.add(cub(0.22, 0.62, 0.02, c.detalii, 0, 1.03, fata + 0.002));
+        g.add(cub(0.03, 0.62, 0.025, 0xc8ccd8, -0.12, 1.03, fata + 0.006));
+        g.add(cub(0.86, 0.12, 0.48, mai_inchis(c.tricou), 0, 1.4, 0));        // gulerul
+        g.add(cub(0.16, 0.12, 0.02, mai_inchis(c.tricou), -0.26, 0.86, fata + 0.004));
+        g.add(cub(0.16, 0.12, 0.02, mai_inchis(c.tricou), 0.26, 0.86, fata + 0.004));
+        g.add(cub(0.84, 0.08, 0.46, mai_inchis(c.tricou), 0, 0.73, 0));       // tivul de jos
+        break;
       case 'camasa':
         g.add(cub(0.14, 0.08, 0.03, c.detalii, -0.1, 1.38, fata));       // gulerul
         g.add(cub(0.14, 0.08, 0.03, c.detalii, 0.1, 1.38, fata));
@@ -172,9 +207,14 @@ export class Personaj {
     this.manaSt.position.set(-0.53, 1.35, 0);
     this.manaDr.position.set(0.53, 1.35, 0);
     for (const g of [this.manaSt, this.manaDr]) {
-      if (a.tricou === 'hanorac' || a.tricou === 'camasa') {
+      if (a.tricou === 'maieu') {
+        // fără mâneci: doar o bretea subțire pe umăr și brațul gol
+        g.add(cub(0.12, 0.1, 0.3, c.tricou, -0.05 * Math.sign(g.position.x), 0.02, 0));
+        g.add(cub(0.24, 0.66, 0.28, c.piele, 0, -0.31, 0));
+      } else if (a.tricou === 'hanorac' || a.tricou === 'camasa' || a.tricou === 'geaca') {
         // mâneci lungi + palma
         g.add(cub(0.28, 0.6, 0.32, c.tricou, 0, -0.26, 0));
+        if (a.tricou === 'geaca') g.add(cub(0.3, 0.08, 0.34, mai_inchis(c.tricou), 0, -0.53, 0)); // manșeta
         g.add(cub(0.22, 0.12, 0.26, c.piele, 0, -0.62, 0));
       } else {
         g.add(cub(0.3, 0.28, 0.34, c.tricou, 0, -0.08, 0));   // mânecă scurtă
@@ -272,6 +312,14 @@ export class Personaj {
       }
       const f = o.userData.flacara as THREE.Object3D | undefined;
       if (f) f.scale.y = (zboara ? 2.6 : inAer ? 1.6 : 0.7) + Math.sin(t * 30) * 0.25;
+    }
+    // aureola și steaua plutesc; bagheta sclipește
+    for (const slot of [this.sloturi.cap, this.sloturi.umar]) for (const o of slot.children) {
+      if (o.userData.pluteste) { o.position.y = Math.sin(t * 2.5) * 0.04; o.rotation.y = t * 1.5; }
+    }
+    for (const o of this.sloturi.mana.children) {
+      const s = o.userData.scanteie as THREE.Object3D | undefined;
+      if (s) { s.rotation.z = t * 4; s.scale.setScalar(0.14 * (1 + Math.sin(t * 8) * 0.25)); }
     }
     for (const o of this.sloturi.umar.children) {
       // balonul se leagănă și rămâne puțin în urmă când alergi; papagalul dă din cap
