@@ -16,6 +16,12 @@ export function pornesteAtingere(intrari: Intrari) {
   // Degetele care rotesc camera: id -> ultima poziție
   const degeteCamera = new Map<number, { x: number; y: number }>();
 
+  // Butonul de teleportare (puterea „Teleportare”)
+  document.getElementById('buton-teleport')!.addEventListener('pointerdown', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    intrari.teleportApasat = true;
+  });
+
   // Butonul SARI are propriul ascultător
   sari.addEventListener('pointerdown', (e) => {
     e.preventDefault();
@@ -68,12 +74,24 @@ export function pornesteAtingere(intrari: Intrari) {
     }
   });
 
+  // rotița mouse-ului (pe calculator) face și ea zoom
+  window.addEventListener('wheel', (e) => { intrari.zoom *= e.deltaY > 0 ? 0.9 : 1.1; }, { passive: true });
+
   window.addEventListener('pointermove', (e) => {
     if (e.pointerId === degetJoystick) {
       mutaJoystick(e.clientX, e.clientY);
       return;
     }
     const ultima = degeteCamera.get(e.pointerId);
+    if (ultima && degeteCamera.size >= 2) {
+      // două degete pe ecran: depărtezi = zoom in, apropii = zoom out
+      const [a, b] = [...degeteCamera.values()];
+      const inainte = Math.hypot(a.x - b.x, a.y - b.y);
+      ultima.x = e.clientX; ultima.y = e.clientY;
+      const dupa = Math.hypot(a.x - b.x, a.y - b.y);
+      if (inainte > 10) intrari.zoom *= dupa / inainte;
+      return;
+    }
     if (ultima) {
       intrari.rotireCamera.x += e.clientX - ultima.x;
       intrari.rotireCamera.y += e.clientY - ultima.y;

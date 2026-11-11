@@ -6,9 +6,10 @@ import { Cristale, type DefCristale } from './Cristale';
 import { Teleport, type DefTeleport } from './Teleport';
 import { Meteor, type DefMeteor } from './Meteor';
 import { Vant, type DefVant } from './Vant';
+import { Extraterestru, type DefExtraterestru } from './Extraterestru';
 import type { Obstacol } from './Obstacol';
 
-export type DefinitieObstacol = DefLaser | DefLaserRotativ | DefPendul | DefCurent | DefCristale | DefTeleport | DefMeteor | DefVant;
+export type DefinitieObstacol = DefLaser | DefLaserRotativ | DefPendul | DefCurent | DefCristale | DefTeleport | DefMeteor | DefVant | DefExtraterestru;
 export type { Obstacol, EfectObstacol } from './Obstacol';
 
 export function creeazaObstacol(def: DefinitieObstacol): Obstacol {
@@ -21,5 +22,6 @@ export function creeazaObstacol(def: DefinitieObstacol): Obstacol {
     case 'teleport': return new Teleport(def);
     case 'meteor': return new Meteor(def);
     case 'vant': return new Vant(def);
+    case 'extraterestru': return new Extraterestru(def);
   }
 }

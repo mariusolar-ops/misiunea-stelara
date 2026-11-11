@@ -9,6 +9,10 @@ export class Intrari {
   sariApasat = false;
   /** True cât timp butonul SARI e ținut apăsat (pentru zbor) */
   sariTinut = false;
+  /** Zoom adunat de la degete/rotiță (>1 = mai aproape). Jocul îl citește și îl readuce la 1 */
+  zoom = 1;
+  /** Butonul de teleportare a fost apăsat */
+  teleportApasat = false;
   /** Cât s-a rotit camera din deget de la ultimul cadru (în pixeli) */
   rotireCamera = { x: 0, y: 0 };
 

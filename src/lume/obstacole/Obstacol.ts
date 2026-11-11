@@ -13,12 +13,14 @@ export interface CorpObstacol {
  * lovitura = l-a împins un pendul (doar pentru sunet)
  * vant = a intrat într-un curent de aer (doar pentru sunet)
  */
-export type EfectObstacol = 'laser' | 'cristal' | 'lovitura' | 'vant' | 'portal-bun' | 'portal-gresit' | null;
+export type EfectObstacol = 'laser' | 'cristal' | 'lovitura' | 'vant' | 'portal-bun' | 'portal-gresit' | 'prins' | null;
 
 export interface Obstacol {
   obiect: THREE.Object3D;
   /** Mișcă obstacolul și verifică personajul (la fiecare pas de fizică) */
   actualizeaza(j: CorpObstacol, timp: number, dt: number): EfectObstacol;
+  /** Opțional: ce face când jucătorul se întoarce la steag */
+  reseteaza?(pozJucator: THREE.Vector3, directie: number): void;
 }
 
 /** Distanța de la punctul p la segmentul [a, b] */

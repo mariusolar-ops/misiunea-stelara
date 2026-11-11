@@ -1,7 +1,7 @@
 // Jucătorul: leagă personajul (ce se vede) de fizică (cum se mișcă).
 import * as THREE from 'three';
 import { Personaj } from './Personaj';
-import { misca, solulDeSub } from './Fizica';
+import { misca, solulDeSub, ocupat } from './Fizica';
 import type { Platforma, EfectCalcare } from '../lume/Platforma';
 import type { Intrari } from '../control/Intrari';
 import type { PuteriActive } from './Puteri';
@@ -32,7 +32,7 @@ export class Jucator {
   /** Devine true când personajul sare (pentru sunet); Joc îl resetează */
   aSarit = false;
   /** Super-puterile pornite */
-  puteri: PuteriActive = { saritura: false, viteza: false, dubla: false, zbor: false };
+  puteri: PuteriActive = { saritura: false, viteza: false, dubla: false, zbor: false, teleport: false };
   /** Energia de zbor rămasă (secunde) */
   energie = ENERGIE_ZBOR;
   /** True cât timp zboară acum */
@@ -68,6 +68,24 @@ export class Jucator {
   }
 
   /** Pune personajul într-un loc (start sau checkpoint) */
+  /**
+   * Puterea „Teleportare”: te mută până la 4 unități în fața ta.
+   * Nu te poate băga într-un perete sau într-o platformă (încearcă mai aproape dacă e ocupat).
+   */
+  teleportInainte(platforme: Platforma[]) {
+    const dx = Math.sin(this.directie), dz = Math.cos(this.directie);
+    for (const d of [4, 3, 2, 1]) {
+      const tinta = this.poz.clone().add(new THREE.Vector3(dx * d, 0.05, dz * d));
+      if (!ocupat(tinta, platforme)) {
+        this.poz.copy(tinta);
+        this.viteza.y = Math.max(this.viteza.y, 0);
+        this.peZid = false;
+        return true;
+      }
+    }
+    return false;
+  }
+
   teleporteaza(p: THREE.Vector3, directie = 0) {
     this.poz.copy(p);
     this.viteza.set(0, 0, 0);

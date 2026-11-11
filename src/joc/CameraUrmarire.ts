@@ -13,6 +13,8 @@ export class CameraUrmarire {
   inaltime = 0.38;
   /** Cât de departe stă camera (se apropie la Personalizare) */
   distanta = DISTANTA;
+  /** Zoom-ul ales de jucător (1 = normal, mai mic = mai aproape) */
+  zoomJucator = 1;
   /** Cât de repede se rotește la tras cu degetul (din Setări) */
   sensibilitate = SENSIBILITATE;
   private tinta = new THREE.Vector3();
@@ -35,10 +37,10 @@ export class CameraUrmarire {
     const dorit = poz.clone(); dorit.y += 1.4;
     this.tinta.lerp(dorit, Math.min(1, dt * 10));
 
-    const oriz = Math.cos(this.inaltime) * this.distanta;
+    const oriz = Math.cos(this.inaltime) * this.distanta * this.zoomJucator;
     this.camera.position.set(
       this.tinta.x + Math.sin(this.unghi) * oriz,
-      this.tinta.y + Math.sin(this.inaltime) * this.distanta + 0.6,
+      this.tinta.y + Math.sin(this.inaltime) * this.distanta * this.zoomJucator + 0.6,
       this.tinta.z + Math.cos(this.unghi) * oriz,
     );
     this.camera.lookAt(this.tinta);

@@ -4,7 +4,8 @@
 import * as THREE from 'three';
 
 export type TipAnimal = 'caine' | 'pisica' | 'iepure' | 'capra' | 'zebra'
-  | 'cal' | 'magar' | 'gaina' | 'soparla' | 'porc' | 'tigru' | 'girafa' | 'crocodil' | 'porumbel' | 'pinguin' | 'flamingo' | 'kiwi' | 'minge';
+  | 'cal' | 'magar' | 'gaina' | 'soparla' | 'porc' | 'tigru' | 'girafa' | 'crocodil' | 'porumbel' | 'pinguin' | 'flamingo' | 'kiwi' | 'minge'
+  | 'panda' | 'vulpe' | 'dinozaur' | 'unicorn' | 'broasca';
 
 export interface InfoAnimal {
   tip: TipAnimal;
@@ -16,6 +17,8 @@ export interface InfoAnimal {
   recolorabil: boolean;
   /** Animal secret: apare doar după recompensa supremă */
   secret?: boolean;
+  /** Animal care se cumpără (cu monede din joc); în ele te poți transforma când le ai pe toate */
+  pret?: number;
 }
 
 export const ANIMALE: InfoAnimal[] = [
@@ -37,6 +40,12 @@ export const ANIMALE: InfoAnimal[] = [
   { tip: 'pinguin', nume: 'Pinguin', emoji: '🐧', culoare: 0x1c1c28, recolorabil: false },
   { tip: 'flamingo', nume: 'Flamingo', emoji: '🦩', culoare: 0xff7ab0, recolorabil: false },
   { tip: 'minge', nume: 'Minge de baschet', emoji: '🏀', culoare: 0xf07a20, recolorabil: false },
+  // animalele de 260 de monede: când le ai pe toate, te poți transforma în ele
+  { tip: 'panda', nume: 'Panda', emoji: '🐼', culoare: 0xf4f4f0, recolorabil: false, pret: 260 },
+  { tip: 'vulpe', nume: 'Vulpe', emoji: '🦊', culoare: 0xe8702a, recolorabil: false, pret: 260 },
+  { tip: 'dinozaur', nume: 'Dinozaur', emoji: '🦖', culoare: 0x5ac84a, recolorabil: false, pret: 260 },
+  { tip: 'unicorn', nume: 'Unicorn', emoji: '🦄', culoare: 0xf8f4ff, recolorabil: false, pret: 260 },
+  { tip: 'broasca', nume: 'Broscuță', emoji: '🐸', culoare: 0x3fbf3a, recolorabil: false, pret: 260 },
   // pisica Kiwi: gri, cu coroană de aur – recompensa supremă
   { tip: 'kiwi', nume: 'Kiwi', emoji: '😺', culoare: 0x8a8f99, recolorabil: false, secret: true },
 ];
@@ -174,6 +183,8 @@ export class Animal {
   private faza = 0;
   private directie = 0;
   private atinsSol = false;
+  /** True când jucătorul s-a transformat în acest animal (stă exact unde e jucătorul) */
+  avatar = false;
   /** Se apelează când mingea atinge solul (pentru sunetul de „tup”) */
   laSaritura?: () => void;
 
@@ -193,6 +204,7 @@ export class Animal {
       soparla: () => noi.soparla(), porc: () => noi.porc(), tigru: () => noi.tigru(),
       girafa: () => noi.girafa(), crocodil: () => noi.crocodil(), porumbel: () => noi.porumbel(),
       pinguin: () => noi.pinguin(), flamingo: () => noi.flamingo(), kiwi: () => kiwi(), minge: () => noi.mingeBaschet(),
+      panda: () => noi.panda(), vulpe: () => noi.vulpe(), dinozaur: () => noi.dinozaur(), unicorn: () => noi.unicorn(), broasca: () => noi.broasca(),
     };
     this.model = (retete[tip] ?? retete.caine)();
     this.obiect.add(this.model.grup);
@@ -219,7 +231,8 @@ export class Animal {
     const p = this.obiect.position;
     const inainte = p.clone();
     // dacă a rămas foarte în urmă (ex. personajul a căzut), sare direct lângă el
-    if (p.distanceTo(tinta) > 15) this.teleporteaza(pozMihai, directieMihai);
+    if (this.avatar) p.copy(pozMihai);   // transformat: animalul ești chiar tu
+    else if (p.distanceTo(tinta) > 15) this.teleporteaza(pozMihai, directieMihai);
     else p.lerp(tinta, Math.min(1, dt * 6));
 
     // se întoarce în direcția în care aleargă
@@ -230,6 +243,7 @@ export class Animal {
       dif = Math.atan2(Math.sin(dif), Math.cos(dif));
       this.directie += dif * Math.min(1, dt * 10);
     }
+    if (this.avatar) this.directie = directieMihai;
     this.obiect.rotation.y = this.directie;
 
     const k = Math.min(1, viteza / 6);
@@ -255,4 +269,12 @@ export class Animal {
     }
     if (this.model.cap) this.model.cap.rotation.x = Math.sin(this.faza * 2) * 0.12 * k;
   }
+}
+
+/** Animalele care se cumpără (în ele te poți transforma) */
+export const ANIMALE_CU_PRET = ANIMALE.filter((a) => a.pret);
+
+/** Are toate animalele de cumpărat? (atunci se poate transforma) */
+export function areToateAnimalele(cumparate: string[]) {
+  return ANIMALE_CU_PRET.every((a) => cumparate.includes('animal-' + a.tip));
 }

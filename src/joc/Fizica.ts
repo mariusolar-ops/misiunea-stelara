@@ -102,3 +102,9 @@ export function solulDeSub(poz: THREE.Vector3, platforme: Platforma[]): number |
   }
   return cel === -Infinity ? null : cel;
 }
+
+/** E locul ăsta ocupat de o platformă? (personajul ar intra în ea) */
+export function ocupat(poz: THREE.Vector3, platforme: Platforma[]) {
+  puneCutia(poz);
+  return platforme.some((p) => p.solid && seSuprapun(cutieJucator, p.cutie));
+}

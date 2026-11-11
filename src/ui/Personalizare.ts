@@ -4,8 +4,8 @@
 import type { Progres } from '../joc/Salvare';
 import { salveaza } from '../joc/Salvare';
 import type { CuloriPersonaj, AspectPersonaj } from '../joc/Personaj';
-import { CATALOG } from '../joc/Accesorii';
-import { ANIMALE } from '../joc/Animal';
+import { CATALOG, CULORI_ACCESORII } from '../joc/Accesorii';
+import { ANIMALE, ANIMALE_CU_PRET, areToateAnimalele, type TipAnimal } from '../joc/Animal';
 import { PUTERI } from '../joc/Puteri';
 import { sunete } from '../audio/Sunete';
 import { EFECTE, PRET_CUFAR, NUME_CATEGORII, deschideCufar, type CategorieEfect } from '../joc/Efecte';
@@ -152,14 +152,44 @@ export class Personalizare {
   private animal(el: HTMLElement) {
     const p = this.progres;
     const deblocat = areTotul(p);
-    el.append(this.randOptiuni('Animal', ANIMALE.filter((a) => !a.secret || deblocat).map((a) => [a.tip, `${a.emoji} ${t(a.nume)}`]), p.animal, (v) => {
+    const detinut = (a: { tip: string; pret?: number }) => !a.pret || p.cumparate.includes('animal-' + a.tip);
+    el.append(this.randOptiuni('Animal', ANIMALE.filter((a) => (!a.secret || deblocat) && detinut(a)).map((a) => [a.tip, `${a.emoji} ${t(a.nume)}`]), p.animal, (v) => {
       p.animal = v;
       p.culoareAnimal = ANIMALE.find((a) => a.tip === v)!.culoare; // culoarea lui obișnuită
     }));
-    if (!deblocat) el.append(this.indiciuRecompensa());
     if (ANIMALE.find((a) => a.tip === p.animal)?.recolorabil) {
       el.append(this.randCulori('Blană', BLANA, p.culoareAnimal, (v) => { p.culoareAnimal = v; }));
     }
+    // animalele de cumpărat (cu monede din joc)
+    const deCumparat = ANIMALE_CU_PRET.filter((a) => !detinut(a));
+    if (deCumparat.length) {
+      el.append(this.rand('De cumpărat', ...deCumparat.map((a) => {
+        const b = document.createElement('button');
+        b.className = 'optiune cumpara-animal';
+        b.innerHTML = `${a.emoji} ${t(a.nume)} <span class="moneda-mica"></span>${a.pret}`;
+        b.disabled = p.portofel < a.pret!;
+        b.addEventListener('click', () => {
+          if (p.portofel < a.pret!) return;
+          p.portofel -= a.pret!;
+          p.cumparate.push('animal-' + a.tip);
+          p.animal = a.tip; p.culoareAnimal = a.culoare;
+          sunete.cumparare();
+          this.salveazaSiAplica();
+        });
+        return b;
+      })));
+    }
+    // transformarea: doar când ai TOATE animalele de cumpărat
+    if (areToateAnimalele(p.cumparate)) {
+      const opt: [string, string][] = [['eu', '🙂 ' + t('Eu')], ...ANIMALE_CU_PRET.map((a): [string, string] => [a.tip, `${a.emoji} ${t(a.nume)}`])];
+      el.append(this.randOptiuni('Transformă-te', opt, p.transformare ?? 'eu', (v) => { p.transformare = v === 'eu' ? null : (v as TipAnimal); }));
+    } else {
+      const s = document.createElement('p');
+      s.className = 'sfat indiciu-aur';
+      s.textContent = '🪄 ' + t('Cumpără toate cele 5 animale de 260 de monede ca să te poți transforma în ele!');
+      el.append(s);
+    }
+    if (!deblocat) el.append(this.indiciuRecompensa());
   }
 
   private magazin(el: HTMLElement) {
@@ -193,6 +223,22 @@ export class Personalizare {
         });
       } else {
         b.textContent = purtat ? t('Scoate') : t('Pune');
+        if (a.culoarePrincipala !== undefined) {
+          // butonul de culoare: fiecare atingere trece la următoarea culoare
+          const c = document.createElement('button');
+          const actuala = p.culoriAccesorii[a.id] ?? a.culoarePrincipala;
+          c.className = 'buton-culoare';
+          c.style.background = '#' + actuala.toString(16).padStart(6, '0');
+          c.textContent = '🎨';
+          c.addEventListener('click', () => {
+            const i = CULORI_ACCESORII.indexOf(actuala);
+            p.culoriAccesorii[a.id] = CULORI_ACCESORII[(i + 1) % CULORI_ACCESORII.length];
+            if (!purtat) p.echipate[a.slot] = a.id;
+            sunete.click();
+            this.salveazaSiAplica();
+          });
+          card.append(c);
+        }
         b.className = purtat ? 'scoate' : 'pune';
         b.addEventListener('click', () => {
           if (purtat) delete p.echipate[a.slot]; else p.echipate[a.slot] = a.id;

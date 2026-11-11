@@ -17,6 +17,25 @@ export interface Accesoriu {
   construieste: () => THREE.Object3D;
   /** Accesoriu secret: nu se cumpără, se câștigă (cu toate stelele secrete) */
   secret?: boolean;
+  /** Dacă se poate recolora: culoarea (din model) care se înlocuiește cu cea aleasă */
+  culoarePrincipala?: number;
+}
+
+/** Culorile din care alegi pentru accesoriile care se pot recolora */
+export const CULORI_ACCESORII = [0xe84a4a, 0xff9a3c, 0xffd23f, 0x4ccf6a, 0x2ee6d6, 0x2a6fd8, 0x8a6cff, 0xff5fa8, 0x1a1a2e, 0xf2f4f8];
+
+/** Construiește accesoriul și (dacă ai ales o culoare) îl recolorează */
+export function construiesteColorat(a: Accesoriu, culoare?: number) {
+  const o = a.construieste();
+  if (culoare === undefined || a.culoarePrincipala === undefined) return o;
+  o.traverse((m) => {
+    if (!(m instanceof THREE.Mesh)) return;
+    const mat = m.material as THREE.MeshLambertMaterial;
+    if (mat.color?.getHex() !== a.culoarePrincipala) return;
+    mat.color.set(culoare);
+    if (mat.emissive && mat.emissive.getHex() !== 0) mat.emissive.set(culoare).multiplyScalar(0.25);
+  });
+  return o;
 }
 
 const CUB = new THREE.BoxGeometry(1, 1, 1);
@@ -38,7 +57,7 @@ function grup(...copii: THREE.Object3D[]) {
 // Pentru „spate”, (0,0,0) e mijlocul spatelui. Pentru „umar”, (0,0,0) e deasupra umărului stâng.
 export const CATALOG: Accesoriu[] = [
   {
-    id: 'sapca', nume: 'Șapcă', emoji: '🧢', pret: 10, slot: 'cap',
+    id: 'sapca', nume: 'Șapcă', emoji: '🧢', pret: 10, slot: 'cap', culoarePrincipala: 0xe84a4a,
     construieste: () => grup(
       cub(0.6, 0.2, 0.6, 0xe84a4a, 0, 0.36, 0),
       cub(0.58, 0.05, 0.3, 0xe84a4a, 0, 0.28, 0.4),
@@ -46,7 +65,7 @@ export const CATALOG: Accesoriu[] = [
     ),
   },
   {
-    id: 'ochelari', nume: 'Ochelari de soare', emoji: '🕶️', pret: 15, slot: 'fata',
+    id: 'ochelari', nume: 'Ochelari de soare', emoji: '🕶️', pret: 15, slot: 'fata', culoarePrincipala: 0x1a1a2e,
     construieste: () => grup(
       cub(0.56, 0.04, 0.03, 0x111111, 0, 0.1, 0.275),
       cub(0.19, 0.13, 0.03, 0x1a1a2e, -0.12, 0.04, 0.28),
@@ -98,7 +117,7 @@ export const CATALOG: Accesoriu[] = [
     ),
   },
   {
-    id: 'racheta', nume: 'Rucsac-rachetă', emoji: '🚀', pret: 55, slot: 'spate',
+    id: 'racheta', nume: 'Rucsac-rachetă', emoji: '🚀', pret: 55, slot: 'spate', culoarePrincipala: 0xf2f4f8,
     construieste: () => {
       const g = grup(
         cub(0.5, 0.5, 0.12, 0x9aa6bd, 0, 0.05, -0.06),
@@ -135,7 +154,7 @@ export const CATALOG: Accesoriu[] = [
     },
   },
   {
-    id: 'aripi', nume: 'Aripi de stea', emoji: '✨', pret: 0, slot: 'spate', secret: true,
+    id: 'aripi', nume: 'Aripi de stea', emoji: '✨', pret: 0, slot: 'spate', secret: true, culoarePrincipala: 0x2ee6d6,
     construieste: () => {
       // două aripi din cuburi turcoaz și aurii, care bat ușor din aripi
       const g = new THREE.Group();
@@ -179,7 +198,7 @@ export const CATALOG: Accesoriu[] = [
     },
   },
   {
-    id: 'casti', nume: 'Căști audio', emoji: '🎧', pret: 25, slot: 'cap',
+    id: 'casti', nume: 'Căști audio', emoji: '🎧', pret: 25, slot: 'cap', culoarePrincipala: 0x2ee6d6,
     construieste: () => grup(
       cub(0.08, 0.1, 0.5, 0x2a2a33, 0, 0.44, 0),               // arcul de deasupra
       cub(0.06, 0.34, 0.08, 0x2a2a33, -0.31, 0.24, 0),

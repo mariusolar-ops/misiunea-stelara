@@ -475,3 +475,10 @@ body.butoane-mici #buton-sari.apasat { transform: scale(0.8) translateY(4px); }
 .panou-dev .grila-dev .mic-buton.pornit { background: var(--turcoaz); color: var(--fundal); }
 .panou-dev input { font-size: 22px; padding: 8px 14px; border-radius: 12px; border: 2px solid var(--turcoaz); background: #0b0f2e; color: #fff; text-align: center; letter-spacing: 3px; user-select: text; -webkit-user-select: text; pointer-events: auto; }
 .mesaj-dev { color: #ffd23f; font-weight: 800; min-height: 22px; }
+.card-accesoriu .buton-culoare { border: 2px solid #fff8; border-radius: 10px; padding: 4px; font-size: 14px; pointer-events: auto; }
+#buton-zoom { position: absolute; top: 10px; left: calc(max(12px, env(safe-area-inset-left)) + 124px); pointer-events: auto; }
+#buton-teleport {
+  position: absolute; right: calc(max(32px, env(safe-area-inset-right)) + 135px); bottom: 30px; width: 76px; height: 76px; border-radius: 50%;
+  font-size: 34px; background: #8a6cff; border: 3px solid #fff5; box-shadow: 0 5px 0 #5a3cbf; pointer-events: auto; touch-action: none;
+}
+body.joystick-dreapta #buton-teleport { right: auto; left: calc(max(32px, env(safe-area-inset-left)) + 135px); }

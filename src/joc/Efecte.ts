@@ -39,6 +39,23 @@ export const EFECTE: Efect[] = [
   { id: 'p-clopotei', categorie: 'pasi', nume: 'Clopoței', emoji: '🔔' },
   { id: 'p-robot', categorie: 'pasi', nume: 'Pași de robot', emoji: '🦾' },
   { id: 'p-bule', categorie: 'pasi', nume: 'Bule', emoji: '🫧' },
+  // --- 16 efecte noi ---
+  { id: 'u-bule', categorie: 'urma', nume: 'Bule de săpun', emoji: '🫧' },
+  { id: 'u-frunze', categorie: 'urma', nume: 'Frunze', emoji: '🍃' },
+  { id: 'u-note', categorie: 'urma', nume: 'Note muzicale', emoji: '🎵' },
+  { id: 'u-galaxie', categorie: 'urma', nume: 'Praf de galaxie', emoji: '🌌' },
+  { id: 's-fluier', categorie: 'saritura', nume: 'Fluier', emoji: '🥳' },
+  { id: 's-arcade', categorie: 'saritura', nume: 'Joc vechi', emoji: '👾' },
+  { id: 's-miau', categorie: 'saritura', nume: 'Miau', emoji: '😺' },
+  { id: 's-racheta', categorie: 'saritura', nume: 'Rachetă', emoji: '🚀' },
+  { id: 'a-flori', categorie: 'aterizare', nume: 'Flori', emoji: '🌸' },
+  { id: 'a-fulger', categorie: 'aterizare', nume: 'Fulger', emoji: '⚡' },
+  { id: 'a-bule', categorie: 'aterizare', nume: 'Stropi de bule', emoji: '💦' },
+  { id: 'a-curcubeu', categorie: 'aterizare', nume: 'Inel curcubeu', emoji: '🌈' },
+  { id: 'p-xilofon', categorie: 'pasi', nume: 'Xilofon', emoji: '🎼' },
+  { id: 'p-cal', categorie: 'pasi', nume: 'Copite de cal', emoji: '🐴' },
+  { id: 'p-gelatina', categorie: 'pasi', nume: 'Gelatină', emoji: '🍮' },
+  { id: 'p-zapada', categorie: 'pasi', nume: 'Zăpadă care scârțâie', emoji: '☃️' },
 ];
 
 export const NUME_CATEGORII: Record<CategorieEfect, string> = {
@@ -82,6 +99,10 @@ export function emiteUrma(id: string, part: Particule, poz: THREE.Vector3, timp:
     case 'u-zapada': vit.y = -0.4; part.emite(tmp, vit, 0xffffff, 1.2, 0.12); break;
     case 'u-neon': part.emite(tmp, vit, Math.random() < 0.6 ? 0x2ee6d6 : 0x9ffcf3, 0.7, 0.14); break;
     case 'u-inimi': vit.y = 0.9; part.emite(tmp, vit, Math.random() < 0.5 ? 0xff5fa8 : 0xff3a5a, 0.9, 0.18); break;
+    case 'u-bule': vit.y = 1.2; part.emite(tmp, vit, Math.random() < 0.5 ? 0xcff8ff : 0xffd8f8, 1.3, 0.2); break;
+    case 'u-frunze': vit.y = -0.6; vit.x *= 3; part.emite(tmp, vit, [0x4ccf6a, 0x8acf3a, 0xffb02e][Math.floor(Math.random() * 3)], 1.2, 0.16); break;
+    case 'u-note': vit.y = 1.4; culoare.setHSL(Math.random(), 0.9, 0.6); part.emite(tmp, vit, culoare, 0.9, 0.17); break;
+    case 'u-galaxie': vit.multiplyScalar(2); part.emite(tmp, vit, [0x8a6cff, 0xffffff, 0x2a1a6a, 0xff5fa8][Math.floor(Math.random() * 4)], 1, 0.12); break;
   }
 }
 
@@ -99,6 +120,19 @@ export function efectAterizare(id: string, part: Particule, poz: THREE.Vector3, 
       break;
     case 'a-stele':
       part.explozie(tmp, 16, [0xffd23f, 0xffffff], 4 + k * 2, 0.16, 10, 1);
+      break;
+    case 'a-flori':
+      part.explozie(tmp, 18, [0xff9ac0, 0xffffff, 0xffd23f], 3 + k * 2, 0.15, 6, 1.2);
+      break;
+    case 'a-fulger':
+      part.inel(tmp, 0xffe040, 0.3, 2.5 + k, 0.4, 1);
+      part.explozie(tmp, 14, [0xffe040, 0xffffff], 6 + k * 2, 0.1, 20, 0.5);
+      break;
+    case 'a-bule':
+      part.explozie(tmp, 16, [0xcff8ff, 0x9ffcf3], 3, 0.18, -2, 1.4);
+      break;
+    case 'a-curcubeu':
+      for (const [i, c] of [0xff5f5f, 0xffd23f, 0x4ccf6a, 0x2ee6d6].entries()) part.inel(tmp.clone().setY(tmp.y + i * 0.02), c, 0.2 + i * 0.3, 2.2 + i * 0.5 + k, 0.8, 0.8);
       break;
     case 'a-confetti':
       part.explozie(tmp, 20, CONFETTI, 4 + k * 2, 0.15, 9, 1.2);

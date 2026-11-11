@@ -253,3 +253,83 @@ export function mingeBaschet(): Model {
   const cd = new THREE.Group(); // nu are coadă 🙂
   return { grup: g, picioare: [], coada: cd, minge, distanta: 1.3 };
 }
+
+// ---------- Animalele de 260 de monede (în ele te poți și transforma) ----------
+
+export function panda(): Model {
+  const g = new THREE.Group();
+  const alb = 0xf4f4f0;
+  g.add(cub(0.46, 0.4, 0.62, alb, 0, 0.42, 0), cub(0.48, 0.2, 0.3, NEGRU, 0, 0.5, 0.06)); // corp + „vesta” neagră
+  const cap = new THREE.Group();
+  cap.position.set(0, 0.74, 0.36);
+  cap.add(cub(0.4, 0.34, 0.32, alb, 0, 0, 0));
+  cap.add(cub(0.12, 0.12, 0.06, NEGRU, -0.17, 0.2, -0.04), cub(0.12, 0.12, 0.06, NEGRU, 0.17, 0.2, -0.04)); // urechi
+  cap.add(cub(0.12, 0.1, 0.02, NEGRU, -0.1, 0.03, 0.165), cub(0.12, 0.1, 0.02, NEGRU, 0.1, 0.03, 0.165)); // petele de la ochi
+  cap.add(cub(0.04, 0.04, 0.01, ALB, -0.09, 0.04, 0.178), cub(0.04, 0.04, 0.01, ALB, 0.09, 0.04, 0.178));
+  cap.add(cub(0.08, 0.05, 0.04, NEGRU, 0, -0.07, 0.17));
+  g.add(cap);
+  const picioare = patruPicioare(0.15, 0.2, 0.26, 0.14, NEGRU);
+  const cd = coada(0, 0.48, -0.32, cub(0.1, 0.1, 0.06, alb, 0, 0, 0));
+  g.add(...picioare, cd);
+  return { grup: g, picioare, coada: cd, cap, distanta: 1.5 };
+}
+
+export function vulpe(): Model {
+  const g = new THREE.Group();
+  const port = 0xe8702a;
+  g.add(cub(0.3, 0.28, 0.66, port, 0, 0.38, 0), cub(0.26, 0.08, 0.5, ALB, 0, 0.25, 0.04));
+  const cap = new THREE.Group();
+  cap.position.set(0, 0.56, 0.38);
+  cap.add(cub(0.3, 0.26, 0.26, port, 0, 0, 0), cub(0.16, 0.12, 0.16, ALB, 0, -0.06, 0.18), cub(0.06, 0.05, 0.04, NEGRU, 0, -0.03, 0.27));
+  cap.add(cub(0.09, 0.14, 0.05, port, -0.1, 0.19, -0.02), cub(0.09, 0.14, 0.05, port, 0.1, 0.19, -0.02));
+  cap.add(cub(0.05, 0.08, 0.06, NEGRU, -0.1, 0.27, -0.02), cub(0.05, 0.08, 0.06, NEGRU, 0.1, 0.27, -0.02));
+  ochi(cap, 0.08, 0.04, 0.135);
+  g.add(cap);
+  const picioare = patruPicioare(0.1, 0.24, 0.24, 0.08, 0x3a2418);
+  const cd = coada(0, 0.44, -0.34, cub(0.16, 0.16, 0.42, port, 0, 0.02, -0.2), cub(0.17, 0.17, 0.12, ALB, 0, 0.02, -0.46));
+  cd.rotation.x = -0.35;
+  g.add(...picioare, cd);
+  return { grup: g, picioare, coada: cd, cap, distanta: 1.5 };
+}
+
+export function dinozaur(): Model {
+  const g = new THREE.Group();
+  const verde = 0x5ac84a, burta = 0xd8f0a0;
+  g.add(cub(0.42, 0.46, 0.56, verde, 0, 0.62, 0), cub(0.34, 0.36, 0.04, burta, 0, 0.58, 0.29));
+  for (const [y, z] of [[0.92, 0.1], [0.92, -0.1], [0.8, -0.3]]) g.add(cub(0.06, 0.12, 0.1, 0xffa020, 0, y, z)); // țepi pe spate
+  const cap = new THREE.Group();
+  cap.position.set(0, 1.0, 0.3);
+  cap.add(cub(0.34, 0.3, 0.42, verde, 0, 0, 0.08), cub(0.3, 0.06, 0.3, ALB, 0, -0.12, 0.14)); // cap + dințișori
+  ochi(cap, 0.1, 0.07, 0.295);
+  g.add(cap);
+  g.add(cub(0.08, 0.2, 0.08, verde, -0.24, 0.66, 0.18), cub(0.08, 0.2, 0.08, verde, 0.24, 0.66, 0.18)); // mânuțe scurte
+  const picioare = [picior(-0.13, 0.4, 0, 0.16, 0.4, verde), picior(0.13, 0.4, 0, 0.16, 0.4, verde)];
+  const cd = coada(0, 0.6, -0.28, cub(0.24, 0.24, 0.3, verde, 0, -0.02, -0.12), cub(0.14, 0.14, 0.3, verde, 0, -0.08, -0.38));
+  g.add(...picioare, cd);
+  return { grup: g, picioare, coada: cd, cap, distanta: 1.6 };
+}
+
+export function unicorn(): Model {
+  const m = cal(0xf8f4ff);
+  // coama și coada curcubeu, cornul auriu
+  const culori = [0xff5f5f, 0xffd23f, 0x4ccf6a, 0x2ee6d6, 0x8a6cff];
+  culori.forEach((c, i) => m.grup.add(cub(0.08, 0.12, 0.08, c, 0, 1.38 - i * 0.12, 0.42 - i * 0.04)));
+  m.cap!.add(cub(0.06, 0.24, 0.06, 0xffd23f, 0, 0.24, 0.2));
+  m.coada.clear();
+  culori.forEach((c, i) => m.coada.add(cub(0.1, 0.12, 0.1, c, 0, -0.06 - i * 0.11, -0.05)));
+  return m;
+}
+
+export function broasca(): Model {
+  const g = new THREE.Group();
+  const verde = 0x3fbf3a;
+  g.add(cub(0.42, 0.26, 0.4, verde, 0, 0.2, 0), cub(0.34, 0.04, 0.3, 0xd8f0a0, 0, 0.07, 0.04));
+  // ochii mari, sus pe cap
+  for (const x of [-0.12, 0.12]) g.add(cub(0.14, 0.14, 0.14, verde, x, 0.38, 0.14), cub(0.1, 0.1, 0.02, ALB, x, 0.39, 0.215), cub(0.05, 0.06, 0.01, NEGRU, x, 0.39, 0.228));
+  g.add(cub(0.26, 0.03, 0.02, 0xa82a2a, 0, 0.22, 0.205)); // zâmbetul
+  const picioare = [picior(-0.2, 0.12, -0.12, 0.12, 0.12, verde), picior(0.2, 0.12, -0.12, 0.12, 0.12, verde),
+    picior(-0.14, 0.1, 0.16, 0.08, 0.1, verde), picior(0.14, 0.1, 0.16, 0.08, 0.1, verde)];
+  const cd = new THREE.Group();
+  g.add(...picioare);
+  return { grup: g, picioare, coada: cd, topaie: true, distanta: 1.3 };
+}

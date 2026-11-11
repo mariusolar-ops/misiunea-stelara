@@ -108,10 +108,15 @@ export class Nivel {
     let rez: EfectObstacol = null;
     for (const o of this.obstacole) {
       const e = o.actualizeaza(j, timp, dt);
-      if (e === 'laser' || e === 'cristal' || e === 'portal-bun' || e === 'portal-gresit') rez = e;
+      if (e === 'laser' || e === 'cristal' || e === 'portal-bun' || e === 'portal-gresit' || e === 'prins') rez = e;
       else if (e && !rez) rez = e;
     }
     return rez;
+  }
+
+  /** Când jucătorul revine la steag (ex. extraterestrul pornește iar din spatele lui) */
+  reseteazaObstacole(poz: THREE.Vector3, directie: number) {
+    for (const o of this.obstacole) o.reseteaza?.(poz, directie);
   }
 
   /** Animațiile decorative (o dată pe cadru, nu în pașii de fizică) */

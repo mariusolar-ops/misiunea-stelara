@@ -3,14 +3,14 @@
 import * as THREE from 'three';
 import { creeazaScena } from '../lume/Scena';
 import { Jucator } from './Jucator';
-import { Animal } from './Animal';
+import { Animal, areToateAnimalele, type TipAnimal } from './Animal';
 import { CameraUrmarire } from './CameraUrmarire';
 import { Nivel } from './Nivel';
 import { incarca, inregistreazaFinal, salveaza, type Progres } from './Salvare';
 import { puteriDin } from './Puteri';
 import { esteEveniment, textEveniment } from './Eveniment';
 import { ENERGIE_ZBOR } from './Jucator';
-import { cautaAccesoriu, SLOTURI } from './Accesorii';
+import { cautaAccesoriu, construiesteColorat, SLOTURI } from './Accesorii';
 import { Personalizare } from '../ui/Personalizare';
 import { Clasament } from '../ui/Clasament';
 import { sunete, seteazaSunet } from '../audio/Sunete';
@@ -47,6 +47,8 @@ export class Joc {
   private grafica: ReturnType<typeof creeazaScena>;
   jucator: Jucator;
   private animal: Animal;
+  /** Animalul în care te-ai transformat (dacă te-ai transformat) */
+  private avatar: Animal | null = null;
   private particule: Particule;
   /** Timp acumulat pentru urma din spatele personajului */
   private timpUrma = 0;
@@ -58,6 +60,7 @@ export class Joc {
   private ultimulArtificiu = 0;
   /** Câte portale greșite a ales în tura asta (la nivelul cu portale) */
   private greseliPortale = 0;
+  private ultimTeleport = -9;
   /** Constructorul de niveluri: nivelul la care lucrezi și definiția lui jucabilă (index -1) */
   private editor: Editor | null = null;
   private nivelPropriu: NivelPropriu | null = null;
@@ -119,6 +122,12 @@ export class Joc {
     pornesteMuzica();
     this.elSunet.textContent = this.progres.sunet ? '🔊' : '🔇';
     this.elSunet.addEventListener('click', () => this.comutaSunet());
+    // butonul de zoom: aproape → normal → departe
+    document.getElementById('buton-zoom')!.addEventListener('click', () => {
+      const z = this.camera.zoomJucator;
+      this.camera.zoomJucator = z < 0.8 ? 1 : z < 1.3 ? 1.6 : 0.6;
+      sunete.click();
+    });
 
     // Butoanele din joc și de pe ecranul de final
     document.getElementById('buton-pauza')!.addEventListener('click', () => this.pauza());
@@ -233,10 +242,20 @@ export class Joc {
     this.animal.schimba(p.animal, p.culoareAnimal);
     this.animal.teleporteaza(this.jucator.poz, this.jucator.directie);
     this.jucator.puteri = puteriDin(p.puteriActive);
+    // transformarea în animal
+    if (this.avatar) { this.grafica.scena.remove(this.avatar.obiect); this.avatar = null; }
+    const tr = p.transformare && areToateAnimalele(p.cumparate) ? p.transformare as TipAnimal : null;
+    if (tr) {
+      this.avatar = new Animal(this.grafica.scena, tr);
+      this.avatar.avatar = true;
+      this.avatar.obiect.scale.setScalar(1.8);
+    }
+    this.jucator.personaj.obiect.visible = !tr;
+    document.getElementById('buton-teleport')!.classList.toggle('ascuns', !this.jucator.puteri.teleport);
     if (p.dev.activ && p.dev.zborInfinit) this.jucator.puteri.zbor = true;
     for (const slot of SLOTURI) {
       const a = cautaAccesoriu(p.echipate[slot]);
-      this.jucator.personaj.puneAccesoriu(slot, a ? a.construieste() : null);
+      this.jucator.personaj.puneAccesoriu(slot, a ? construiesteColorat(a, p.culoriAccesorii[a.id]) : null);
     }
   }
 
@@ -306,6 +325,7 @@ export class Joc {
     // camera stă în spatele personajului (pe partea opusă direcției în care privește)
     this.camera.unghi = dir + Math.PI;
     this.camera.sari(this.jucator.poz);
+    this.nivel.reseteazaObstacole(this.jucator.poz, dir);
   }
 
   /** Mihai a găsit steaua secretă din nivelul ăsta */
@@ -483,11 +503,30 @@ export class Joc {
       this.jucator.aSarit = false;
     }
 
+    // zoom cu două degete (sau rotița mouse-ului)
+    if (this.intrari.zoom !== 1) {
+      this.camera.zoomJucator = THREE.MathUtils.clamp(this.camera.zoomJucator / this.intrari.zoom, 0.45, 2.2);
+      this.intrari.zoom = 1;
+    }
+    // puterea „Teleportare”
+    if (this.intrari.teleportApasat) {
+      this.intrari.teleportApasat = false;
+      if (this.stare === 'joaca' && this.jucator.puteri.teleport && this.timp - this.ultimTeleport > 1) {
+        const de = this.jucator.poz.clone();
+        if (this.jucator.teleportInainte(nivel.platforme)) {
+          this.ultimTeleport = this.timp;
+          this.particule.explozie(de.setY(de.y + 1), 14, [0x8a6cff, 0x2ee6d6], 3, 0.14, 0, 0.6);
+          this.particule.explozie(this.jucator.poz.clone().setY(this.jucator.poz.y + 1), 14, [0xffffff, 0x2ee6d6], 3, 0.14, 0, 0.6);
+          sunete.teleport();
+        }
+      }
+    }
+
     if (this.stare === 'joaca') {
       // fizica în pași mici și egali
       this.rezervaFizica += dt;
       let peLava = false;
-      let atinsDe: 'laser' | 'cristal' | null = null;
+      let atinsDe: 'laser' | 'cristal' | 'prins' | null = null;
       let portal: 'portal-bun' | 'portal-gresit' | null = null;
       while (this.rezervaFizica >= PAS_FIZICA) {
         nivel.actualizeaza(PAS_FIZICA, this.timp);
@@ -495,7 +534,7 @@ export class Joc {
         if (efect === 'lava') peLava = true;
         // obstacolele (lasere, pendule, curenți, cristale)
         const ob = nivel.actualizeazaObstacole(this.jucator, this.timp, PAS_FIZICA);
-        if ((ob === 'laser' || ob === 'cristal') && !this.devInvincibil()) atinsDe = ob;
+        if ((ob === 'laser' || ob === 'cristal' || ob === 'prins') && !this.devInvincibil()) atinsDe = ob;
         else if (ob === 'portal-bun' || ob === 'portal-gresit') portal = ob;
         else if (ob === 'lovitura') sunete.lovitura();
         else if (ob === 'vant') sunete.vant();
@@ -551,6 +590,10 @@ export class Joc {
         this.particule.explozie(this.jucator.poz.clone().setY(this.jucator.poz.y + 1), 20, [0x8a6cff, 0x2ee6d6, 0xffffff], 4, 0.14, 6, 0.8);
         if (portal === 'portal-bun') { this.hud.arataMesaj(t('Portalul corect! Mergi mai departe!')); sunete.secret(); }
         else { this.greseliPortale++; this.hud.arataMesaj(t('Portal greșit! Mai încearcă.')); sunete.cadere(); }
+      } else if (atinsDe === 'prins') {
+        this.hud.arataMesaj(t(laSteag ? 'Te-a prins extraterestrul! Înapoi la steag.' : 'Te-a prins extraterestrul! Înapoi la start.'));
+        sunete.cadere();
+        this.revino();
       } else if (atinsDe === 'cristal') {
         this.hud.arataMesaj(t(laSteag ? 'Au, cristale ascuțite! Înapoi la steag.' : 'Au, cristale ascuțite! Înapoi la start.'));
         sunete.lava();
@@ -571,6 +614,7 @@ export class Joc {
     this.jucator.deseneaza(dt, nivel.platforme);
     if (this.stare === 'final') this.sarbatoare(dt);
     this.animal.actualizeaza(dt, this.jucator.poz, this.jucator.directie, this.timp);
+    this.avatar?.actualizeaza(dt, this.jucator.poz, this.jucator.directie, this.timp);
     if (this.stare === 'editor') this.editor?.cadru(rot);
     else this.camera.actualizeaza(this.jucator.poz, dt);
     this.grafica.renderer.render(this.grafica.scena, this.grafica.camera);

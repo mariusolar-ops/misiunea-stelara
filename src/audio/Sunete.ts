@@ -4,6 +4,7 @@
 let ctx: AudioContext | null = null;
 let volumGeneral: GainNode | null = null;
 let pornit = true;
+let notaXilofon = 0;
 /** Volumul efectelor, 0..1 (din Setări) */
 let volumEfecte = 0.8;
 const VOLUM_MAXIM = 0.45;
@@ -74,6 +75,10 @@ export const sunete = {
       case 'robot': bip('square', 420, 420, 0.06, 0, 0.3); bip('square', 640, 640, 0.07, 0.06, 0.3); break;
       case 'pian': bip('triangle', 1047, 1047, 0.3, 0, 0.6); bip('sine', 2094, 2094, 0.15, 0, 0.2); break;
       case 'bula': bip('sine', 380, 1300, 0.09, 0, 0.6); break;
+      case 'fluier': bip('sine', 900, 2200, 0.25, 0, 0.4); break;
+      case 'arcade': [523, 659, 784, 1047].forEach((f, i) => bip('square', f, f, 0.05, i * 0.04, 0.2)); break;
+      case 'miau': bip('triangle', 700, 1100, 0.12, 0, 0.5); bip('triangle', 1100, 600, 0.22, 0.12, 0.5); break;
+      case 'racheta': bip('sawtooth', 120, 900, 0.35, 0, 0.18); break;
       default: bip('square', 280, 560, 0.13, 0, 0.35);
     }
   },
@@ -86,6 +91,10 @@ export const sunete = {
       case 'clopotei': bip('sine', 1568 * k, 1568 * k, 0.18, 0, 0.25); bip('sine', 2093 * k, 2093 * k, 0.14, 0.02, 0.15); break;
       case 'robot': bip('square', 260 * k, 220 * k, 0.07, 0, 0.18); bip('sawtooth', 120, 90, 0.05, 0.05, 0.12); break;
       case 'bule': bip('sine', 320 * k, 900 * k, 0.07, 0, 0.45); break;
+      case 'xilofon': { notaXilofon = (notaXilofon + 1) % 5; const f = [523, 587, 659, 784, 880][notaXilofon]; bip('sine', f, f, 0.2, 0, 0.45); bip('triangle', f * 2, f * 2, 0.08, 0, 0.15); break; }
+      case 'cal': bip('triangle', 900 * k, 600 * k, 0.04, 0, 0.5); bip('triangle', 800 * k, 500 * k, 0.04, 0.09, 0.4); break;
+      case 'gelatina': bip('sine', 200 * k, 380 * k, 0.12, 0, 0.5); bip('sine', 380 * k, 240 * k, 0.1, 0.06, 0.3); break;
+      case 'zapada': bip('sawtooth', 1800 * k, 900 * k, 0.05, 0, 0.12); bip('square', 1200 * k, 700 * k, 0.04, 0.03, 0.08); break;
     }
   },
   aterizare: () => bip('triangle', 160, 60, 0.18, 0, 0.6),
@@ -96,5 +105,6 @@ export const sunete = {
   },
   artificiu: () => { bip('triangle', 200, 1400, 0.25, 0, 0.25); bip('square', 1800, 600, 0.3, 0.22, 0.12); },
   minge: () => bip('sine', 140, 70, 0.08, 0, 0.35),
+  teleport: () => { bip('sine', 300, 2000, 0.15, 0, 0.4); bip('sine', 2000, 600, 0.15, 0.12, 0.3); },
   click: () => bip('triangle', 700, 500, 0.05, 0, 0.4),
 };

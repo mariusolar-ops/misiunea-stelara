@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -45,6 +45,7 @@ function decorTema(tema: Tema): Decor {
     case 'nori': return decorNori();
     case 'ocean': return decorOcean();
     case 'curcubeu': return decorCurcubeu();
+    case 'ozn': return decorOzn();
   }
 }
 
@@ -543,4 +544,30 @@ function decorCurcubeu(): Decor {
     });
   }
   return { obiect: grup, fundal: 0x1a0a3a };
+}
+
+function decorOzn(): Decor {
+  // Planeta verde a extratereștrilor, cu farfurii zburătoare care se rotesc pe cer
+  const grup = planetaCuPete(0x3a8a4a, 0x6ad04a, 0x103010);
+  const farfurii: THREE.Group[] = [];
+  for (let i = 0; i < 6; i++) {
+    const f = new THREE.Group();
+    f.add(new THREE.Mesh(new THREE.CylinderGeometry(3, 4.5, 1, 12), new THREE.MeshLambertMaterial({ color: 0xb8c0d0 })));
+    const cupola = new THREE.Mesh(new THREE.SphereGeometry(2, 10, 8, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x9ffcf3, transparent: true, opacity: 0.6 }));
+    cupola.position.y = 0.4;
+    f.add(cupola);
+    const raza = new THREE.Mesh(new THREE.ConeGeometry(4, 20, 12, 1, true), new THREE.MeshBasicMaterial({ color: 0xc0ffa0, transparent: true, opacity: 0.12, depthWrite: false }));
+    raza.position.y = -10.5;
+    f.add(raza);
+    farfurii.push(f);
+    grup.add(f);
+  }
+  return {
+    obiect: grup, fundal: 0x0a1a12,
+    anima: (timp) => farfurii.forEach((f, i) => {
+      const u = timp * 0.08 + (i / 6) * Math.PI * 2;
+      f.position.set(Math.cos(u) * (90 + i * 10), 30 + (i % 3) * 15 + Math.sin(timp + i) * 2, Math.sin(u) * (90 + i * 10) - 50);
+      f.rotation.y = timp;
+    }),
+  };
 }
