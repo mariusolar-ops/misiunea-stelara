@@ -54,3 +54,20 @@ export function anuntaTitluri(titluri: Titlu[]) {
     setTimeout(() => el.remove(), 3500);
   }, i * 3700));
 }
+
+/** Fereastra mare pentru recompensa supremă: costum de aur + titlu + Kiwi */
+export function anuntaRecompensaSuprema() {
+  const strat = document.createElement('div');
+  strat.className = 'strat-cufar';
+  strat.innerHTML = `
+    <div class="premiu">
+      <div class="emoji-premiu">👑</div>
+      <div class="categorie-premiu">${t('Ai adunat TOT!')}</div>
+      <div class="nume-premiu">${t('Costumul de aur, titlul „Bogatul anului” și pisica Kiwi sunt ale tale!')}</div>
+      <p class="sfat">${t('Le găsești la Personalizează → Stil și Animal.')}</p>
+      <button class="mare">${t('Super!')}</button>
+    </div>`;
+  document.body.append(strat);
+  sunete.cufar();
+  strat.querySelector('button')!.addEventListener('click', () => strat.remove());
+}

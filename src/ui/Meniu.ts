@@ -96,16 +96,20 @@ export class Meniu {
       const n = this.nivele[i];
       const grupa = SECRETE.find((x) => x.index === i);
       const esteSecret = !!grupa;
-      const deschis = esteSecret ? secretDeschis(p.secrete, i) : loc < p.deblocate;
+      const deschis = esteSecret ? secretDeschis(p, i) : loc < p.deblocate;
       const rez = p.nivele[i];
       const card = document.createElement('button');
-      card.className = 'card-nivel' + (deschis ? '' : ' blocat') + (esteSecret ? (i === SECRETE[1].index ? ' secret aur' : ' secret') : '');
+      card.className = 'card-nivel' + (deschis ? '' : ' blocat') + (esteSecret ? (i === SECRETE[1].index ? ' secret aur' : i === SECRETE[2].index ? ' secret portal' : ' secret') : '');
       card.disabled = !deschis;
       if (deschis) {
         card.innerHTML = `<span class="nr">${numarAfisat(i)}</span><span class="nume">${t(n.nume)}</span>
            <span class="stele">${stele(rez?.stele ?? 0)}</span>
            <span class="timp">${rez ? t('Record') + ': ' + formatTimp(rez.timp) : ''}</span>`;
         card.addEventListener('click', () => this.actiuni.joacaNivel(i));
+      } else if (grupa && grupa.realizare) {
+        // nivelul secret cu portale: fără stele, doar indiciul
+        card.innerHTML = `<span class="nr">?</span><span class="nume">${t('Nivel secret')}</span><span class="lacat">🔐</span>
+           <span class="timp">${t('Termină „Cele 10 portale” fără nicio greșeală!')}</span>`;
       } else if (grupa) {
         // nivelul secret: doar semne de întrebare și câte stele ai găsit din grupa lui
         const gasite = grupa.nivele.filter((x) => p.secrete.includes(x)).length;

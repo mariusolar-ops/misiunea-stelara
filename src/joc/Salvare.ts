@@ -52,6 +52,8 @@ export interface Progres {
   /** Titlurile câștigate (după id) și cel ales să apară lângă nume */
   titluri: string[];
   titluAles: string | null;
+  /** Realizări speciale (ex. „portale-perfect” = nivelul cu portale fără nicio greșeală) */
+  realizari: string[];
 }
 
 export interface Setari {
@@ -88,7 +90,7 @@ function progresNou(): Progres {
     cumparate: [], echipate: {}, sunet: true,
     secrete: [], nume: 'Mihai', prieteni: [],
     efecte: { ...EFECTE_IMPLICITE, detinute: [] }, setari: { ...SETARI_IMPLICITE },
-    zilnic: { ultimaZi: null, serie: 0 }, titluri: [], titluAles: null,
+    zilnic: { ultimaZi: null, serie: 0 }, titluri: [], titluAles: null, realizari: [],
   };
 }
 

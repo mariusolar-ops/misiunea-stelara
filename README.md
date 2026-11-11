@@ -29,7 +29,9 @@ Actualizările vin singure: când telefonul are internet și deschizi jocul, ia 
 
 - 11 niveluri: Baza de pe Lună, Inelul de asteroizi, Stația spațială, Luna vulcanică, Lângă gaura neagră,
   Laboratorul cu lasere, Planeta de gheață, Fortăreața robotului, Răscrucea cometei (cu două drumuri),
-  Asteroidul cu gravitație mică, Turnul spre stele + 2 niveluri secrete (Nebuloasa secretă, Templul de aur)
+  Asteroidul cu gravitație mică, Turnul spre stele, Pereții magnetici, Cele 10 portale, Labirintul de cristal,
+  Valea meteoriților, Norii săltăreți, Planeta ocean, Vulcanul care erupe
+  + 3 niveluri secrete (Nebuloasa secretă, Templul de aur, Dimensiunea portalelor)
 - 5 stele secrete mov (nivelurile 1–5) deblochează „Aripi de stea” și Nebuloasa secretă;
   4 stele de aur (nivelurile 6–9) deblochează Templul de aur
 - Clasament (total stele + cel mai bun timp pe fiecare nivel) cu prietenii adăugați prin cod
@@ -42,6 +44,7 @@ Actualizările vin singure: când telefonul are internet și deschizi jocul, ia 
   (se pot opri oricând, pentru joc „greu”)
 - Cufere surpriză (100 de monede din joc): urme în spatele personajului, sunete de săritură, efecte la aterizare
 - Muzică spațială compusă din cod și ecran de Setări (volum, muzică, joystick stânga/dreapta, mărime butoane, cameră)
+- Recompensa supremă (toate accesoriile + toate efectele): costum de aur, titlul „Bogatul anului”, pisica Kiwi
 - Serie zilnică (monede în fiecare zi, cufăr gratis în ziua a 7-a) și titluri pentru realizări
 - Jocul e în 5 limbi: română, engleză, franceză, spaniolă, germană (Setări → Limbă)
 - Eveniment „Monede x2” în primele 15 minute din fiecare oră (după ceasul telefonului)

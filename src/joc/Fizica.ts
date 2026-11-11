@@ -27,6 +27,8 @@ export interface RezultatMiscare {
   platformaSub: Platforma | null;
   /** True dacă s-a lovit cu capul de ceva */
   lovitSus: boolean;
+  /** Dacă a atins un perete magnetic: direcția dinspre perete spre personaj */
+  perete: THREE.Vector3 | null;
 }
 
 /**
@@ -39,7 +41,7 @@ export function misca(
   pas: THREE.Vector3,
   platforme: Platforma[],
 ): RezultatMiscare {
-  const rez: RezultatMiscare = { peSol: false, platformaSub: null, lovitSus: false };
+  const rez: RezultatMiscare = { peSol: false, platformaSub: null, lovitSus: false, perete: null };
   const j = LATIME_JUCATOR / 2;
 
   // --- pe X ---
@@ -49,6 +51,7 @@ export function misca(
     if (!p.solid || !seSuprapun(cutieJucator, p.cutie)) continue;
     if (pas.x > 0) poz.x = p.cutie.min.x - j - 0.001;
     else if (pas.x < 0) poz.x = p.cutie.max.x + j + 0.001;
+    if (p.magnetic && pas.x !== 0) rez.perete = new THREE.Vector3(pas.x > 0 ? -1 : 1, 0, 0);
     puneCutia(poz);
   }
 
@@ -59,6 +62,7 @@ export function misca(
     if (!p.solid || !seSuprapun(cutieJucator, p.cutie)) continue;
     if (pas.z > 0) poz.z = p.cutie.min.z - j - 0.001;
     else if (pas.z < 0) poz.z = p.cutie.max.z + j + 0.001;
+    if (p.magnetic && pas.z !== 0) rez.perete = new THREE.Vector3(0, 0, pas.z > 0 ? -1 : 1);
     puneCutia(poz);
   }
 

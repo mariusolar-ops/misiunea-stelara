@@ -23,6 +23,8 @@ export interface AspectPersonaj {
   coafura: Coafura;
   tricou: ModelTricou;
   pantaloni: ModelPantaloni;
+  /** Costumul de aur (recompensa supremă) */
+  costumAur?: boolean;
 }
 
 // Culorile de pornire, după hainele lui Mihai: tricou și pantaloni bleu, adidași închiși
@@ -69,7 +71,10 @@ export class Personaj {
   }
 
   /** (Re)construiește tot personajul cu culorile și aspectul date */
-  construieste(c: CuloriPersonaj, a: AspectPersonaj) {
+  construieste(culoriAlese: CuloriPersonaj, a: AspectPersonaj) {
+    // costumul de aur: hainele devin aurii și strălucesc
+    const AUR = 0xffc83a, AUR2 = 0xe0a020;
+    const c = a.costumAur ? { ...culoriAlese, tricou: AUR, pantaloni: AUR2, pantofi: 0xfff0b0, detalii: 0xffffff } : culoriAlese;
     // golim tot ce era înainte (și eliberăm materialele)
     this.corpGrup.traverse((o) => { if (o instanceof THREE.Mesh) (o.material as THREE.Material).dispose(); });
     this.corpGrup.clear();
@@ -95,6 +100,13 @@ export class Personaj {
     this.sloturi.umar.position.set(-0.53, 1.42, 0);
     this.corpGrup.add(this.piciorSt, this.piciorDr, this.manaSt, this.manaDr,
       this.sloturi.cap, this.sloturi.fata, this.sloturi.spate, this.sloturi.umar);
+    if (a.costumAur) {
+      this.corpGrup.traverse((o) => {
+        if (!(o instanceof THREE.Mesh)) return;
+        const m = o.material as THREE.MeshLambertMaterial;
+        if (m.color.getHex() === AUR || m.color.getHex() === AUR2) m.emissive.set(0x5a3c00);
+      });
+    }
   }
 
   private construiestePicioare(c: CuloriPersonaj, a: AspectPersonaj) {
@@ -272,6 +284,17 @@ export class Personaj {
    * Animația: viteza (0..1) decide cât de tare balansează mâinile și picioarele.
    * În aer, mâinile se ridică și picioarele se strâng puțin. Când zboară, ține mâinile în lateral.
    */
+  /** Dansul de victorie: țopăie, ridică mâinile și le flutură (se apelează după animeaza) */
+  sarbatoreste(timp: number) {
+    const t = timp * 8;
+    this.corpGrup.position.y = Math.abs(Math.sin(t)) * 0.28;
+    this.corpGrup.rotation.x = 0;
+    this.manaSt.rotation.set(-2.7 + Math.sin(t) * 0.35, 0, -0.35 - Math.sin(t) * 0.25);
+    this.manaDr.rotation.set(-2.7 - Math.sin(t) * 0.35, 0, 0.35 + Math.sin(t) * 0.25);
+    this.piciorSt.rotation.x = Math.sin(t) * 0.3;
+    this.piciorDr.rotation.x = -Math.sin(t) * 0.3;
+  }
+
   animeaza(dt: number, viteza: number, inAer: boolean, urca: boolean, zboara = false) {
     this.animeazaAccesorii(viteza, inAer, zboara);
     const lerp = (a: number, b: number, k: number) => a + (b - a) * Math.min(1, k * dt);

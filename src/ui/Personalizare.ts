@@ -10,6 +10,7 @@ import { PUTERI } from '../joc/Puteri';
 import { sunete } from '../audio/Sunete';
 import { EFECTE, PRET_CUFAR, NUME_CATEGORII, deschideCufar, type CategorieEfect } from '../joc/Efecte';
 import { arataCufar } from './AnimatieCufar';
+import { areTotul, catMaiLipseste } from '../joc/Recompense';
 import { t } from '../i18n';
 
 const container = document.getElementById('meniu')!;
@@ -136,6 +137,12 @@ export class Personalizare {
       this.randOptiuni('Tricou', [['simplu', 'Simplu'], ['dungi', 'Dungi'], ['stea', 'Stea'], ['fulger', 'Fulger'], ['hanorac', 'Hanorac'], ['camasa', 'Cămașă']], a.tricou, seteaza('tricou')),
       this.randOptiuni('Jos', [['lungi', 'Pantaloni lungi'], ['scurti', 'Pantaloni scurți'], ['fusta', 'Fustă']], a.pantaloni, seteaza('pantaloni')),
     );
+    // costumul de aur (recompensa supremă)
+    if (areTotul(this.progres)) {
+      el.append(this.randOptiuni('Costum de aur', [['da', '✨ Pornit'], ['nu', 'Oprit']], a.costumAur ? 'da' : 'nu', (v) => { a.costumAur = v === 'da'; }));
+    } else {
+      el.append(this.indiciuRecompensa());
+    }
     const sfat = document.createElement('p');
     sfat.className = 'sfat';
     sfat.textContent = t('Culorile pentru dungi, stea, fulger și funde le alegi la „Culori” → „Detalii”.');
@@ -144,10 +151,12 @@ export class Personalizare {
 
   private animal(el: HTMLElement) {
     const p = this.progres;
-    el.append(this.randOptiuni('Animal', ANIMALE.map((a) => [a.tip, `${a.emoji} ${t(a.nume)}`]), p.animal, (v) => {
+    const deblocat = areTotul(p);
+    el.append(this.randOptiuni('Animal', ANIMALE.filter((a) => !a.secret || deblocat).map((a) => [a.tip, `${a.emoji} ${t(a.nume)}`]), p.animal, (v) => {
       p.animal = v;
       p.culoareAnimal = ANIMALE.find((a) => a.tip === v)!.culoare; // culoarea lui obișnuită
     }));
+    if (!deblocat) el.append(this.indiciuRecompensa());
     if (ANIMALE.find((a) => a.tip === p.animal)?.recolorabil) {
       el.append(this.randCulori('Blană', BLANA, p.culoareAnimal, (v) => { p.culoareAnimal = v; }));
     }
@@ -289,5 +298,14 @@ export class Personalizare {
       }
       el.append(this.rand(NUME_CATEGORII[cat], ...optiuni));
     }
+  }
+
+  /** Indiciul pentru recompensa supremă: ce mai trebuie adunat */
+  private indiciuRecompensa() {
+    const lipsa = catMaiLipseste(this.progres);
+    const p = document.createElement('p');
+    p.className = 'sfat indiciu-aur';
+    p.textContent = '🔒 ' + t('Costumul de aur, titlul „Bogatul anului” și pisica Kiwi: adună toate accesoriile și toate efectele din cufere! (mai ai {a} accesorii și {e} efecte)', { a: lipsa.accesorii, e: lipsa.efecte });
+    return p;
   }
 }

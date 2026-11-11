@@ -13,7 +13,7 @@ export interface CorpObstacol {
  * lovitura = l-a împins un pendul (doar pentru sunet)
  * vant = a intrat într-un curent de aer (doar pentru sunet)
  */
-export type EfectObstacol = 'laser' | 'cristal' | 'lovitura' | 'vant' | null;
+export type EfectObstacol = 'laser' | 'cristal' | 'lovitura' | 'vant' | 'portal-bun' | 'portal-gresit' | null;
 
 export interface Obstacol {
   obiect: THREE.Object3D;

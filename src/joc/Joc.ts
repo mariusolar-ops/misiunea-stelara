@@ -19,7 +19,7 @@ import { Particule } from '../lume/Particule';
 import { emiteUrma, efectAterizare, confettiFinal } from './Efecte';
 import { centruPoarta } from '../lume/Poarta';
 import { EcranSetari, aplicaSetari, sensibilitateCamera } from '../ui/Setari';
-import { EcranTitluri, anuntaTitluri } from '../ui/Titluri';
+import { EcranTitluri, anuntaTitluri, anuntaRecompensaSuprema } from '../ui/Titluri';
 import { titluriNoi } from './Titluri';
 import { verificaZiua } from './Zilnic';
 import { arataPremiuZilnic } from '../ui/Zilnic';
@@ -47,6 +47,11 @@ export class Joc {
   /** Pentru sunetele de pași */
   private timpPas = 0;
   private timpPortal = 0;
+  /** Când s-a terminat nivelul (pentru dansul de victorie și artificii) */
+  private timpFinal = 0;
+  private ultimulArtificiu = 0;
+  /** Câte portale greșite a ales în tura asta (la nivelul cu portale) */
+  private greseliPortale = 0;
   private pasStang = true;
   private timerFinal = 0;
   /** Era eveniment x2 când a început nivelul? (dacă da, primește dublu chiar dacă se termină între timp) */
@@ -89,7 +94,7 @@ export class Joc {
       comutaSunet: () => this.comutaSunet(),
       titluri: (inapoi) => new EcranTitluri(this.progres, inapoi).arata(),
       setari: (inapoi) => new EcranSetari(this.progres, inapoi, () => this.aplicaSetari()).arata(),
-      clasament: () => new Clasament(this.progres, NIVELE, (i) => secretDeschis(this.progres.secrete, i), () => this.arataMeniu()).arata(),
+      clasament: () => new Clasament(this.progres, NIVELE, (i) => secretDeschis(this.progres, i), () => this.arataMeniu()).arata(),
     });
 
     // Aspectul salvat (culori, accesorii, cățel) și sunetul
@@ -140,7 +145,11 @@ export class Joc {
   /** Anunță titlurile nou câștigate (dacă sunt) */
   verificaTitluri() {
     const noi = titluriNoi(this.progres);
-    if (noi.length) { salveaza(this.progres); anuntaTitluri(noi); }
+    if (!noi.length) return;
+    salveaza(this.progres);
+    // la recompensa supremă arătăm doar fereastra mare (titlurile sunt oricum în lista 🏅)
+    if (noi.some((x) => x.id === 'bogat')) anuntaRecompensaSuprema();
+    else anuntaTitluri(noi);
   }
 
   /** La pornire: premiul zilei din seria zilnică (o dată pe zi) */
@@ -214,6 +223,10 @@ export class Joc {
     this.nivel = new Nivel(NIVELE[index], this.progres.secrete.includes(index), grupaSecret(index)?.culoare);
     this.grafica.scena.add(this.nivel.grup);
     this.jucator.gravitatie = NIVELE[index].gravitatie ?? 1;
+    this.greseliPortale = 0;
+    // camera de început a nivelului (ex. mai de sus la labirint)
+    this.camera.inaltime = NIVELE[index].camera?.inaltime ?? 0.38;
+    this.camera.distanta = NIVELE[index].camera?.distanta ?? 8;
     (this.grafica.scena.background as THREE.Color).set(this.nivel.decor.fundal);
     this.cronometru = 0;
     this.hud.seteazaTimp(0);
@@ -253,19 +266,24 @@ export class Joc {
     const nivel = this.nivel!;
     this.stare = 'final';
     const dublu = this.eraEveniment || esteEveniment();
+    let portalePerfect = false;
+    if (nivel.def.nivelPortale && this.greseliPortale === 0 && !this.progres.realizari.includes('portale-perfect')) {
+      this.progres.realizari.push('portale-perfect');
+      portalePerfect = true;
+    }
     const { stele, record, castig } = inregistreazaFinal(
       this.progres, this.indexNivel, this.cronometru, nivel.monedeLuate, nivel.tintaMonede,
       ORDINE_NORMALA.indexOf(this.indexNivel), NR_NIVELE_NORMALE, dublu ? 2 : 1);
     // ce urmează: nivelul normal următor; după ultimul, nivelurile secrete deschise (pe rând)
     const urm = urmatorulNormal(this.indexNivel);
     const ultimulNormal = this.indexNivel === ORDINE_NORMALA[ORDINE_NORMALA.length - 1];
-    const secreteDeschise = SECRETE.filter((x) => secretDeschis(this.progres.secrete, x.index)).map((x) => x.index);
+    const secreteDeschise = SECRETE.filter((x) => secretDeschis(this.progres, x.index)).map((x) => x.index);
     const dupaSecret = secreteDeschise.find((x) => x > this.indexNivel && esteNivelSecret(this.indexNivel));
     this.urmatorul = urm ?? (ultimulNormal ? secreteDeschise[0] ?? -1 : dupaSecret ?? -1);
     const stelePeGrupe = SECRETE.map((x) => `${x.emoji} ${x.nivele.filter((n) => this.progres.secrete.includes(n)).length}/${x.nivele.length}`).join('  ');
     // întâi sărbătorim: confetti + „Nivel terminat!”, apoi (după o clipă) apare ecranul de final
     confettiFinal(this.particule, this.jucator.poz);
-    this.hud.arataMesaj('🎉 ' + t('Nivel terminat!') + ' 🎉', 1.4);
+    this.hud.arataMesaj(portalePerfect ? '🔐 ' + t('Fără nicio greșeală! Ai deblocat un nivel secret!') : '🎉 ' + t('Nivel terminat!') + ' 🎉', portalePerfect ? 3 : 1.4);
     const final = {
       nume: nivel.def.nume, timp: this.cronometru, monede: nivel.monedeLuate, total: nivel.tintaMonede,
       stele, record, castig, dublu, numeJucator: this.progres.nume,
@@ -276,10 +294,29 @@ export class Joc {
         : esteNivelSecret(this.indexNivel) ? `${t('Ai terminat un nivel secret! Ești un adevărat explorator!')} ${numarAfisat(this.indexNivel)}` : undefined,
     };
     clearTimeout(this.timerFinal);
+    this.timpFinal = this.timp;
+    this.ultimulArtificiu = this.timp;
     this.timerFinal = window.setTimeout(() => {
       if (this.stare === 'final') this.hud.arataFinal(final);
       this.verificaTitluri();
-    }, 1300);
+    }, 2300);
+  }
+
+  /** Animația de victorie: personajul dansează, camera se învârte în jurul lui, artificii pe cer */
+  private sarbatoare(dt: number) {
+    const t = this.timp - this.timpFinal;
+    this.jucator.personaj.sarbatoreste(this.timp);
+    this.camera.unghi += dt * (t < 2.3 ? 1.4 : 0.3);
+    this.camera.distanta += (5 - this.camera.distanta) * Math.min(1, dt * 2);
+    this.camera.inaltime += (0.22 - this.camera.inaltime) * Math.min(1, dt * 2);
+    if (t < 2.6 && this.timp - this.ultimulArtificiu > 0.32) {
+      this.ultimulArtificiu = this.timp;
+      const u = Math.random() * Math.PI * 2;
+      const poz = this.jucator.poz.clone().add(new THREE.Vector3(Math.cos(u) * 4, 5 + Math.random() * 3, Math.sin(u) * 4));
+      const culori = [[0xff5f5f, 0xffd23f], [0x2ee6d6, 0xffffff], [0x8a6cff, 0xff5fa8], [0x4ccf6a, 0xffd23f]][Math.floor(Math.random() * 4)];
+      this.particule.explozie(poz, 26, culori, 5, 0.15, 3, 1.2);
+      sunete.artificiu();
+    }
   }
 
   /** Urma din spatele personajului, efectul la aterizare și particulele */
@@ -369,6 +406,7 @@ export class Joc {
       this.rezervaFizica += dt;
       let peLava = false;
       let atinsDe: 'laser' | 'cristal' | null = null;
+      let portal: 'portal-bun' | 'portal-gresit' | null = null;
       while (this.rezervaFizica >= PAS_FIZICA) {
         nivel.actualizeaza(PAS_FIZICA, this.timp);
         const efect = this.jucator.actualizeaza(PAS_FIZICA, this.intrari, this.camera.unghi, nivel.platforme, sari, this.timp);
@@ -376,6 +414,7 @@ export class Joc {
         // obstacolele (lasere, pendule, curenți, cristale)
         const ob = nivel.actualizeazaObstacole(this.jucator, this.timp, PAS_FIZICA);
         if (ob === 'laser' || ob === 'cristal') atinsDe = ob;
+        else if (ob === 'portal-bun' || ob === 'portal-gresit') portal = ob;
         else if (ob === 'lovitura') sunete.lovitura();
         else if (ob === 'vant') sunete.vant();
         if (efect === 'trambulina') sunete.trambulina();
@@ -420,6 +459,13 @@ export class Joc {
         this.hud.arataMesaj(t(laSteag ? 'Zap! Laserul te-a trimis înapoi la steag.' : 'Zap! Laserul te-a trimis înapoi la start.'));
         sunete.laser();
         this.revino();
+      } else if (portal) {
+        // teleportat: camera și animalul vin după personaj
+        this.camera.sari(this.jucator.poz);
+        this.animal.teleporteaza(this.jucator.poz, this.jucator.directie);
+        this.particule.explozie(this.jucator.poz.clone().setY(this.jucator.poz.y + 1), 20, [0x8a6cff, 0x2ee6d6, 0xffffff], 4, 0.14, 6, 0.8);
+        if (portal === 'portal-bun') { this.hud.arataMesaj(t('Portalul corect! Mergi mai departe!')); sunete.secret(); }
+        else { this.greseliPortale++; this.hud.arataMesaj(t('Portal greșit! Mai încearcă.')); sunete.cadere(); }
       } else if (atinsDe === 'cristal') {
         this.hud.arataMesaj(t(laSteag ? 'Au, cristale ascuțite! Înapoi la steag.' : 'Au, cristale ascuțite! Înapoi la start.'));
         sunete.lava();
@@ -438,6 +484,7 @@ export class Joc {
     nivel.anima(this.timp);
     this.efecteVizuale(dt);
     this.jucator.deseneaza(dt, nivel.platforme);
+    if (this.stare === 'final') this.sarbatoare(dt);
     this.animal.actualizeaza(dt, this.jucator.poz, this.jucator.directie, this.timp);
     this.camera.actualizeaza(this.jucator.poz, dt);
     this.grafica.renderer.render(this.grafica.scena, this.grafica.camera);

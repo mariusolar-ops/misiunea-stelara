@@ -3,7 +3,7 @@
 // Platformele speciale (care se mișcă, dispar, lavă, trambulină, bandă) sunt în folderul „platforme”.
 import * as THREE from 'three';
 
-export type TipPlatforma = 'normal' | 'miscare' | 'dispare' | 'lava' | 'trambulina' | 'banda' | 'gheata';
+export type TipPlatforma = 'normal' | 'miscare' | 'dispare' | 'lava' | 'trambulina' | 'banda' | 'gheata' | 'perete';
 
 export interface DefinitiePlatforma {
   /** Centrul platformei [x, y, z] */
@@ -61,6 +61,8 @@ export class Platforma {
   cutie = new THREE.Box3();
   /** Dacă e false, personajul trece prin ea (ex. un bloc care a dispărut) */
   solid = true;
+  /** Perete magnetic: poți alerga pe el și sări de pe el */
+  magnetic = false;
   /** Cât s-a mișcat platforma în ultimul pas – ca să-l ducă pe personaj cu ea */
   deplasare = new THREE.Vector3();
 

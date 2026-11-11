@@ -432,3 +432,6 @@ body.butoane-mici #buton-sari.apasat { transform: scale(0.8) translateY(4px); }
 .titlu-meniu { font-size: 15px; font-weight: 800; color: #ffd23f; }
 #meniu .buton-titluri { right: calc(max(16px, env(safe-area-inset-right)) + 124px); }
 .titlu-rand { color: #ffd23f; }
+.card-nivel.secret.portal { border-color: #8a6cff; background: linear-gradient(#2a1a6a, #120a3a); }
+.indiciu-aur { color: #ffd23f; }
+.nume-premiu { max-width: 70vw; }

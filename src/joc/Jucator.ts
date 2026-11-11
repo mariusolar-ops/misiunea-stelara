@@ -42,6 +42,11 @@ export class Jucator {
   gravitatie = 1;
   /** Cât de tare a aterizat în ultimul pas (0 = n-a aterizat). Joc îl citește și îl resetează. */
   aterizare = 0;
+  /** E lipit de un perete magnetic? */
+  peZid = false;
+  private normalaZid = new THREE.Vector3();
+  /** După ce sari de pe perete, o clipă nu te mai lipești (ca să nu te prinzi iar de același perete) */
+  private timpDetasare = 0;
   /** Stă pe gheață? (atunci alunecă) */
   private peGheata = false;
   private platformaSub: Platforma | null = null;
@@ -70,6 +75,7 @@ export class Jucator {
     this.platformaSub = null;
     this.impingere.set(0, 0, 0);
     this.energie = ENERGIE_ZBOR;
+    this.peZid = false;
   }
 
   /**
@@ -100,6 +106,31 @@ export class Jucator {
     this.timpInAer = this.peSol ? 0 : this.timpInAer + dt;
     const vSaritura = VITEZA_SARITURA * (this.puteri.saritura ? FACTOR_SUPER_SARITURA : 1);
     if (this.peSol) { this.dublaFolosita = false; this.energie = Math.min(ENERGIE_ZBOR, this.energie + dt * 2); }
+
+    // 3-zid) Pe peretele magnetic: alergi pe el, aluneci foarte încet și poți sări de pe el
+    this.timpDetasare = Math.max(0, this.timpDetasare - dt);
+    if (this.peZid) {
+      const n = this.normalaZid;
+      const vn = this.viteza.x * n.x + this.viteza.z * n.z; // cât de repede te miști dinspre perete
+      if (dx * n.x + dz * n.z > 0.6 && putere > 0.5) {
+        this.peZid = false; // tragi de joystick în partea cealaltă: te desprinzi
+      } else if (sariAcum) {
+        // săritura de pe perete: în sus și în partea opusă peretelui
+        this.viteza.x += n.x * (9 - vn);
+        this.viteza.z += n.z * (9 - vn);
+        this.viteza.y = vSaritura;
+        this.peZid = false;
+        this.timpDetasare = 0.25;
+        this.timpDeLaSari = 99;
+        this.dublaFolosita = false;
+        this.aSarit = true;
+      } else {
+        // o mică „atracție” spre perete, ca să rămâi lipit cât alergi pe lângă el
+        this.viteza.x -= n.x * (vn + 3);
+        this.viteza.z -= n.z * (vn + 3);
+      }
+    }
+
     if (this.timpDeLaSari < TIMP_MEMORIE_SARI && this.timpInAer < TIMP_COYOTE) {
       this.viteza.y = vSaritura;
       this.aSarit = true;
@@ -125,7 +156,13 @@ export class Jucator {
     }
 
     // 4) Gravitația (nu trage în jos cât timp zbori)
-    if (!this.zboara) this.viteza.y = Math.max(this.viteza.y - GRAVITATIE * this.gravitatie * dt, -VITEZA_MAX_CADERE);
+    // pe perete: dacă alergi pe lângă el, rămâi la aceeași înălțime; dacă stai, aluneci încet în jos
+    if (this.peZid && this.viteza.y <= 0) {
+      const n = this.normalaZid, vn = this.viteza.x * n.x + this.viteza.z * n.z;
+      const deLungul = Math.hypot(this.viteza.x - n.x * vn, this.viteza.z - n.z * vn); // viteza de-a lungul peretelui
+      this.viteza.y = deLungul > 2.5 ? 0 : -0.8;
+    }
+    else if (!this.zboara) this.viteza.y = Math.max(this.viteza.y - GRAVITATIE * this.gravitatie * dt, -VITEZA_MAX_CADERE);
 
     // 5) Mișcarea, cu coliziuni
     const pas = this.viteza.clone().add(this.impingere).multiplyScalar(dt);
@@ -135,6 +172,14 @@ export class Jucator {
     if (rez.peSol && !eraPeSol && vitezaCadere > 9) this.aterizare = vitezaCadere;
     this.peSol = rez.peSol;
     this.platformaSub = rez.platformaSub;
+    // ne-am lipit (sau am rămas lipiți) de un perete magnetic?
+    if (rez.perete && !rez.peSol && this.timpDetasare <= 0) {
+      if (!this.peZid) this.dublaFolosita = false;
+      this.peZid = true;
+      this.normalaZid.copy(rez.perete);
+    } else if (!rez.perete || rez.peSol) {
+      this.peZid = false;
+    }
 
     // 5b) Efectul platformei pe care am aterizat (lavă, trambulină, bandă...)
     let efect: EfectCalcare = null;
@@ -160,7 +205,16 @@ export class Jucator {
     this.personaj.obiect.position.copy(this.poz);
     this.personaj.obiect.rotation.y = this.directie;
     const vOriz = Math.min(1, Math.hypot(this.viteza.x, this.viteza.z) / VITEZA_MERS);
-    this.personaj.animeaza(dt, vOriz, !this.peSol, this.viteza.y > 0, this.zboara);
+    this.personaj.animeaza(dt, this.peZid ? Math.max(vOriz, 0.6) : vOriz, !this.peSol && !this.peZid, this.viteza.y > 0, this.zboara);
+    // pe perete: personajul se apleacă spre perete
+    const o = this.personaj.obiect;
+    o.rotation.order = 'YXZ';
+    let aplecare = 0;
+    if (this.peZid) {
+      const dreaptaX = Math.cos(this.directie), dreaptaZ = -Math.sin(this.directie);
+      aplecare = -(this.normalaZid.x * dreaptaX + this.normalaZid.z * dreaptaZ) * 0.5;
+    }
+    o.rotation.z += (aplecare - o.rotation.z) * Math.min(1, dt * 10);
 
     // umbra stă pe platforma de dedesubt și se micșorează cu cât ești mai sus
     const sol = solulDeSub(this.poz, platforme);

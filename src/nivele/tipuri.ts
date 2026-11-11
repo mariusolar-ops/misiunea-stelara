@@ -26,6 +26,10 @@ export interface DefinitieNivel {
   indicii?: { poz: Punct; raza: number; text: string }[];
   /** Câte monede trebuie pentru 3 stele (implicit: toate). Folositor când sunt mai multe drumuri. */
   monedePentru3Stele?: number;
+  /** Nivelul cu portale: numărăm greșelile (fără greșeli = se deschide un nivel secret) */
+  nivelPortale?: boolean;
+  /** Camera de la început (ex. mai de sus, la labirint) */
+  camera?: { inaltime?: number; distanta?: number };
   /** Gravitația (1 = normală, 0.4 = gravitație mică: sari foarte sus și plutești). Implicit 1 */
   gravitatie?: number;
   /** Steaua secretă ascunsă în nivel (opțional) */

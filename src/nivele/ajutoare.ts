@@ -58,8 +58,8 @@ export function lava(x: number, sus: number, z: number, l: number, a: number): D
 }
 
 /** Trambulină: te aruncă în sus (forța 20 = cam 6 unități înălțime) */
-export function trambulina(x: number, sus: number, z: number, l: number, a: number, forta = 20): DefinitiePlatforma {
-  return { ...bloc(x, sus, z, l, a, CULORI.lime, 0.6), tip: 'trambulina', forta };
+export function trambulina(x: number, sus: number, z: number, l: number, a: number, forta = 20, culoare: number = CULORI.lime): DefinitiePlatforma {
+  return { ...bloc(x, sus, z, l, a, culoare, 0.6), tip: 'trambulina', forta };
 }
 
 /** Bandă rulantă: te împinge cu viteza [vx, vz] */
@@ -83,4 +83,19 @@ export function laserX(z: number, y: number, x1: number, x2: number, extra: Extr
 /** Laser de-a curmezișul drumului, pe direcția z (de la z1 la z2), la x și înălțimea y */
 export function laserZ(x: number, y: number, z1: number, z2: number, extra: ExtraLaser = {}): DefLaser {
   return { tip: 'laser', a: [x, y, z1], b: [x, y, z2], ...extra };
+}
+
+/**
+ * Perete magnetic (mov): poți alerga pe el și sări de pe el.
+ * @param jos  de la ce înălțime începe peretele
+ * @param h    cât de înalt e
+ * @param l,a  grosimea/lungimea pe x și pe z (unul din ele e subțire, ex. 0.6)
+ */
+export function perete(x: number, jos: number, z: number, l: number, h: number, a: number): DefinitiePlatforma {
+  return { ...bloc(x, jos + h, z, l, a, 0x8a3aff, h), tip: 'perete' };
+}
+
+/** O mare de lavă care urcă și coboară (vulcanul care erupe): „cat” = cât urcă, „perioada” = secunde */
+export function lavaCareUrca(x: number, sus: number, z: number, l: number, a: number, cat: number, perioada: number): DefinitiePlatforma {
+  return { ...bloc(x, sus, z, l, a, 0xff7a2f, 12), tip: 'lava', miscare: { cat: [0, cat, 0], perioada } };
 }

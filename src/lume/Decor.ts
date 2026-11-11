@@ -3,7 +3,8 @@
 import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
-export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur';
+export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -37,6 +38,13 @@ function decorTema(tema: Tema): Decor {
     case 'gravitatie': return decorGravitatie();
     case 'turn': return decorTurn();
     case 'aur': return decorAur();
+    case 'magnetic': return decorMagnetic();
+    case 'portale': return decorPortale();
+    case 'labirint': return decorLabirint();
+    case 'meteori': return decorMeteori();
+    case 'nori': return decorNori();
+    case 'ocean': return decorOcean();
+    case 'curcubeu': return decorCurcubeu();
   }
 }
 
@@ -379,4 +387,160 @@ function decorAur(): Decor {
   soare.position.set(40, 60, -250);
   grup.add(soare);
   return { obiect: grup, fundal: 0x1a1206 };
+}
+
+function decorMagnetic(): Decor {
+  // Un magnet uriaș în formă de U și inele de energie mov care pulsează
+  const grup = new THREE.Group();
+  const rosu = new THREE.MeshLambertMaterial({ color: 0xd8304a }), arg = new THREE.MeshLambertMaterial({ color: 0xd8dce8 });
+  const magnet = new THREE.Group();
+  const baza = new THREE.Mesh(new THREE.BoxGeometry(40, 10, 10), rosu); baza.position.y = -15;
+  for (const x of [-15, 15]) {
+    const brat = new THREE.Mesh(new THREE.BoxGeometry(10, 30, 10), rosu); brat.position.set(x, 5, 0); magnet.add(brat);
+    const varf = new THREE.Mesh(new THREE.BoxGeometry(10.2, 8, 10.2), arg); varf.position.set(x, 24, 0); magnet.add(varf);
+  }
+  magnet.add(baza);
+  magnet.position.set(-80, 10, -150);
+  magnet.rotation.y = 0.5;
+  grup.add(magnet);
+  const inele: THREE.Mesh[] = [];
+  for (let i = 0; i < 3; i++) {
+    const inel = new THREE.Mesh(new THREE.TorusGeometry(25 + i * 12, 0.6, 6, 40),
+      new THREE.MeshBasicMaterial({ color: 0xb070ff, transparent: true, opacity: 0.4 }));
+    inel.position.set(40, 20, -170);
+    inele.push(inel);
+    grup.add(inel);
+  }
+  return { obiect: grup, fundal: 0x120826, anima: (timp) => inele.forEach((inel, i) => { inel.scale.setScalar(1 + ((timp * 0.3 + i / 3) % 1) * 0.5); (inel.material as THREE.MeshBasicMaterial).opacity = 0.5 * (1 - ((timp * 0.3 + i / 3) % 1)); }) };
+}
+
+function decorPortale(): Decor {
+  // Portale uriașe care se învârt în depărtare
+  const grup = new THREE.Group();
+  const portale: THREE.Mesh[] = [];
+  for (const [x, y, z, r, c] of [[-70, 30, -140, 22, 0x8a6cff], [80, 10, -170, 30, 0x2ee6d6], [0, 60, -260, 40, 0xff5fa8]] as const) {
+    const p = new THREE.Mesh(new THREE.TorusGeometry(r, 2, 8, 40), new THREE.MeshBasicMaterial({ color: c }));
+    p.position.set(x, y, z);
+    portale.push(p);
+    grup.add(p);
+    const interior = new THREE.Mesh(new THREE.CircleGeometry(r, 32), new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.15, depthWrite: false }));
+    interior.position.set(x, y, z);
+    grup.add(interior);
+  }
+  return { obiect: grup, fundal: 0x0e0620, anima: (timp) => portale.forEach((p, i) => { p.rotation.z = timp * (0.3 + i * 0.1); }) };
+}
+
+function decorLabirint(): Decor {
+  // Cristale uriașe în jur și o planetă de cristal dedesubt
+  const grup = planetaCuPete(0x6ab0d8, 0x9ae8ff, 0x204a60);
+  const mat = new THREE.MeshLambertMaterial({ color: 0x9ae8ff, emissive: 0x1a5a70, flatShading: true });
+  for (let i = 0; i < 10; i++) {
+    const u = (i / 10) * Math.PI * 2;
+    const c = new THREE.Mesh(new THREE.OctahedronGeometry(1, 0), mat);
+    c.scale.set(4, 12 + (i % 3) * 6, 4);
+    c.position.set(Math.cos(u) * 70, -10, Math.sin(u) * 70 - 20);
+    c.rotation.y = u;
+    grup.add(c);
+  }
+  return { obiect: grup, fundal: 0x061628 };
+}
+
+function decorMeteori(): Decor {
+  // O ploaie de meteoriți care cad încontinuu, departe, cu cozi de foc
+  const grup = planetaCuPete(0x5a4a44, 0x2a1a18, 0x401000);
+  const meteori: { m: THREE.Group; faza: number; x: number; z: number }[] = [];
+  const piatra = new THREE.MeshLambertMaterial({ color: 0x7a5a4a, flatShading: true });
+  const foc = new THREE.MeshBasicMaterial({ color: 0xff7a2f, transparent: true, opacity: 0.6, depthWrite: false });
+  for (let i = 0; i < 6; i++) {
+    const m = new THREE.Group();
+    m.add(new THREE.Mesh(new THREE.DodecahedronGeometry(3, 0), piatra));
+    const coada = new THREE.Mesh(new THREE.ConeGeometry(2.6, 16, 8).translate(0, 8, 0), foc);
+    m.add(coada);
+    m.rotation.z = 0.6;
+    meteori.push({ m, faza: i / 6, x: -100 + i * 40, z: -120 - (i % 3) * 50 });
+    grup.add(m);
+  }
+  return {
+    obiect: grup, fundal: 0x140a0a,
+    anima: (timp) => meteori.forEach((o) => { const t = (timp * 0.12 + o.faza) % 1; o.m.position.set(o.x - t * 80, 120 - t * 160, o.z); }),
+  };
+}
+
+function decorNori(): Decor {
+  // Nori pufoși, roz și albi, care plutesc încet (fiecare nor = câteva sfere)
+  const grup = new THREE.Group();
+  const nori: THREE.Group[] = [];
+  const mat = [new THREE.MeshLambertMaterial({ color: 0xffffff }), new THREE.MeshLambertMaterial({ color: 0xffd8ec })];
+  for (let i = 0; i < 12; i++) {
+    const nor = new THREE.Group();
+    for (let k = 0; k < 4; k++) {
+      const b = new THREE.Mesh(new THREE.SphereGeometry(5 + (k % 2) * 3, 10, 8), mat[i % 2]);
+      b.position.set(k * 6 - 9, (k % 2) * 2, 0);
+      nor.add(b);
+    }
+    const u = (i / 12) * Math.PI * 2;
+    nor.position.set(Math.cos(u) * (60 + (i % 3) * 30), -15 + (i % 4) * 12, Math.sin(u) * (60 + (i % 3) * 30) - 40);
+    nori.push(nor);
+    grup.add(nor);
+  }
+  return { obiect: grup, fundal: 0x2a2a6a, anima: (timp) => nori.forEach((n, i) => { n.position.y += Math.sin(timp * 0.5 + i) * 0.01; n.rotation.y = Math.sin(timp * 0.1 + i) * 0.2; }) };
+}
+
+function decorOcean(): Decor {
+  // Fundul mării: alge care se leagănă, pești care înoată în cerc și bule care urcă
+  const grup = planetaCuPete(0xd8c890, 0xb8a870);
+  const algeMat = new THREE.MeshLambertMaterial({ color: 0x2a9a5a, flatShading: true });
+  const alge: THREE.Mesh[] = [];
+  for (let i = 0; i < 16; i++) {
+    const a = new THREE.Mesh(new THREE.ConeGeometry(1.2, 14 + (i % 4) * 4, 5), algeMat);
+    const u = (i / 16) * Math.PI * 2;
+    a.position.set(Math.cos(u) * (30 + (i % 3) * 12), -32, Math.sin(u) * (30 + (i % 3) * 12) - 45);
+    alge.push(a);
+    grup.add(a);
+  }
+  const pesti = new THREE.Group();
+  const culoriPesti = [0xffa020, 0xff5fa8, 0x2ee6d6, 0xffd23f];
+  for (let i = 0; i < 14; i++) {
+    const p = new THREE.Group();
+    const c = culoriPesti[i % 4];
+    p.add(new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.9, 0.5), new THREE.MeshLambertMaterial({ color: c })));
+    const coada = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.8, 0.2), new THREE.MeshLambertMaterial({ color: c }));
+    coada.position.x = -1;
+    p.add(coada);
+    const u = (i / 14) * Math.PI * 2;
+    p.position.set(Math.cos(u) * 25, -5 + (i % 5) * 4, Math.sin(u) * 25);
+    p.rotation.y = -u;
+    pesti.add(p);
+  }
+  pesti.position.z = -45;
+  grup.add(pesti);
+  const nr = 250, poz = new Float32Array(nr * 3);
+  for (let i = 0; i < nr; i++) { poz[i * 3] = (Math.random() - 0.5) * 70; poz[i * 3 + 1] = Math.random() * 50 - 20; poz[i * 3 + 2] = -Math.random() * 100 + 10; }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(poz, 3));
+  const bule = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xcff8ff, size: 4, sizeAttenuation: false, transparent: true, opacity: 0.6 }));
+  grup.add(bule);
+  return {
+    obiect: grup, fundal: 0x05304a,
+    anima: (timp) => {
+      alge.forEach((a, i) => { a.rotation.z = Math.sin(timp + i) * 0.15; });
+      pesti.rotation.y = -timp * 0.15;
+      bule.position.y = (timp * 2) % 50;
+    },
+  };
+}
+
+function decorCurcubeu(): Decor {
+  // Curcubee uriașe pe cer (jumătăți de inele colorate)
+  const grup = new THREE.Group();
+  const culori = [0xff5f5f, 0xff9a3c, 0xffd23f, 0x4ccf6a, 0x2ee6d6, 0x8a6cff];
+  for (const [x, z, s, rot] of [[0, -200, 1, 0], [-150, -60, 0.6, 1.2], [140, -100, 0.7, -1]] as const) {
+    culori.forEach((c, i) => {
+      const arc = new THREE.Mesh(new THREE.TorusGeometry((70 - i * 4) * s, 2 * s, 6, 40, Math.PI), new THREE.MeshBasicMaterial({ color: c }));
+      arc.position.set(x, -30, z);
+      arc.rotation.y = rot;
+      grup.add(arc);
+    });
+  }
+  return { obiect: grup, fundal: 0x1a0a3a };
 }

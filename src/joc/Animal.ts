@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 
 export type TipAnimal = 'caine' | 'pisica' | 'iepure' | 'capra' | 'zebra'
-  | 'cal' | 'magar' | 'gaina' | 'soparla' | 'porc' | 'tigru' | 'girafa' | 'crocodil' | 'porumbel' | 'pinguin' | 'flamingo';
+  | 'cal' | 'magar' | 'gaina' | 'soparla' | 'porc' | 'tigru' | 'girafa' | 'crocodil' | 'porumbel' | 'pinguin' | 'flamingo' | 'kiwi';
 
 export interface InfoAnimal {
   tip: TipAnimal;
@@ -14,6 +14,8 @@ export interface InfoAnimal {
   culoare: number;
   /** Se poate schimba culoarea? (zebra are dungi fixe) */
   recolorabil: boolean;
+  /** Animal secret: apare doar după recompensa supremă */
+  secret?: boolean;
 }
 
 export const ANIMALE: InfoAnimal[] = [
@@ -34,6 +36,8 @@ export const ANIMALE: InfoAnimal[] = [
   { tip: 'porumbel', nume: 'Porumbel', emoji: '🕊️', culoare: 0x9aa0b0, recolorabil: false },
   { tip: 'pinguin', nume: 'Pinguin', emoji: '🐧', culoare: 0x1c1c28, recolorabil: false },
   { tip: 'flamingo', nume: 'Flamingo', emoji: '🦩', culoare: 0xff7ab0, recolorabil: false },
+  // pisica Kiwi: gri, cu coroană de aur – recompensa supremă
+  { tip: 'kiwi', nume: 'Kiwi', emoji: '😺', culoare: 0x8a8f99, recolorabil: false, secret: true },
 ];
 
 import { cub, picior, coada, inchis, NEGRU, type Model } from './animale/ajutor';
@@ -147,6 +151,22 @@ function zebra(): Model {
   return { grup: g, picioare, coada: cd, distanta: 1.9 };
 }
 
+/** Kiwi: o pisică gri cu o coroană de aur pe cap și un clopoțel auriu la gât */
+function kiwi(): Model {
+  const m = pisica(0x8a8f99);
+  const aur = 0xffd23f;
+  const coroana = new THREE.Group();
+  coroana.position.set(0, 0.74, 0.36);
+  coroana.add(cub(0.3, 0.07, 0.3, aur, 0, 0, 0));
+  for (const [x, z] of [[-0.12, 0.12], [0.12, 0.12], [-0.12, -0.12], [0.12, -0.12], [0, 0.12]]) coroana.add(cub(0.06, 0.1, 0.06, aur, x, 0.08, z));
+  coroana.add(cub(0.05, 0.05, 0.02, 0xe84a4a, 0, 0.01, 0.155));            // un rubin
+  coroana.traverse((o) => { if (o instanceof THREE.Mesh) (o.material as THREE.MeshLambertMaterial).emissive.set(0x5a4000); });
+  m.grup.add(coroana);
+  m.grup.add(cub(0.34, 0.05, 0.3, 0xe84a4a, 0, 0.44, 0.3));              // zgărdiță roșie
+  m.grup.add(cub(0.07, 0.07, 0.07, aur, 0, 0.39, 0.45));                  // clopoțel
+  return m;
+}
+
 export class Animal {
   obiect = new THREE.Group();
   private model!: Model;
@@ -168,7 +188,7 @@ export class Animal {
       cal: () => noi.cal(culoare), magar: () => noi.magar(), gaina: () => noi.gaina(culoare),
       soparla: () => noi.soparla(), porc: () => noi.porc(), tigru: () => noi.tigru(),
       girafa: () => noi.girafa(), crocodil: () => noi.crocodil(), porumbel: () => noi.porumbel(),
-      pinguin: () => noi.pinguin(), flamingo: () => noi.flamingo(),
+      pinguin: () => noi.pinguin(), flamingo: () => noi.flamingo(), kiwi: () => kiwi(),
     };
     this.model = (retete[tip] ?? retete.caine)();
     this.obiect.add(this.model.grup);
