@@ -435,4 +435,6 @@ export const TRADUCERI: Record<string, [string, string, string, string]> = {
   "Dansează! Plăcile dispar dacă stai pe ele.": ["Dance! The tiles vanish if you stand still.", "Danse ! Les dalles disparaissent si tu restes dessus.", "¡Baila! Las baldosas desaparecen si te quedas quieto.", "Tanz! Die Platten verschwinden, wenn du stehen bleibst."],
   "Biblioteca plutitoare": ["Floating Library", "Bibliothèque flottante", "Biblioteca flotante", "Schwebende Bibliothek"],
   "Ventilatorul suflă spre stânga – ține-te spre dreapta!": ["The fan blows to the left – keep to the right!", "Le ventilateur souffle vers la gauche – reste à droite !", "El ventilador sopla hacia la izquierda: ¡mantente a la derecha!", "Der Ventilator bläst nach links – halte dich rechts!"],
+  "Parcul de distracții": ["Amusement Park", "Parc d’attractions", "Parque de atracciones", "Freizeitpark"],
+  "Urcă în vagonul roșu – te duce peste gol!": ["Get on the red cart – it takes you over the gap!", "Monte dans le wagon rouge – il t’emmène au-dessus du vide !", "¡Súbete al vagón rojo: te lleva sobre el hueco!", "Steig in den roten Wagen – er bringt dich über die Lücke!"],
 };

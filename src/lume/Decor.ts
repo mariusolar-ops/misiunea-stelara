@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -49,6 +49,7 @@ function decorTema(tema: Tema): Decor {
     case 'bomboane': return decorBomboane();
     case 'disco': return decorDisco();
     case 'biblioteca': return decorBiblioteca();
+    case 'parc': return decorParc();
   }
 }
 
@@ -709,5 +710,61 @@ function decorBiblioteca(): Decor {
       const deschis = 0.3 + 0.3 * Math.sin(timp * 0.5 + i);
       c.st.rotation.z = deschis; c.dr.rotation.z = -deschis;
     }),
+  };
+}
+
+function decorParc(): Decor {
+  // O roată mare (cu cabine colorate care stau mereu drepte), un carusel și baloane care urcă
+  const grup = planetaCuPete(0x4a8a5a, 0x3a6a4a);
+  const roata = new THREE.Group();
+  roata.add(new THREE.Mesh(new THREE.TorusGeometry(30, 0.8, 6, 48), new THREE.MeshLambertMaterial({ color: 0xe8e8f0 })));
+  const cabine: THREE.Mesh[] = [];
+  const culori = [0xe8304a, 0xffd23f, 0x2ee6d6, 0xff5fa8, 0x8a6cff, 0x4ccf6a];
+  for (let i = 0; i < 12; i++) {
+    const u = (i / 12) * Math.PI * 2;
+    const spita = new THREE.Mesh(new THREE.BoxGeometry(0.4, 30, 0.4), new THREE.MeshLambertMaterial({ color: 0xc8c8d0 }));
+    spita.position.set(Math.cos(u) * 15, Math.sin(u) * 15, 0);
+    spita.rotation.z = u - Math.PI / 2;
+    roata.add(spita);
+    const cab = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 4), new THREE.MeshLambertMaterial({ color: culori[i % 6] }));
+    cab.userData.u = u;
+    cabine.push(cab);
+    grup.add(cab);
+  }
+  roata.position.set(-60, 20, -150);
+  grup.add(roata);
+  const picior = new THREE.Mesh(new THREE.BoxGeometry(3, 60, 3), new THREE.MeshLambertMaterial({ color: 0xc8c8d0 }));
+  picior.position.set(-60, -10, -152);
+  grup.add(picior);
+  // carusel
+  const carusel = new THREE.Group();
+  carusel.add(new THREE.Mesh(new THREE.ConeGeometry(16, 8, 12), new THREE.MeshLambertMaterial({ color: 0xff5fa8 })));
+  carusel.children[0].position.y = 12;
+  carusel.add(new THREE.Mesh(new THREE.CylinderGeometry(15, 15, 1.5, 12), new THREE.MeshLambertMaterial({ color: 0xffd23f })));
+  for (let i = 0; i < 8; i++) {
+    const u = (i / 8) * Math.PI * 2;
+    const cal = new THREE.Mesh(new THREE.BoxGeometry(2, 3, 4), new THREE.MeshLambertMaterial({ color: culori[i % 6] }));
+    cal.position.set(Math.cos(u) * 12, 3, Math.sin(u) * 12);
+    carusel.add(cal);
+  }
+  carusel.position.set(70, -20, -120);
+  grup.add(carusel);
+  // baloane
+  const baloane: THREE.Mesh[] = [];
+  for (let i = 0; i < 12; i++) {
+    const b = new THREE.Mesh(new THREE.SphereGeometry(2, 8, 6), new THREE.MeshLambertMaterial({ color: culori[i % 6] }));
+    b.position.set(-80 + i * 15, 0, -90 - (i % 3) * 30);
+    b.userData.faza = i * 7;
+    baloane.push(b);
+    grup.add(b);
+  }
+  return {
+    obiect: grup, fundal: 0x101a3a,
+    anima: (timp) => {
+      roata.rotation.z = timp * 0.12;
+      cabine.forEach((c) => { const u = c.userData.u + timp * 0.12; c.position.set(-60 + Math.cos(u) * 30, 20 + Math.sin(u) * 30 - 2.5, -150); });
+      carusel.rotation.y = timp * 0.5;
+      baloane.forEach((b) => { b.position.y = ((timp * 3 + b.userData.faza) % 80) - 20; });
+    },
   };
 }
