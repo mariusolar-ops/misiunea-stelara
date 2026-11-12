@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -47,6 +47,7 @@ function decorTema(tema: Tema): Decor {
     case 'curcubeu': return decorCurcubeu();
     case 'ozn': return decorOzn();
     case 'bomboane': return decorBomboane();
+    case 'disco': return decorDisco();
   }
 }
 
@@ -624,5 +625,42 @@ function decorBomboane(): Decor {
   return {
     obiect: grup, fundal: 0x3a1a3a,
     anima: (timp) => { acadele.forEach((a, i) => { a.rotation.z = timp * 0.3 * (i % 2 ? 1 : -1); }); jeleuri.rotation.y = timp * 0.02; },
+  };
+}
+
+function decorDisco(): Decor {
+  // Un glob disco uriaș din oglinzi mici (o singură bucată) și reflectoare colorate care se rotesc
+  const grup = new THREE.Group();
+  const n = 260, raza = 14;
+  const oglinzi = new THREE.InstancedMesh(new THREE.BoxGeometry(1.6, 1.6, 0.3), new THREE.MeshLambertMaterial({ color: 0xffffff, emissive: 0x303040 }), n);
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(1, 1, 1), p = new THREE.Vector3(), c = new THREE.Color();
+  for (let i = 0; i < n; i++) {
+    // puncte distribuite uniform pe sferă (spirala Fibonacci)
+    const y = 1 - (i / (n - 1)) * 2, r = Math.sqrt(1 - y * y), u = i * 2.39996;
+    p.set(Math.cos(u) * r * raza, y * raza, Math.sin(u) * r * raza);
+    q.setFromRotationMatrix(new THREE.Matrix4().lookAt(p, new THREE.Vector3(), THREE.Object3D.DEFAULT_UP));
+    oglinzi.setMatrixAt(i, m.compose(p, q, s));
+    oglinzi.setColorAt(i, c.setHSL(0.6 + Math.random() * 0.1, 0.2, 0.6 + Math.random() * 0.4));
+  }
+  const glob = new THREE.Group();
+  glob.add(oglinzi);
+  glob.position.set(0, 55, -60);
+  grup.add(glob);
+  // reflectoare: conuri transparente colorate care se rotesc din jurul globului
+  const reflectoare: THREE.Mesh[] = [];
+  [0xff5fa8, 0x2ee6d6, 0xffd23f, 0x8a6cff].forEach((col, i) => {
+    const con = new THREE.Mesh(new THREE.ConeGeometry(10, 70, 16, 1, true).translate(0, -35, 0),
+      new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.08, depthWrite: false, side: THREE.DoubleSide }));
+    con.position.copy(glob.position);
+    con.userData.faza = (i / 4) * Math.PI * 2;
+    reflectoare.push(con);
+    grup.add(con);
+  });
+  return {
+    obiect: grup, fundal: 0x12081e,
+    anima: (timp) => {
+      glob.rotation.y = timp * 0.4;
+      reflectoare.forEach((r) => { r.rotation.set(0.5 * Math.sin(timp * 0.7 + r.userData.faza), 0, 0.6 * Math.cos(timp * 0.5 + r.userData.faza)); });
+    },
   };
 }
