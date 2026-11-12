@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -48,6 +48,7 @@ function decorTema(tema: Tema): Decor {
     case 'ozn': return decorOzn();
     case 'bomboane': return decorBomboane();
     case 'disco': return decorDisco();
+    case 'biblioteca': return decorBiblioteca();
   }
 }
 
@@ -662,5 +663,51 @@ function decorDisco(): Decor {
       glob.rotation.y = timp * 0.4;
       reflectoare.forEach((r) => { r.rotation.set(0.5 * Math.sin(timp * 0.7 + r.userData.faza), 0, 0.6 * Math.cos(timp * 0.5 + r.userData.faza)); });
     },
+  };
+}
+
+function decorBiblioteca(): Decor {
+  // Cărți uriașe care plutesc și se deschid și se închid încet, plus creioane uriașe
+  const grup = new THREE.Group();
+  const carti: { st: THREE.Group; dr: THREE.Group }[] = [];
+  const culori = [0xd8304a, 0x2a6fd8, 0x3fbf5a, 0xffc23f, 0x8a6cff];
+  for (let i = 0; i < 7; i++) {
+    const carte = new THREE.Group();
+    const coperta = new THREE.MeshLambertMaterial({ color: culori[i % 5] });
+    const pagini = new THREE.MeshLambertMaterial({ color: 0xfaf6e8 });
+    const parti = [-1, 1].map((sens) => {
+      const jum = new THREE.Group();
+      const cop = new THREE.Mesh(new THREE.BoxGeometry(10, 0.6, 14), coperta);
+      cop.position.x = sens * 5;
+      const pag = new THREE.Mesh(new THREE.BoxGeometry(9.4, 1, 13.4), pagini);
+      pag.position.set(sens * 5, 0.75, 0);
+      jum.add(cop, pag);
+      carte.add(jum);
+      return jum;
+    });
+    const u = (i / 7) * Math.PI * 2;
+    carte.position.set(Math.cos(u) * 80, -10 + (i % 3) * 18, Math.sin(u) * 80 - 50);
+    carte.rotation.set(0.4, -u, 0);
+    carti.push({ st: parti[0], dr: parti[1] });
+    grup.add(carte);
+  }
+  for (let i = 0; i < 4; i++) {
+    const creion = new THREE.Group();
+    const corp = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 30, 6), new THREE.MeshLambertMaterial({ color: culori[i] }));
+    const varf = new THREE.Mesh(new THREE.ConeGeometry(1.5, 5, 6), new THREE.MeshLambertMaterial({ color: 0xf0d0a0 }));
+    varf.position.y = -17.5; varf.rotation.x = Math.PI;
+    const guma = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 3, 6), new THREE.MeshLambertMaterial({ color: 0xff9ac0 }));
+    guma.position.y = 16.5;
+    creion.add(corp, varf, guma);
+    creion.position.set(-100 + i * 65, 20, -170);
+    creion.rotation.z = 0.5 - i * 0.3;
+    grup.add(creion);
+  }
+  return {
+    obiect: grup, fundal: 0x1a1230,
+    anima: (timp) => carti.forEach((c, i) => {
+      const deschis = 0.3 + 0.3 * Math.sin(timp * 0.5 + i);
+      c.st.rotation.z = deschis; c.dr.rotation.z = -deschis;
+    }),
   };
 }

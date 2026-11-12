@@ -433,4 +433,6 @@ export const TRADUCERI: Record<string, [string, string, string, string]> = {
   "Atenție: ciocolata se topește!": ["Careful: the chocolate melts!", "Attention : le chocolat fond !", "¡Cuidado: el chocolate se derrite!", "Vorsicht: Die Schokolade schmilzt!"],
   "Discoteca spațială": ["Space Disco", "Disco spatiale", "Discoteca espacial", "Weltraum-Disco"],
   "Dansează! Plăcile dispar dacă stai pe ele.": ["Dance! The tiles vanish if you stand still.", "Danse ! Les dalles disparaissent si tu restes dessus.", "¡Baila! Las baldosas desaparecen si te quedas quieto.", "Tanz! Die Platten verschwinden, wenn du stehen bleibst."],
+  "Biblioteca plutitoare": ["Floating Library", "Bibliothèque flottante", "Biblioteca flotante", "Schwebende Bibliothek"],
+  "Ventilatorul suflă spre stânga – ține-te spre dreapta!": ["The fan blows to the left – keep to the right!", "Le ventilateur souffle vers la gauche – reste à droite !", "El ventilador sopla hacia la izquierda: ¡mantente a la derecha!", "Der Ventilator bläst nach links – halte dich rechts!"],
 };
