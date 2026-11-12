@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -50,6 +50,7 @@ function decorTema(tema: Tema): Decor {
     case 'disco': return decorDisco();
     case 'biblioteca': return decorBiblioteca();
     case 'parc': return decorParc();
+    case 'ciuperci': return decorCiuperci();
   }
 }
 
@@ -765,6 +766,48 @@ function decorParc(): Decor {
       cabine.forEach((c) => { const u = c.userData.u + timp * 0.12; c.position.set(-60 + Math.cos(u) * 30, 20 + Math.sin(u) * 30 - 2.5, -150); });
       carusel.rotation.y = timp * 0.5;
       baloane.forEach((b) => { b.position.y = ((timp * 3 + b.userData.faza) % 80) - 20; });
+    },
+  };
+}
+
+function decorCiuperci(): Decor {
+  // Ciuperci uriașe care strălucesc (pălării colorate cu buline) și licurici care clipesc
+  const grup = planetaCuPete(0x2a4a3a, 0x3a6a4a);
+  const palarii: THREE.MeshLambertMaterial[] = [];
+  const culori = [0xe8303a, 0x8a6cff, 0x2ee6d6, 0xff9a3c, 0xff5fa8];
+  for (let i = 0; i < 9; i++) {
+    const c = new THREE.Group();
+    const h = 20 + (i % 3) * 10;
+    const picior = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 3.5, h, 8), new THREE.MeshLambertMaterial({ color: 0xf0e8d8 }));
+    picior.position.y = h / 2;
+    const mat = new THREE.MeshLambertMaterial({ color: culori[i % 5], emissive: new THREE.Color(culori[i % 5]).multiplyScalar(0.3) });
+    palarii.push(mat);
+    const palarie = new THREE.Mesh(new THREE.SphereGeometry(10, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), mat);
+    palarie.position.y = h;
+    c.add(picior, palarie);
+    for (let k = 0; k < 5; k++) {
+      const u = (k / 5) * Math.PI * 2, v = 0.6;
+      const bulina = new THREE.Mesh(new THREE.SphereGeometry(1.4, 6, 4), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+      bulina.position.set(Math.cos(u) * Math.sin(v) * 10, h + Math.cos(v) * 10, Math.sin(u) * Math.sin(v) * 10);
+      c.add(bulina);
+    }
+    const u = (i / 9) * Math.PI * 2;
+    c.position.set(Math.cos(u) * 75, -45, Math.sin(u) * 75 - 50);
+    grup.add(c);
+  }
+  // licurici: puncte galbene care plutesc
+  const nr = 160, poz = new Float32Array(nr * 3);
+  for (let i = 0; i < nr; i++) { poz[i * 3] = (Math.random() - 0.5) * 60; poz[i * 3 + 1] = Math.random() * 25 - 2; poz[i * 3 + 2] = -Math.random() * 100 + 5; }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(poz, 3));
+  const licurici = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xfff080, size: 4, sizeAttenuation: false, transparent: true }));
+  grup.add(licurici);
+  return {
+    obiect: grup, fundal: 0x08141a,
+    anima: (timp) => {
+      palarii.forEach((m, i) => m.emissive.set(culori[i % 5]).multiplyScalar(0.25 + 0.15 * Math.sin(timp * 1.5 + i)));
+      (licurici.material as THREE.PointsMaterial).opacity = 0.5 + 0.5 * Math.sin(timp * 3);
+      licurici.position.y = Math.sin(timp * 0.5) * 1.5;
     },
   };
 }
