@@ -22,6 +22,7 @@ export interface ActiuniMeniu {
   titluri(inapoi: () => void): void;
   construieste(): void;
   developer(): void;
+  noutati(): void;
   esteNivelPropriu(): boolean;
   inapoiLaConstructor(): void;
 }
@@ -43,6 +44,9 @@ function stele(n: number) {
 }
 
 export class Meniu {
+  /** Pagina deschisă la „Alege nivelul” */
+  private paginaNivele = 0;
+
   constructor(private nivele: DefinitieNivel[], private actiuni: ActiuniMeniu) {}
 
   ascunde() { container.innerHTML = ''; }
@@ -96,16 +100,31 @@ export class Meniu {
     setari.setAttribute('aria-label', t('Setări'));
     const titluri = buton('🏅', 'buton-sunet buton-titluri', () => this.actiuni.titluri(() => this.arataPrincipal(p)));
     titluri.setAttribute('aria-label', t('Titluri'));
-    container.append(sunet, setari, titluri);
+    const carte = buton('📒', 'buton-sunet buton-noutati', () => this.actiuni.noutati());
+    carte.setAttribute('aria-label', t('Noutăți'));
+    container.append(sunet, setari, titluri, carte);
   }
 
   arataNivele(p: Progres) {
     container.innerHTML = `<h2>${t('Alege nivelul')}</h2>`;
     container.append(buton('‹ ' + t('Înapoi'), 'mic-buton inapoi', () => this.arataPrincipal(p)));
+    // paginile: câte 10 niveluri, plus una cu nivelurile secrete
+    const nrPagini = Math.ceil(ORDINE_NORMALA.length / 10);
+    const pagini = Array.from({ length: nrPagini }, (_, k) => `${k * 10 + 1}–${Math.min(ORDINE_NORMALA.length, (k + 1) * 10)}`).concat(['🔐 ' + t('Secrete')]);
+    const taburi = document.createElement('div');
+    taburi.className = 'taburi taburi-nivele';
+    pagini.forEach((eticheta, k) => {
+      const b = buton(eticheta, k === this.paginaNivele ? 'activ' : '', () => { this.paginaNivele = k; this.arataNivele(p); });
+      taburi.append(b);
+    });
+    container.append(taburi);
     const rand = document.createElement('div');
     rand.className = 'rand-nivele';
     // întâi nivelurile normale, în ordinea de joc, apoi cele secrete
-    [...ORDINE_NORMALA, ...SECRETE.map((x) => x.index)].forEach((i, loc) => {
+    const toate = [...ORDINE_NORMALA, ...SECRETE.map((x) => x.index)];
+    toate.forEach((i, loc) => {
+      const pagina = loc < ORDINE_NORMALA.length ? Math.floor(loc / 10) : nrPagini;
+      if (pagina !== this.paginaNivele) return;
       const n = this.nivele[i];
       const grupa = SECRETE.find((x) => x.index === i);
       const esteSecret = !!grupa;

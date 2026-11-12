@@ -1,14 +1,14 @@
 // Punctul de pornire al jocului „Mihai: Misiunea Stelară”
 import './ui/stil.css';
 import { Joc } from './joc/Joc';
-import { pregatesteSunetul } from './audio/Sunete';
+import { pregatesteSunetul, sunete } from './audio/Sunete';
 import { pornestePwa } from './pwa/Instalare';
 
 const canvas = document.getElementById('scena') as HTMLCanvasElement;
 const joc = new Joc(canvas);
 joc.porneste();
 // premiul zilei (seria zilnică), la o clipă după pornire
-setTimeout(() => { joc.verificaZiua(); joc.verificaTitluri(); }, 800);
+setTimeout(() => { joc.verificaNoutati(); joc.verificaZiua(); joc.verificaTitluri(); }, 800);
 
 // Aplicație instalabilă + offline. Când apare posibilitatea de instalare, reîmprospătăm meniul.
 pornestePwa(() => joc.reimprospateazaMeniu());
@@ -36,3 +36,5 @@ document.addEventListener('click', (e) => {
 
 // Sunetul se poate porni doar după ce copilul atinge ecranul (regulă a browserelor)
 window.addEventListener('pointerdown', pregatesteSunetul);
+// la prima atingere: un sunet de extratereștri care te întâmpină 👽
+window.addEventListener('pointerdown', () => setTimeout(() => sunete.extraterestri(), 150), { once: true });

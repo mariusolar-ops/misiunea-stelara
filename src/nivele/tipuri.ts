@@ -24,6 +24,11 @@ export interface DefinitieNivel {
   obstacole?: DefinitieObstacol[];
   /** Mesaje care apar o dată, când treci printr-un loc (ex. la o răscruce) */
   indicii?: { poz: Punct; raza: number; text: string }[];
+  /**
+   * Răscruci: când atingi locul „poz” (primul pas pe un drum), monedele din zona celuilalt drum
+   * dispar – ca să nu poți strânge monedele de pe ambele drumuri. „grup” = numărul răscrucii.
+   */
+  alegeri?: { grup: number; poz: Punct; raza: number; ascunde: { x: [number, number]; z: [number, number] } }[];
   /** Câte monede trebuie pentru 3 stele (implicit: toate). Folositor când sunt mai multe drumuri. */
   monedePentru3Stele?: number;
   /** Nivelul cu portale: numărăm greșelile (fără greșeli = se deschide un nivel secret) */

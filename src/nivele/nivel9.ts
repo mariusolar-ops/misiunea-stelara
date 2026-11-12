@@ -77,6 +77,14 @@ export const nivel9: DefinitieNivel = {
     laserX(-74, 5.4, 4.5, 7.5, { miscare: { cat: [0, 2.4, 0], perioada: 2.6 } }),
   ],
 
+  // ce drum ai ales: monedele de pe celălalt drum dispar (ca să nu le poți lua pe toate)
+  alegeri: [
+    { grup: 1, poz: [-8, 0, -15], raza: 1.8, ascunde: { x: [2, 20], z: [-52, -13] } },
+    { grup: 1, poz: [8, 0, -15], raza: 1.3, ascunde: { x: [-20, -2], z: [-53, -13] } },
+    { grup: 2, poz: [-6, 5, -62], raza: 1.8, ascunde: { x: [2, 20], z: [-89, -60] } },
+    { grup: 2, poz: [6, 5, -62], raza: 1.8, ascunde: { x: [-20, -2], z: [-89, -60] } },
+  ],
+
   indicii: [
     { poz: [0, 0, -9], raza: 3, text: 'Alege drumul! Verde = ușor, roșu = greu' },
     { poz: [0, 5, -56], raza: 3, text: 'Încă o răscruce! Aer sau lasere?' },

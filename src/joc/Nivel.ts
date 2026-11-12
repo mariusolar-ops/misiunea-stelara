@@ -67,6 +67,7 @@ export class Nivel {
   /** Câte monede trebuie pentru 3 stele (la nivelul cu două drumuri nu se pot lua toate deodată) */
   get tintaMonede() { return this.def.monedePentru3Stele ?? this.monede.length; }
   private indiciiAratate = new Set<number>();
+  private alegeriFacute = new Set<number>();
 
   /** Verifică ce a atins personajul în acest cadru */
   verifica(poz: THREE.Vector3, timp: number): Evenimente {
@@ -80,6 +81,18 @@ export class Nivel {
       }
     }
     if (this.steaSecreta?.atinsa(poz)) { this.steaSecreta.ia(timp); ev.secretNou = true; }
+    // ai ales un drum la o răscruce? monedele de pe celălalt drum dispar
+    for (const a of this.def.alegeri ?? []) {
+      if (this.alegeriFacute.has(a.grup)) continue;
+      const dx = poz.x - a.poz[0], dz = poz.z - a.poz[2];
+      if (dx * dx + dz * dz > a.raza * a.raza || Math.abs(poz.y - a.poz[1]) > 1.5) continue;
+      this.alegeriFacute.add(a.grup);
+      for (const m of this.monede) {
+        if (m.luata) continue;
+        const { x: [x1, x2], z: [z1, z2] } = a.ascunde;
+        if (m.poz.x >= x1 && m.poz.x <= x2 && m.poz.z >= z1 && m.poz.z <= z2) { m.luata = true; m.obiect.visible = false; }
+      }
+    }
     for (const m of this.monede) {
       if (!m.luata && m.atinsa(poz)) { m.ia(timp); this.monedeLuate++; ev.monedeNoi++; ev.pozMonede.push(m.poz); }
     }

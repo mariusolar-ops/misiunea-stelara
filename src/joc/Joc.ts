@@ -16,11 +16,12 @@ import { Clasament } from '../ui/Clasament';
 import { sunete, seteazaSunet } from '../audio/Sunete';
 import { Editor } from '../editor/Editor';
 import { EcranDeveloper } from '../ui/Developer';
+import { arataNoutati, arataNoutatiNoi } from '../ui/Noutati';
 import { arataNiveleMele, salveazaNivelMeu } from '../editor/EcranNiveleMele';
 import type { NivelPropriu } from '../editor/NiveleMele';
 import type { DefinitieNivel } from '../nivele/tipuri';
 import { calculeazaStele } from './Salvare';
-import { pornesteMuzica } from '../audio/Muzica';
+import { pornesteMuzica, seteazaModMuzica } from '../audio/Muzica';
 import { Particule } from '../lume/Particule';
 import { emiteUrma, efectAterizare, confettiFinal } from './Efecte';
 import { centruPoarta } from '../lume/Poarta';
@@ -36,6 +37,8 @@ import { Meniu } from '../ui/Meniu';
 import { NIVELE, NR_NIVELE_NORMALE, SECRETE, ORDINE_NORMALA, numarAfisat, urmatorulNormal, grupaSecret, secretDeschis, esteNivelSecret } from '../nivele';
 import { t } from '../i18n';
 
+/** Câte secunde trebuie să aștepți între două teleportări */
+const PAUZA_TELEPORT = 10;
 const PAS_FIZICA = 1 / 120;   // fizica rulează în pași mici, ca să nu treacă prin platforme
 const INALTIME_CADERE = -25;  // sub înălțimea asta personajul „cade” și revine la steag
 
@@ -60,7 +63,8 @@ export class Joc {
   private ultimulArtificiu = 0;
   /** Câte portale greșite a ales în tura asta (la nivelul cu portale) */
   private greseliPortale = 0;
-  private ultimTeleport = -9;
+  private ultimTeleport = -99;
+  private elTeleport = document.getElementById('buton-teleport')!;
   /** Constructorul de niveluri: nivelul la care lucrezi și definiția lui jucabilă (index -1) */
   private editor: Editor | null = null;
   private nivelPropriu: NivelPropriu | null = null;
@@ -105,6 +109,7 @@ export class Joc {
       continua: () => this.continua(),
       reincepe: () => this.joacaNivel(this.indexNivel),
       construieste: () => this.arataNiveleMele(),
+      noutati: () => arataNoutati(() => this.arataMeniu()),
       developer: () => new EcranDeveloper(this.progres, () => { this.aplicaAspect(); this.verificaTitluri(); }, () => this.arataMeniu()).arata(),
       esteNivelPropriu: () => this.indexNivel === -1 && !!this.nivelPropriu,
       inapoiLaConstructor: () => { if (this.nivelPropriu) this.deschideEditor(this.nivelPropriu); },
@@ -220,6 +225,11 @@ export class Joc {
     // la recompensa supremă arătăm doar fereastra mare (titlurile sunt oricum în lista 🏅)
     if (noi.some((x) => x.id === 'bogat')) anuntaRecompensaSuprema();
     else anuntaTitluri(noi);
+  }
+
+  /** La pornire: dacă e o actualizare nouă, arată ce e nou */
+  verificaNoutati() {
+    arataNoutatiNoi(this.progres, () => arataNoutati(() => this.arataMeniu()));
   }
 
   /** La pornire: premiul zilei din seria zilnică (o dată pe zi) */
@@ -470,6 +480,7 @@ export class Joc {
     if (this.stare === 'pauza') return; // pe pauză nu desenăm nimic – economisim bateria
 
     this.timp += dt;
+    seteazaModMuzica(this.stare === 'joaca' || this.stare === 'final' ? 'joc' : 'meniu');
     this.intrari.actualizeaza();
     const rot = this.intrari.iaRotireCamera();
     let sari = this.intrari.iaSari();
@@ -508,10 +519,17 @@ export class Joc {
       this.camera.zoomJucator = THREE.MathUtils.clamp(this.camera.zoomJucator / this.intrari.zoom, 0.45, 2.2);
       this.intrari.zoom = 1;
     }
+    // butonul de teleportare arată câte secunde mai trebuie să aștepți
+    const ramas = Math.ceil(PAUZA_TELEPORT - (this.timp - this.ultimTeleport));
+    const textTeleport = ramas > 0 ? String(ramas) : '🌀';
+    if (this.elTeleport.textContent !== textTeleport) {
+      this.elTeleport.textContent = textTeleport;
+      this.elTeleport.classList.toggle('reincarcare', ramas > 0);
+    }
     // puterea „Teleportare”
     if (this.intrari.teleportApasat) {
       this.intrari.teleportApasat = false;
-      if (this.stare === 'joaca' && this.jucator.puteri.teleport && this.timp - this.ultimTeleport > 1) {
+      if (this.stare === 'joaca' && this.jucator.puteri.teleport && this.timp - this.ultimTeleport > PAUZA_TELEPORT) {
         const de = this.jucator.poz.clone();
         if (this.jucator.teleportInainte(nivel.platforme)) {
           this.ultimTeleport = this.timp;

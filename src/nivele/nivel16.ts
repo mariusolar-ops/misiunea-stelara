@@ -35,7 +35,7 @@ export const nivel16: DefinitieNivel = {
   ],
 
   obstacole: [
-    { tip: 'vant', poz: [0, 8, -50], dim: [14, 8, 14], forta: [5, 0] },
+    { tip: 'vant', poz: [0, 8, -50], dim: [14, 8, 14], forta: [4, 0] },
   ],
 
   indicii: [

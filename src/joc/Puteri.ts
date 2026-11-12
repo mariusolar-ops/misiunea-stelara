@@ -15,8 +15,8 @@ export const PUTERI: Putere[] = [
   { id: 'p-saritura', nume: 'Super-săritură', emoji: '🦘', descriere: 'Sari mult mai sus', pret: 40 },
   { id: 'p-viteza', nume: 'Viteză', emoji: '⚡', descriere: 'Alergi mai repede', pret: 50 },
   { id: 'p-dubla', nume: 'Săritură dublă', emoji: '🌀', descriere: 'Mai sari o dată în aer', pret: 80 },
-  { id: 'p-teleport', nume: 'Teleportare', emoji: '🌀', descriere: 'Apasă butonul 🌀 ca să te teleportezi în față', pret: 150 },
-  { id: 'p-zbor', nume: 'Zbor', emoji: '🕊️', descriere: 'Ține apăsat SARI în aer ca să zbori', pret: 1000 },
+  { id: 'p-teleport', nume: 'Teleportare', emoji: '🌀', descriere: 'Apasă butonul 🌀 ca să te teleportezi în față', pret: 300 },
+  { id: 'p-zbor', nume: 'Zbor', emoji: '🕊️', descriere: 'Ține apăsat SARI în aer ca să zbori', pret: 800 },
 ];
 
 /** Ce puteri are personajul acum (pentru fizică) */

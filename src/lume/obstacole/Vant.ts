@@ -31,7 +31,7 @@ export class Vant implements Obstacol {
     }
   }
 
-  actualizeaza(j: CorpObstacol, timp: number, dt: number): EfectObstacol {
+  actualizeaza(j: CorpObstacol, timp: number): EfectObstacol {
     const [x, y, z] = this.def.poz, [l, h, a] = this.def.dim, [fx, fz] = this.def.forta;
     const pex = Math.abs(fx) > Math.abs(fz);
     const sens = Math.sign(pex ? fx : fz) || 1;
@@ -40,7 +40,8 @@ export class Vant implements Obstacol {
       d.m.position.set(pex ? x + t * l * sens : x + d.lat, y + d.y, pex ? z + d.lat : z + t * a * sens);
     }
     const in_ = Math.abs(j.poz.x - x) < l / 2 && Math.abs(j.poz.z - z) < a / 2 && j.poz.y + 1 > y - h / 2 && j.poz.y < y + h / 2;
-    if (in_) { j.viteza.x += fx * dt * 2.2; j.viteza.z += fz * dt * 2.2; }
+    // vântul te mută direct (ca banda rulantă), așa că trebuie să ții joystick-ul împotriva lui
+    if (in_ && j.impingere) { j.impingere.x += fx; j.impingere.z += fz; }
     const intrat = in_ && !this.inauntru;
     this.inauntru = in_;
     return intrat ? 'vant' : null;

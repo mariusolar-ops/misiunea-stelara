@@ -106,5 +106,19 @@ export const sunete = {
   artificiu: () => { bip('triangle', 200, 1400, 0.25, 0, 0.25); bip('square', 1800, 600, 0.3, 0.22, 0.12); },
   minge: () => bip('sine', 140, 70, 0.08, 0, 0.35),
   teleport: () => { bip('sine', 300, 2000, 0.15, 0, 0.4); bip('sine', 2000, 600, 0.15, 0.12, 0.3); },
+  /** Crăpătura cufărului (tot mai sus la fiecare atingere) */
+  crapa: (n: number) => { bip('square', 300 + n * 180, 150 + n * 90, 0.12, 0, 0.35); bip('triangle', 900 + n * 300, 1300 + n * 300, 0.25, 0.05, 0.3); },
+  /** Sunet de extratereștri la intrarea în joc (ca un teremin care face „uiu-uiu”) */
+  extraterestri: () => {
+    if (!pornit || !ctx || !volumGeneral) return;
+    const t0 = ctx.currentTime, osc = ctx.createOscillator(), g = ctx.createGain(), lfo = ctx.createOscillator(), lfoG = ctx.createGain();
+    osc.type = 'sine'; osc.frequency.setValueAtTime(500, t0); osc.frequency.linearRampToValueAtTime(900, t0 + 1.2);
+    lfo.frequency.value = 7; lfoG.gain.value = 60;
+    lfo.connect(lfoG).connect(osc.frequency);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.35, t0 + 0.1); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.5);
+    osc.connect(g).connect(volumGeneral);
+    osc.start(t0); lfo.start(t0); osc.stop(t0 + 1.6); lfo.stop(t0 + 1.6);
+    [1200, 1500, 1100].forEach((f, i) => bip('square', f, f * 1.2, 0.06, 1.3 + i * 0.09, 0.12)); // „bip-bip-bip”
+  },
   click: () => bip('triangle', 700, 500, 0.05, 0, 0.4),
 };

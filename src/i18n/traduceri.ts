@@ -439,4 +439,10 @@ export const TRADUCERI: Record<string, [string, string, string, string]> = {
   "Urcă în vagonul roșu – te duce peste gol!": ["Get on the red cart – it takes you over the gap!", "Monte dans le wagon rouge – il t’emmène au-dessus du vide !", "¡Súbete al vagón rojo: te lleva sobre el hueco!", "Steig in den roten Wagen – er bringt dich über die Lücke!"],
   "Pădurea de ciuperci luminoase": ["Glowing Mushroom Forest", "Forêt de champignons lumineux", "Bosque de setas luminosas", "Leuchtpilzwald"],
   "Pășește în pufulețul de păpădie – te ridică sus!": ["Step into the dandelion fluff – it lifts you up!", "Entre dans le duvet de pissenlit – il te soulève !", "¡Entra en la pelusa de diente de león: te eleva!", "Tritt in den Pusteblumen-Flaum – er hebt dich hoch!"],
+  "Atinge cufărul!": ["Tap the chest!", "Touche le coffre !", "¡Toca el cofre!", "Tippe auf die Truhe!"],
+  "Ce e nou?": ["What’s new?", "Quoi de neuf ?", "¿Qué hay de nuevo?", "Was ist neu?"],
+  "Controale": ["Controls", "Commandes", "Controles", "Steuerung"],
+  "Noutăți": ["News", "Nouveautés", "Novedades", "Neuigkeiten"],
+  "Secrete": ["Secret", "Secrets", "Secretos", "Geheim"],
+  "Toate noutățile": ["All the news", "Toutes les nouveautés", "Todas las novedades", "Alle Neuigkeiten"],
 };

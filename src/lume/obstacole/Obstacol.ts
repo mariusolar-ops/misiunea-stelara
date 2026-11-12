@@ -6,6 +6,8 @@ import * as THREE from 'three';
 export interface CorpObstacol {
   poz: THREE.Vector3;     // la tălpi
   viteza: THREE.Vector3;
+  /** Împingere directă (vânt, bandă) – se adaugă la mișcarea din pasul următor */
+  impingere?: THREE.Vector3;
 }
 
 /**

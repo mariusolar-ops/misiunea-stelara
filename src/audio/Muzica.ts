@@ -10,6 +10,17 @@ const ACORDURI = [
   { bas: NOTE.C3, pad: [NOTE.C4, NOTE.E4, NOTE.G4], arp: [NOTE.G4, NOTE.C5, NOTE.E5, NOTE.G5] },
   { bas: NOTE.G2, pad: [NOTE.B3, NOTE.D4, NOTE.G4], arp: [NOTE.G4, NOTE.B4, NOTE.D5, NOTE.B4] },
 ];
+// muzica din meniu: mai veselă (Do major – Sol – La minor – Fa) și mai săltăreață
+const ACORDURI_MENIU = [
+  { bas: NOTE.C3, pad: [NOTE.C4, NOTE.E4, NOTE.G4], arp: [NOTE.C5, NOTE.E5, NOTE.G5, NOTE.E5] },
+  { bas: NOTE.G2, pad: [NOTE.B3, NOTE.D4, NOTE.G4], arp: [NOTE.B4, NOTE.D5, NOTE.G5, NOTE.D5] },
+  { bas: NOTE.A2, pad: [NOTE.A3, NOTE.C4, NOTE.E4], arp: [NOTE.A4, NOTE.C5, NOTE.E5, NOTE.C5] },
+  { bas: NOTE.F2, pad: [NOTE.F4, NOTE.A3, NOTE.C4], arp: [NOTE.A4, NOTE.C5, NOTE.F4 * 2, NOTE.C5] },
+];
+let mod: 'joc' | 'meniu' = 'meniu';
+/** Meniul are altă melodie decât nivelurile */
+export function seteazaModMuzica(m: 'joc' | 'meniu') { mod = m; }
+
 const DURATA_ACORD = 4;      // secunde
 const PAS_ARPEGIU = 0.5;     // o notă la jumătate de secundă
 
@@ -64,7 +75,8 @@ function programeaza() {
   while (urmatoareaNota < ctx.currentTime + 0.3) {
     const t = urmatoareaNota;
     const pasiPeAcord = DURATA_ACORD / PAS_ARPEGIU;
-    const acord = ACORDURI[Math.floor(indexArp / pasiPeAcord) % ACORDURI.length];
+    const lista = mod === 'meniu' ? ACORDURI_MENIU : ACORDURI;
+    const acord = lista[Math.floor(indexArp / pasiPeAcord) % lista.length];
     const pozInAcord = indexArp % pasiPeAcord;
     if (pozInAcord === 0) {
       // început de acord: pad + bas
@@ -75,7 +87,7 @@ function programeaza() {
       nota(ctx, 'sine', acord.bas, t, DURATA_ACORD, 0.3, 0.3, filtru!);
     }
     // arpegiul: nu cântă chiar pe fiecare pas, ca să „respire”
-    if (pozInAcord % 4 !== 3) {
+    if (mod === 'meniu' || pozInAcord % 4 !== 3) {
       nota(ctx, 'sine', acord.arp[pozInAcord % acord.arp.length], t, 0.45, 0.12, 0.02, ecou!);
     }
     indexArp++;

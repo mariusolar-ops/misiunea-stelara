@@ -34,16 +34,25 @@ export class EcranSetari {
 
     container.innerHTML = `
       <h2>⚙️ ${t('Setări')}</h2>
-      <div class="setari">
-        <label class="rand-setare"><span>🔊 ${t('Volum efecte')}</span>
-          <input type="range" min="0" max="100" step="5" value="${s.volumEfecte}" data-volum="volumEfecte" /><b>${s.volumEfecte}%</b></label>
-        <label class="rand-setare"><span>🎵 ${t('Volum muzică')}</span>
-          <input type="range" min="0" max="100" step="5" value="${s.volumMuzica}" data-volum="volumMuzica" /><b>${s.volumMuzica}%</b></label>
-        <div class="rand-setare"><span>🎶 ${t('Muzică')}</span><div class="bule">${optiuni('muzica', [[true, t('Pornită')], [false, t('Oprită')]])}</div></div>
-        <div class="rand-setare"><span>🕹️ Joystick</span><div class="bule">${optiuni('joystick', [['stanga', '⬅️ ' + t('În stânga')], ['dreapta', t('În dreapta') + ' ➡️']])}</div></div>
-        <div class="rand-setare"><span>🔘 ${t('Butoane')}</span><div class="bule">${optiuni('marimeButoane', [['mici', t('Mici')], ['normale', t('Normale')], ['mari', t('Mari')]])}</div></div>
-        <div class="rand-setare"><span>🎥 ${t('Cameră')}</span><div class="bule">${optiuni('camera', [['lenta', t('Lentă')], ['normala', t('Normală')], ['rapida', t('Rapidă')]])}</div>
-        <div class="rand-setare"><span>🌍 ${t('Limbă')}</span><div class="bule">${optiuni('limba', LIMBI.map((l) => [l.cod, `${l.steag} ${l.nume}`]))}</div></div></div>
+      <div class="setari sectiuni">
+        <section class="sectiune-setari">
+          <h3>🔊 ${t('Sunet')}</h3>
+          <label class="rand-setare"><span>${t('Volum efecte')}</span>
+            <input type="range" min="0" max="100" step="5" value="${s.volumEfecte}" data-volum="volumEfecte" /><b>${s.volumEfecte}%</b></label>
+          <label class="rand-setare"><span>${t('Volum muzică')}</span>
+            <input type="range" min="0" max="100" step="5" value="${s.volumMuzica}" data-volum="volumMuzica" /><b>${s.volumMuzica}%</b></label>
+          <div class="rand-setare"><span>${t('Muzică')}</span><div class="bule">${optiuni('muzica', [[true, t('Pornită')], [false, t('Oprită')]])}</div></div>
+        </section>
+        <section class="sectiune-setari">
+          <h3>🎮 ${t('Controale')}</h3>
+          <div class="rand-setare"><span>Joystick</span><div class="bule">${optiuni('joystick', [['stanga', '⬅️ ' + t('În stânga')], ['dreapta', t('În dreapta') + ' ➡️']])}</div></div>
+          <div class="rand-setare"><span>${t('Butoane')}</span><div class="bule">${optiuni('marimeButoane', [['mici', t('Mici')], ['normale', t('Normale')], ['mari', t('Mari')]])}</div></div>
+          <div class="rand-setare"><span>${t('Cameră')}</span><div class="bule">${optiuni('camera', [['lenta', t('Lentă')], ['normala', t('Normală')], ['rapida', t('Rapidă')]])}</div></div>
+        </section>
+        <section class="sectiune-setari lata">
+          <h3>🌍 ${t('Limbă')}</h3>
+          <div class="bule">${optiuni('limba', LIMBI.map((l) => [l.cod, `${l.steag} ${l.nume}`]))}</div>
+        </section>
       </div>`;
 
     const inapoi = document.createElement('button');
