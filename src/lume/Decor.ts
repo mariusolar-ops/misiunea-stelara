@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -51,6 +51,7 @@ function decorTema(tema: Tema): Decor {
     case 'biblioteca': return decorBiblioteca();
     case 'parc': return decorParc();
     case 'ciuperci': return decorCiuperci();
+    case 'atelier': return decorAtelier();
   }
 }
 
@@ -808,6 +809,57 @@ function decorCiuperci(): Decor {
       palarii.forEach((m, i) => m.emissive.set(culori[i % 5]).multiplyScalar(0.25 + 0.15 * Math.sin(timp * 1.5 + i)));
       (licurici.material as THREE.PointsMaterial).opacity = 0.5 + 0.5 * Math.sin(timp * 3);
       licurici.position.y = Math.sin(timp * 0.5) * 1.5;
+    },
+  };
+}
+
+function decorAtelier(): Decor {
+  // Rachete pe rampele de lansare, cu lumini care clipesc și scântei de sudură
+  const grup = planetaCuPete(0x3a3f52, 0x50566e);
+  const lumini: THREE.MeshBasicMaterial[] = [];
+  const culori = [0xff5f5f, 0x2ee6d6, 0xffd23f, 0x8a6cff, 0xff9a3c];
+  for (let i = 0; i < 7; i++) {
+    const r = new THREE.Group();
+    const corp = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 30, 12), new THREE.MeshLambertMaterial({ color: 0xe8ecf4 }));
+    corp.position.y = 15;
+    const varf = new THREE.Mesh(new THREE.ConeGeometry(4, 10, 12), new THREE.MeshLambertMaterial({ color: culori[i % 5] }));
+    varf.position.y = 35;
+    r.add(corp, varf);
+    for (let k = 0; k < 3; k++) {
+      const aripa = new THREE.Mesh(new THREE.BoxGeometry(0.8, 8, 6), new THREE.MeshLambertMaterial({ color: culori[i % 5] }));
+      const u = (k / 3) * Math.PI * 2;
+      aripa.position.set(Math.cos(u) * 5, 4, Math.sin(u) * 5);
+      aripa.rotation.y = -u;
+      r.add(aripa);
+    }
+    const hublou = new THREE.Mesh(new THREE.SphereGeometry(1.6, 8, 6), new THREE.MeshBasicMaterial({ color: 0x9fdcff }));
+    hublou.position.set(0, 22, 3.8);
+    r.add(hublou);
+    // turnul de lansare de lângă rachetă, cu o lumină sus
+    const turn = new THREE.Mesh(new THREE.BoxGeometry(3, 42, 3), new THREE.MeshLambertMaterial({ color: 0xffb020 }));
+    turn.position.set(8, 21, 0);
+    const mat = new THREE.MeshBasicMaterial({ color: 0xff3030 });
+    lumini.push(mat);
+    const lumina = new THREE.Mesh(new THREE.SphereGeometry(1.2, 6, 4), mat);
+    lumina.position.set(8, 43, 0);
+    r.add(turn, lumina);
+    const u = (i / 7) * Math.PI * 2;
+    r.position.set(Math.cos(u) * 80, -45, Math.sin(u) * 80 - 45);
+    grup.add(r);
+  }
+  // scântei de sudură: puncte portocalii care sar
+  const nr = 120, poz = new Float32Array(nr * 3);
+  for (let i = 0; i < nr; i++) { poz[i * 3] = (Math.random() - 0.5) * 50; poz[i * 3 + 1] = Math.random() * 20 - 3; poz[i * 3 + 2] = -Math.random() * 95 + 5; }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(poz, 3));
+  const scantei = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffa040, size: 3, sizeAttenuation: false, transparent: true }));
+  grup.add(scantei);
+  return {
+    obiect: grup, fundal: 0x0c1020,
+    anima: (timp) => {
+      lumini.forEach((m, i) => m.color.set(Math.sin(timp * 3 + i) > 0 ? 0xff3030 : 0x401010));
+      (scantei.material as THREE.PointsMaterial).opacity = 0.4 + 0.6 * Math.abs(Math.sin(timp * 7));
+      scantei.position.y = Math.sin(timp * 0.7) * 1.2;
     },
   };
 }
