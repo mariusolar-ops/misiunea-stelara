@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -53,6 +53,7 @@ function decorTema(tema: Tema): Decor {
     case 'ciuperci': return decorCiuperci();
     case 'atelier': return decorAtelier();
     case 'muzica': return decorMuzica();
+    case 'marte': return decorMarte();
   }
 }
 
@@ -903,6 +904,57 @@ function decorMuzica(): Decor {
     anima: (timp) => {
       note.forEach((n, i) => { n.position.y = 10 + (i % 3) * 12 + Math.sin(timp * 1.2 + i) * 3; });
       discuri.forEach((d, i) => { d.rotation.y = timp * (i ? -0.6 : 0.6); });
+    },
+  };
+}
+
+function decorMarte(): Decor {
+  // Planeta roșie: stânci înalte, un rover cu antenă, două luni mici și praf purtat de vânt
+  const grup = planetaCuPete(0xb84a2a, 0xd06a3a);
+  for (let i = 0; i < 10; i++) {
+    const h = 15 + (i % 4) * 8;
+    const stanca = new THREE.Mesh(new THREE.CylinderGeometry(4 + (i % 3), 7 + (i % 2) * 2, h, 7), new THREE.MeshLambertMaterial({ color: i % 2 ? 0x9a4a2a : 0xb85a32 }));
+    const u = (i / 10) * Math.PI * 2 + 0.3;
+    stanca.position.set(Math.cos(u) * 70, -45 + h / 2, Math.sin(u) * 70 - 50);
+    grup.add(stanca);
+  }
+  // roverul, departe în fața ta
+  const rover = new THREE.Group();
+  const corp = new THREE.Mesh(new THREE.BoxGeometry(12, 4, 8), new THREE.MeshLambertMaterial({ color: 0xe8ecf4 }));
+  corp.position.y = 5;
+  rover.add(corp);
+  for (const [x, z] of [[-5, -4.5], [0, -4.5], [5, -4.5], [-5, 4.5], [0, 4.5], [5, 4.5]]) {
+    const roata = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.8, 1.2, 10), new THREE.MeshLambertMaterial({ color: 0x2a2a38 }));
+    roata.rotation.x = Math.PI / 2;
+    roata.position.set(x, 1.8, z);
+    rover.add(roata);
+  }
+  const antena = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 6), new THREE.MeshLambertMaterial({ color: 0xc3c7d6 }));
+  antena.position.set(4, 10, 0);
+  const lumina = new THREE.MeshBasicMaterial({ color: 0x2ee6d6 });
+  const bec = new THREE.Mesh(new THREE.SphereGeometry(0.9, 8, 6), lumina);
+  bec.position.set(4, 13.5, 0);
+  rover.add(antena, bec);
+  rover.position.set(18, -20, -120);
+  grup.add(rover);
+  // două luni mici (ca Phobos și Deimos)
+  for (const [x, y, r] of [[-70, 60, 6], [80, 75, 4]]) {
+    const l = new THREE.Mesh(new THREE.SphereGeometry(r, 10, 8), new THREE.MeshLambertMaterial({ color: 0x8a7a6a }));
+    l.position.set(x, y, -150);
+    grup.add(l);
+  }
+  // praful purtat de vânt
+  const nr = 220, poz = new Float32Array(nr * 3);
+  for (let i = 0; i < nr; i++) { poz[i * 3] = (Math.random() - 0.5) * 60; poz[i * 3 + 1] = Math.random() * 20 - 3; poz[i * 3 + 2] = -Math.random() * 105 + 5; }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(poz, 3));
+  const praf = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xf0a060, size: 3, sizeAttenuation: false, transparent: true, opacity: 0.7 }));
+  grup.add(praf);
+  return {
+    obiect: grup, fundal: 0x2a1410,
+    anima: (timp) => {
+      praf.position.x = ((timp * 6) % 30) - 15;
+      lumina.color.set(Math.sin(timp * 4) > 0 ? 0x2ee6d6 : 0x0a3a3a);
     },
   };
 }

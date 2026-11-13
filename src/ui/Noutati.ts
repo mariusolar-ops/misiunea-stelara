@@ -8,6 +8,9 @@ import { t } from '../i18n';
 export interface Noutate { versiune: string; data: string; titlu: string; lucruri: string[] }
 
 export const NOUTATI: Noutate[] = [
+  { versiune: '2026-11-13b', data: '13 noiembrie', titlu: 'Nivel nou: Furtuna de nisip de pe Marte', lucruri: [
+    '🌪️ Furtuna de nisip de pe Marte: vânt care te împinge pe pod, vârtej de praf care te ridică, pietre care se scufundă și un rover',
+  ] },
   { versiune: '2026-11-13a', data: '13 noiembrie', titlu: 'Nivel nou: Pianul cosmic', lucruri: [
     '🎹 Pianul cosmic: clape care urcă și coboară ca un val, tobe-trambulină, bagheta dirijorului și un metronom uriaș',
   ] },
