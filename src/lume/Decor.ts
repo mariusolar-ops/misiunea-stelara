@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -54,6 +54,7 @@ function decorTema(tema: Tema): Decor {
     case 'atelier': return decorAtelier();
     case 'muzica': return decorMuzica();
     case 'marte': return decorMarte();
+    case 'sah': return decorSah();
   }
 }
 
@@ -955,6 +956,57 @@ function decorMarte(): Decor {
     anima: (timp) => {
       praf.position.x = ((timp * 6) % 30) - 15;
       lumina.color.set(Math.sin(timp * 4) > 0 ? 0x2ee6d6 : 0x0a3a3a);
+    },
+  };
+}
+
+function decorSah(): Decor {
+  // Piese de șah uriașe (albe și negre) care plutesc încet în jurul tablei
+  const grup = planetaCuPete(0x2a2a38, 0x4a4a62);
+  const piese: THREE.Group[] = [];
+  const fa = (alb: boolean, tip: number) => {
+    const mat = new THREE.MeshLambertMaterial({ color: alb ? 0xf0eee6 : 0x34344a });
+    const p = new THREE.Group();
+    const baza = new THREE.Mesh(new THREE.CylinderGeometry(5, 6, 3, 14), mat);
+    const corp = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 4, 12, 12), mat);
+    corp.position.y = 7.5;
+    p.add(baza, corp);
+    if (tip === 0) {        // pion: o bilă sus
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(3.2, 12, 8), mat);
+      cap.position.y = 15;
+      p.add(cap);
+    } else if (tip === 1) { // tură: un turn cu creneluri
+      const varf = new THREE.Mesh(new THREE.CylinderGeometry(4, 3.5, 4, 14), mat);
+      varf.position.y = 15;
+      p.add(varf);
+      for (let k = 0; k < 4; k++) {
+        const cr = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2, 1.6), mat);
+        const u = (k / 4) * Math.PI * 2;
+        cr.position.set(Math.cos(u) * 3, 18, Math.sin(u) * 3);
+        p.add(cr);
+      }
+    } else {                // rege: o cruce sus
+      const cap = new THREE.Mesh(new THREE.SphereGeometry(3.5, 12, 8), mat);
+      cap.position.y = 15;
+      const v = new THREE.Mesh(new THREE.BoxGeometry(1.2, 5, 1.2), new THREE.MeshLambertMaterial({ color: 0xffd23f }));
+      v.position.y = 20.5;
+      const o = new THREE.Mesh(new THREE.BoxGeometry(3.5, 1.2, 1.2), new THREE.MeshLambertMaterial({ color: 0xffd23f }));
+      o.position.y = 21;
+      p.add(cap, v, o);
+    }
+    return p;
+  };
+  for (let i = 0; i < 8; i++) {
+    const p = fa(i % 2 === 0, i % 3);
+    const u = (i / 8) * Math.PI * 2;
+    p.position.set(Math.cos(u) * 70, -10 + (i % 3) * 10, Math.sin(u) * 70 - 45);
+    grup.add(p);
+    piese.push(p);
+  }
+  return {
+    obiect: grup, fundal: 0x14141f,
+    anima: (timp) => {
+      piese.forEach((p, i) => { p.position.y = -10 + (i % 3) * 10 + Math.sin(timp * 0.8 + i) * 2.5; p.rotation.y = timp * 0.2 * (i % 2 ? 1 : -1); });
     },
   };
 }
