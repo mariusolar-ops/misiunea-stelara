@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -56,6 +56,7 @@ function decorTema(tema: Tema): Decor {
     case 'marte': return decorMarte();
     case 'sah': return decorSah();
     case 'sera': return decorSera();
+    case 'saturn': return decorSaturn();
   }
 }
 
@@ -1060,6 +1061,48 @@ function decorSera(): Decor {
     anima: (timp) => {
       flori.forEach((f, i) => { f.rotation.z = Math.sin(timp * 0.7 + i) * 0.06; f.rotation.y = timp * 0.15; });
       polen.position.y = Math.sin(timp * 0.6) * 1.5;
+    },
+  };
+}
+
+function decorSaturn(): Decor {
+  // Saturn uriaș, cu inele, pe cer; bucăți de gheață din inel care se rotesc încet
+  const grup = new THREE.Group();
+  const planeta = new THREE.Mesh(new THREE.SphereGeometry(45, 32, 20), new THREE.MeshLambertMaterial({ color: 0xe8c88a }));
+  // dungi pe planetă
+  for (let i = -2; i <= 2; i++) {
+    const dunga = new THREE.Mesh(new THREE.TorusGeometry(45 * Math.cos(i * 0.28), 1.6, 6, 40), new THREE.MeshLambertMaterial({ color: i % 2 ? 0xc8a06a : 0xf0dcae }));
+    dunga.rotation.x = Math.PI / 2;
+    dunga.position.y = 45 * Math.sin(i * 0.28);
+    planeta.add(dunga);
+  }
+  const inel = new THREE.Mesh(new THREE.RingGeometry(58, 85, 64), new THREE.MeshBasicMaterial({ color: 0xd8c8a0, side: THREE.DoubleSide, transparent: true, opacity: 0.55 }));
+  inel.rotation.x = Math.PI / 2;
+  const saturn = new THREE.Group();
+  saturn.add(planeta, inel);
+  saturn.position.set(-90, 40, -180);
+  saturn.rotation.z = 0.35;
+  grup.add(saturn);
+  // bucăți de gheață care plutesc în jurul drumului (o parte din inele)
+  const ghete = new THREE.Group();
+  const mat = new THREE.MeshLambertMaterial({ color: 0xcfeaff });
+  for (let i = 0; i < 40; i++) {
+    const b = new THREE.Mesh(new THREE.IcosahedronGeometry(1 + Math.random() * 2.5, 0), mat);
+    const u = Math.random() * Math.PI * 2, r = 38 + Math.random() * 30;
+    b.position.set(Math.cos(u) * r, -16 + Math.random() * 6, Math.sin(u) * r - 55);
+    ghete.add(b);
+  }
+  grup.add(ghete);
+  // o lună mică
+  const luna = new THREE.Mesh(new THREE.SphereGeometry(6, 12, 10), new THREE.MeshLambertMaterial({ color: 0xa8b0c0 }));
+  luna.position.set(80, 50, -140);
+  grup.add(luna);
+  return {
+    obiect: grup, fundal: 0x0a0e22,
+    anima: (timp) => {
+      inel.rotation.z = timp * 0.05;
+      ghete.rotation.y = timp * 0.03;
+      ghete.children.forEach((g, i) => { g.rotation.x = timp * 0.3 + i; g.rotation.y = timp * 0.2 + i; });
     },
   };
 }
