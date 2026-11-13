@@ -32,11 +32,12 @@ import { nivel25 } from './nivel25';
 import { nivel26 } from './nivel26';
 import { nivel27 } from './nivel27';
 import { nivel28 } from './nivel28';
+import { nivel29 } from './nivel29';
 
 export const NIVELE = [
   nivel1, nivel2, nivel3, nivel4, nivel5, nivelSecret, nivel6, nivel7, nivel8, nivel9, nivel10, nivel11, nivelSecret2,
   nivel12, nivel13, nivel14, nivel15, nivel16, nivel17, nivel18, nivelSecret3,
-  nivel19, nivel20, nivel21, nivel22, nivel23, nivel24, nivel25, nivel26, nivel27, nivel28,
+  nivel19, nivel20, nivel21, nivel22, nivel23, nivel24, nivel25, nivel26, nivel27, nivel28, nivel29,
 ];
 
 /** Poziția primului nivel secret în listă (apare doar după ce găsești toate stelele secrete mov) */
@@ -74,7 +75,7 @@ export function esteNivelSecret(index: number) {
 }
 
 /** Ordinea în care se joacă nivelurile normale (pozițiile din NIVELE) */
-export const ORDINE_NORMALA = [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30];
+export const ORDINE_NORMALA = [0, 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31];
 
 /** Câte niveluri „normale” sunt (fără cel secret) */
 export const NR_NIVELE_NORMALE = ORDINE_NORMALA.length;

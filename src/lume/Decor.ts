@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -55,6 +55,7 @@ function decorTema(tema: Tema): Decor {
     case 'muzica': return decorMuzica();
     case 'marte': return decorMarte();
     case 'sah': return decorSah();
+    case 'sera': return decorSera();
   }
 }
 
@@ -1007,6 +1008,58 @@ function decorSah(): Decor {
     obiect: grup, fundal: 0x14141f,
     anima: (timp) => {
       piese.forEach((p, i) => { p.position.y = -10 + (i % 3) * 10 + Math.sin(timp * 0.8 + i) * 2.5; p.rotation.y = timp * 0.2 * (i % 2 ? 1 : -1); });
+    },
+  };
+}
+
+function decorSera(): Decor {
+  // Cupola de sticlă a serei, flori uriașe care se leagănă și polen care plutește
+  const grup = planetaCuPete(0x2a5a3a, 0x3a7a4a);
+  // arcele de sticlă ale cupolei
+  const sticla = new THREE.MeshBasicMaterial({ color: 0x9fe8ff, transparent: true, opacity: 0.25, depthWrite: false });
+  for (let i = 0; i < 6; i++) {
+    const arc = new THREE.Mesh(new THREE.TorusGeometry(70, 0.8, 6, 40, Math.PI), sticla);
+    arc.position.set(0, -20, -55);
+    arc.rotation.y = (i / 6) * Math.PI;
+    grup.add(arc);
+  }
+  const flori: THREE.Group[] = [];
+  const culori = [0xff5fa8, 0xffd23f, 0x8a6cff, 0xff9a3c, 0x2ee6d6];
+  for (let i = 0; i < 9; i++) {
+    const f = new THREE.Group();
+    const h = 25 + (i % 3) * 8;
+    const tulpina = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.3, h, 6), new THREE.MeshLambertMaterial({ color: 0x3a9a4a }));
+    tulpina.position.y = h / 2;
+    f.add(tulpina);
+    const mat = new THREE.MeshLambertMaterial({ color: culori[i % 5], emissive: new THREE.Color(culori[i % 5]).multiplyScalar(0.2) });
+    for (let k = 0; k < 6; k++) {
+      const petala = new THREE.Mesh(new THREE.SphereGeometry(3, 8, 6), mat);
+      petala.scale.set(1.6, 0.4, 0.8);
+      const u = (k / 6) * Math.PI * 2;
+      petala.position.set(Math.cos(u) * 4, h, Math.sin(u) * 4);
+      petala.rotation.y = -u;
+      f.add(petala);
+    }
+    const mijloc = new THREE.Mesh(new THREE.SphereGeometry(2.2, 8, 6), new THREE.MeshLambertMaterial({ color: 0xffe080 }));
+    mijloc.position.y = h + 0.5;
+    f.add(mijloc);
+    const u = (i / 9) * Math.PI * 2;
+    f.position.set(Math.cos(u) * 60, -40, Math.sin(u) * 60 - 55);
+    grup.add(f);
+    flori.push(f);
+  }
+  // polen
+  const nr = 160, poz = new Float32Array(nr * 3);
+  for (let i = 0; i < nr; i++) { poz[i * 3] = (Math.random() - 0.5) * 50; poz[i * 3 + 1] = Math.random() * 25 - 2; poz[i * 3 + 2] = -Math.random() * 110 + 5; }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(poz, 3));
+  const polen = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xfff6a0, size: 3, sizeAttenuation: false, transparent: true, opacity: 0.8 }));
+  grup.add(polen);
+  return {
+    obiect: grup, fundal: 0x0a1a14,
+    anima: (timp) => {
+      flori.forEach((f, i) => { f.rotation.z = Math.sin(timp * 0.7 + i) * 0.06; f.rotation.y = timp * 0.15; });
+      polen.position.y = Math.sin(timp * 0.6) * 1.5;
     },
   };
 }

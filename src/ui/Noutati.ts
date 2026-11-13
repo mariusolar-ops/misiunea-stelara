@@ -8,6 +8,9 @@ import { t } from '../i18n';
 export interface Noutate { versiune: string; data: string; titlu: string; lucruri: string[] }
 
 export const NOUTATI: Noutate[] = [
+  { versiune: '2026-11-13d', data: '13 noiembrie', titlu: 'Nivel nou: Sera spațială', lucruri: [
+    '🌺 Sera spațială: flori-trambulină, perete de liane pe care alergi, frunze ude, jetul stropitoarei și petale care cad',
+  ] },
   { versiune: '2026-11-13c', data: '13 noiembrie', titlu: 'Nivel nou: Tabla de șah cosmică', lucruri: [
     '♟️ Tabla de șah cosmică: pătrățele de lavă, turnuri care alunecă, raza reginei, săritura calului și pătrățele care se prăbușesc',
   ] },
