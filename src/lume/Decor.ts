@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -52,6 +52,7 @@ function decorTema(tema: Tema): Decor {
     case 'parc': return decorParc();
     case 'ciuperci': return decorCiuperci();
     case 'atelier': return decorAtelier();
+    case 'muzica': return decorMuzica();
   }
 }
 
@@ -860,6 +861,48 @@ function decorAtelier(): Decor {
       lumini.forEach((m, i) => m.color.set(Math.sin(timp * 3 + i) > 0 ? 0xff3030 : 0x401010));
       (scantei.material as THREE.PointsMaterial).opacity = 0.4 + 0.6 * Math.abs(Math.sin(timp * 7));
       scantei.position.y = Math.sin(timp * 0.7) * 1.2;
+    },
+  };
+}
+
+function decorMuzica(): Decor {
+  // Note muzicale uriașe care plutesc și discuri care se învârt, cu lumini de concert
+  const grup = planetaCuPete(0x2a1f45, 0x3f2f66);
+  const culori = [0xff5fa8, 0x2ee6d6, 0xffd23f, 0x8a6cff, 0xa6f04a];
+  const note: THREE.Group[] = [];
+  for (let i = 0; i < 8; i++) {
+    const n = new THREE.Group();
+    const mat = new THREE.MeshLambertMaterial({ color: culori[i % 5], emissive: new THREE.Color(culori[i % 5]).multiplyScalar(0.3) });
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(4, 12, 8), mat);
+    cap.scale.set(1.3, 1, 1);
+    const coada = new THREE.Mesh(new THREE.BoxGeometry(1, 18, 1), mat);
+    coada.position.set(4.5, 9, 0);
+    const steag = new THREE.Mesh(new THREE.BoxGeometry(5, 1.4, 1), mat);
+    steag.position.set(7, 17, 0);
+    steag.rotation.z = -0.5;
+    n.add(cap, coada, steag);
+    const u = (i / 8) * Math.PI * 2;
+    n.position.set(Math.cos(u) * 70, 10 + (i % 3) * 12, Math.sin(u) * 70 - 50);
+    n.lookAt(0, n.position.y, -50);
+    grup.add(n);
+    note.push(n);
+  }
+  // două discuri mari care se învârt
+  const discuri: THREE.Mesh[] = [];
+  for (const [x, z] of [[-60, -20], [60, -90]]) {
+    const d = new THREE.Mesh(new THREE.CylinderGeometry(22, 22, 1.5, 32), new THREE.MeshLambertMaterial({ color: 0x1a1a24 }));
+    const eticheta = new THREE.Mesh(new THREE.CylinderGeometry(7, 7, 1.7, 20), new THREE.MeshLambertMaterial({ color: 0xff5f5f }));
+    d.add(eticheta);
+    d.position.set(x, -20, z);
+    d.rotation.x = 0.35;
+    grup.add(d);
+    discuri.push(d);
+  }
+  return {
+    obiect: grup, fundal: 0x120a24,
+    anima: (timp) => {
+      note.forEach((n, i) => { n.position.y = 10 + (i % 3) * 12 + Math.sin(timp * 1.2 + i) * 3; });
+      discuri.forEach((d, i) => { d.rotation.y = timp * (i ? -0.6 : 0.6); });
     },
   };
 }
