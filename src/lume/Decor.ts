@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -59,6 +59,7 @@ function decorTema(tema: Tema): Decor {
     case 'saturn': return decorSaturn();
     case 'ceas': return decorCeas();
     case 'jucarii': return decorJucarii();
+    case 'cascada': return decorCascada();
   }
 }
 
@@ -1228,6 +1229,49 @@ function decorJucarii(): Decor {
       jucarii.forEach((j, i) => { j.position.y += Math.sin(timp * 1.1 + i) * 0.02; });
       cub.rotation.set(timp * 0.3, timp * 0.4, 0);
       urs.rotation.z = Math.sin(timp * 0.6) * 0.1;
+    },
+  };
+}
+
+function decorCascada(): Decor {
+  // Stânci înalte cu cascade de apă care cad, un curcubeu și stropi care sclipesc
+  const grup = planetaCuPete(0x2a5a4a, 0x3a7a5a);
+  const cascade: THREE.Points[] = [];
+  const pozitii: [number, number][] = [[-55, -70], [55, -50], [-30, -150], [40, -140]];
+  for (const [x, z] of pozitii) {
+    const stanca = new THREE.Mesh(new THREE.BoxGeometry(22, 70, 14), new THREE.MeshLambertMaterial({ color: 0x5a6a7a }));
+    stanca.position.set(x, -10, z);
+    grup.add(stanca);
+    // apa care cade: puncte albastre care coboară
+    const nr = 90, poz = new Float32Array(nr * 3);
+    for (let i = 0; i < nr; i++) { poz[i * 3] = (Math.random() - 0.5) * 8; poz[i * 3 + 1] = Math.random() * 70 - 45; poz[i * 3 + 2] = 0; }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(poz, 3));
+    const apa = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x9fdcff, size: 4, sizeAttenuation: false, transparent: true, opacity: 0.8 }));
+    apa.position.set(x + (x < 0 ? 11.5 : -11.5), 0, z);
+    grup.add(apa);
+    cascade.push(apa);
+  }
+  // curcubeul
+  const culori = [0xff5f5f, 0xff9a3c, 0xffd23f, 0x5acf5a, 0x2a6fd8, 0x8a6cff];
+  culori.forEach((c, i) => {
+    const arc = new THREE.Mesh(new THREE.TorusGeometry(60 - i * 2.2, 1.1, 6, 48, Math.PI), new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.55 }));
+    arc.position.set(0, -10, -170);
+    grup.add(arc);
+  });
+  return {
+    obiect: grup, fundal: 0x0c1a2a,
+    anima: (timp) => {
+      cascade.forEach((a, i) => {
+        const p = a.geometry.getAttribute('position') as THREE.BufferAttribute;
+        for (let k = 0; k < p.count; k++) {
+          let y = p.getY(k) - 0.5 - (k % 3) * 0.15;
+          if (y < -45) y = 25;
+          p.setY(k, y);
+        }
+        p.needsUpdate = true;
+        (a.material as THREE.PointsMaterial).opacity = 0.7 + 0.2 * Math.sin(timp * 3 + i);
+      });
     },
   };
 }
