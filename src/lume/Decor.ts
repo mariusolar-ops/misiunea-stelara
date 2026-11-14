@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras' | 'mina';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -61,6 +61,7 @@ function decorTema(tema: Tema): Decor {
     case 'jucarii': return decorJucarii();
     case 'cascada': return decorCascada();
     case 'oras': return decorOras();
+    case 'mina': return decorMina();
   }
 }
 
@@ -1325,6 +1326,51 @@ function decorOras(): Decor {
     anima: (timp) => {
       neon.forEach((m, i) => m.color.set(culori[i % 4]).multiplyScalar(0.6 + 0.4 * Math.abs(Math.sin(timp * 2 + i))));
       masini.forEach((m, i) => { m.position.x = (((timp * (8 + i * 2) + i * 30) % 160) - 80) * (i % 2 ? 1 : -1); });
+    },
+  };
+}
+
+function decorMina(): Decor {
+  // Interiorul unui asteroid: pereți de stâncă, cristale care strălucesc, grinzi de lemn și felinare
+  const grup = planetaCuPete(0x3a2e24, 0x4a3a2c);
+  // cristale strălucitoare în pereții minei
+  const cristale: THREE.MeshLambertMaterial[] = [];
+  const culori = [0x2ee6d6, 0x8a6cff, 0xff5fa8, 0x5acf5a];
+  for (let i = 0; i < 18; i++) {
+    const mat = new THREE.MeshLambertMaterial({ color: culori[i % 4], emissive: new THREE.Color(culori[i % 4]).multiplyScalar(0.5) });
+    cristale.push(mat);
+    const c = new THREE.Mesh(new THREE.OctahedronGeometry(2 + (i % 3), 0), mat);
+    c.scale.y = 2;
+    const parte = i % 2 ? 1 : -1;
+    c.position.set(parte * (16 + (i % 5) * 4), -6 + (i % 4) * 5, 5 - i * 6);
+    c.rotation.z = parte * 0.4;
+    grup.add(c);
+  }
+  // grinzi de lemn (ca la intrarea în tunel), pe tot drumul
+  const lemn = new THREE.MeshLambertMaterial({ color: 0x7a5232 });
+  const felinare: THREE.MeshBasicMaterial[] = [];
+  for (let i = 0; i < 6; i++) {
+    const z = -6 - i * 17;
+    const y0 = i < 3 ? 0 : 6;
+    for (const x of [-4, 4]) {
+      const stalp = new THREE.Mesh(new THREE.BoxGeometry(0.6, 8, 0.6), lemn);
+      stalp.position.set(x, y0 - 2, z);
+      grup.add(stalp);
+    }
+    const grinda = new THREE.Mesh(new THREE.BoxGeometry(9, 0.7, 0.7), lemn);
+    grinda.position.set(0, y0 + 2.2, z);
+    grup.add(grinda);
+    const mat = new THREE.MeshBasicMaterial({ color: 0xffc860 });
+    felinare.push(mat);
+    const felinar = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 6), mat);
+    felinar.position.set(0, y0 + 1.6, z);
+    grup.add(felinar);
+  }
+  return {
+    obiect: grup, fundal: 0x0e0a08,
+    anima: (timp) => {
+      cristale.forEach((m, i) => m.emissive.set(culori[i % 4]).multiplyScalar(0.35 + 0.25 * Math.sin(timp * 1.5 + i)));
+      felinare.forEach((m, i) => m.color.setRGB(1, 0.75 + 0.1 * Math.sin(timp * 9 + i * 3), 0.35));
     },
   };
 }

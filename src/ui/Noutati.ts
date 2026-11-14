@@ -8,6 +8,9 @@ import { t } from '../i18n';
 export interface Noutate { versiune: string; data: string; titlu: string; lucruri: string[] }
 
 export const NOUTATI: Noutate[] = [
+  { versiune: '2026-11-14e', data: '14 noiembrie', titlu: 'Nivel nou: Mina de pe asteroid', lucruri: [
+    '⛏️ Mina de pe asteroid: pietricele care cad din tavan, un vagonet pe șine, liftul minei, cristale care ies din pământ și un pod cu scânduri care cad',
+  ] },
   { versiune: '2026-11-14d', data: '14 noiembrie', titlu: 'Nivel nou: Acoperișurile orașului neon', lucruri: [
     '🌃 Acoperișurile orașului neon: sărituri de pe un acoperiș pe altul, o dronă, reflectoare, ventilatorul care te ridică și firme luminoase',
   ] },
