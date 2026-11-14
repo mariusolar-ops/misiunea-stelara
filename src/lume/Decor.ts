@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -60,6 +60,7 @@ function decorTema(tema: Tema): Decor {
     case 'ceas': return decorCeas();
     case 'jucarii': return decorJucarii();
     case 'cascada': return decorCascada();
+    case 'oras': return decorOras();
   }
 }
 
@@ -1272,6 +1273,58 @@ function decorCascada(): Decor {
         p.needsUpdate = true;
         (a.material as THREE.PointsMaterial).opacity = 0.7 + 0.2 * Math.sin(timp * 3 + i);
       });
+    },
+  };
+}
+
+function decorOras(): Decor {
+  // Zgârie-nori cu ferestre luminate, dungi de neon care clipesc și mașini zburătoare
+  const grup = new THREE.Group();
+  // textura cu ferestre (desenată din cod)
+  const c = document.createElement('canvas');
+  c.width = 32; c.height = 64;
+  const g = c.getContext('2d')!;
+  g.fillStyle = '#1a1c2e'; g.fillRect(0, 0, 32, 64);
+  for (let y = 2; y < 64; y += 8) for (let x = 2; x < 32; x += 8) {
+    g.fillStyle = Math.random() < 0.55 ? '#ffd27a' : '#2a2e48';
+    g.fillRect(x, y, 5, 5);
+  }
+  const textura = new THREE.CanvasTexture(c);
+  textura.wrapS = textura.wrapT = THREE.RepeatWrapping;
+  textura.magFilter = THREE.NearestFilter;
+  const neon: THREE.MeshBasicMaterial[] = [];
+  const culori = [0xff5fa8, 0x2ee6d6, 0x8a6cff, 0xffd23f];
+  // o singură textură și un singur material pentru toate clădirile (merge repede pe telefon)
+  textura.repeat.set(2, 5);
+  const matCladire = new THREE.MeshBasicMaterial({ map: textura });
+  for (let i = 0; i < 16; i++) {
+    const h = 25 + Math.random() * 45, l = 8 + Math.random() * 6;
+    const bloc = new THREE.Mesh(new THREE.BoxGeometry(l, h, l), matCladire);
+    const parte = i % 2 ? 1 : -1;
+    const x = parte * (40 + Math.random() * 35);
+    const z = 10 - (i / 16) * 140 - Math.random() * 10;
+    bloc.position.set(x, -40 + h / 2, z);
+    grup.add(bloc);
+    // o dungă de neon pe marginea de sus
+    const mat = new THREE.MeshBasicMaterial({ color: culori[i % 4] });
+    neon.push(mat);
+    const dunga = new THREE.Mesh(new THREE.BoxGeometry(l + 0.4, 0.8, l + 0.4), mat);
+    dunga.position.set(x, -40 + h, z);
+    grup.add(dunga);
+  }
+  // mașini zburătoare
+  const masini: THREE.Mesh[] = [];
+  for (let i = 0; i < 6; i++) {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(3, 1.2, 1.6), new THREE.MeshBasicMaterial({ color: culori[(i + 1) % 4] }));
+    m.position.set(0, 14 + (i % 3) * 6, -20 - i * 18);
+    grup.add(m);
+    masini.push(m);
+  }
+  return {
+    obiect: grup, fundal: 0x0a0a1a,
+    anima: (timp) => {
+      neon.forEach((m, i) => m.color.set(culori[i % 4]).multiplyScalar(0.6 + 0.4 * Math.abs(Math.sin(timp * 2 + i))));
+      masini.forEach((m, i) => { m.position.x = (((timp * (8 + i * 2) + i * 30) % 160) - 80) * (i % 2 ? 1 : -1); });
     },
   };
 }
