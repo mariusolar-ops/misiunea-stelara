@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -58,6 +58,7 @@ function decorTema(tema: Tema): Decor {
     case 'sera': return decorSera();
     case 'saturn': return decorSaturn();
     case 'ceas': return decorCeas();
+    case 'jucarii': return decorJucarii();
   }
 }
 
@@ -1165,6 +1166,68 @@ function decorCeas(): Decor {
     anima: (timp) => {
       limbi.forEach(({ mica, mare }, i) => { mica.rotation.z = -timp * 0.1 - i; mare.rotation.z = -timp * 1.2 - i * 2; });
       roti.forEach((r, i) => { r.rotateZ((i % 2 ? 1 : -1) * 0.01); });
+    },
+  };
+}
+
+function decorJucarii(): Decor {
+  // Jucării uriașe care plutesc: un ursuleț, mingi colorate și un cub cu fețe colorate
+  const grup = planetaCuPete(0x6a4a8a, 0x8a6aaa);
+  const lam = (c: number) => new THREE.MeshLambertMaterial({ color: c });
+  const jucarii: THREE.Object3D[] = [];
+  // ursulețul
+  const urs = new THREE.Group();
+  const blana = lam(0xb8804a), bot = lam(0xe8c89a), ochi = lam(0x1a1a24);
+  const corp = new THREE.Mesh(new THREE.SphereGeometry(10, 16, 12), blana);
+  const cap = new THREE.Mesh(new THREE.SphereGeometry(7, 16, 12), blana);
+  cap.position.y = 14;
+  urs.add(corp, cap);
+  for (const x of [-5, 5]) {
+    const ureche = new THREE.Mesh(new THREE.SphereGeometry(2.6, 10, 8), blana);
+    ureche.position.set(x, 20, 0);
+    const o = new THREE.Mesh(new THREE.SphereGeometry(0.9, 8, 6), ochi);
+    o.position.set(x * 0.45, 15.5, 6.3);
+    const mana = new THREE.Mesh(new THREE.SphereGeometry(3.5, 10, 8), blana);
+    mana.position.set(x * 2, 3, 2);
+    const picior = new THREE.Mesh(new THREE.SphereGeometry(4, 10, 8), blana);
+    picior.position.set(x * 1.2, -8, 4);
+    urs.add(ureche, o, mana, picior);
+  }
+  const botul = new THREE.Mesh(new THREE.SphereGeometry(2.6, 10, 8), bot);
+  botul.position.set(0, 12.5, 6);
+  urs.add(botul);
+  urs.position.set(-60, 5, -80);
+  urs.lookAt(0, 5, -40);
+  grup.add(urs);
+  jucarii.push(urs);
+  // mingi colorate (cu o dungă)
+  const culori = [0xff5f5f, 0xffd23f, 0x2ee6d6, 0x5acf5a, 0x8a6cff];
+  for (let i = 0; i < 5; i++) {
+    const m = new THREE.Mesh(new THREE.SphereGeometry(5, 14, 10), lam(culori[i]));
+    const dunga = new THREE.Mesh(new THREE.TorusGeometry(5, 0.7, 6, 24), lam(0xffffff));
+    m.add(dunga);
+    const u = (i / 5) * Math.PI * 2 + 1;
+    m.position.set(Math.cos(u) * 65, 10 + i * 4, Math.sin(u) * 65 - 50);
+    grup.add(m);
+    jucarii.push(m);
+  }
+  // cubul cu fețe colorate (3x3x3 cubulețe)
+  const cub = new THREE.Group();
+  const fete = [0xff5f5f, 0x2a6fd8, 0xffd23f, 0x5acf5a, 0xff9a3c, 0xf4f4f8];
+  for (let x = -1; x <= 1; x++) for (let y = -1; y <= 1; y++) for (let z = -1; z <= 1; z++) {
+    const c = new THREE.Mesh(new THREE.BoxGeometry(3.6, 3.6, 3.6), lam(fete[(x + y * 2 + z * 3 + 9) % 6]));
+    c.position.set(x * 3.8, y * 3.8, z * 3.8);
+    cub.add(c);
+  }
+  cub.position.set(60, 25, -110);
+  grup.add(cub);
+  jucarii.push(cub);
+  return {
+    obiect: grup, fundal: 0x1a1030,
+    anima: (timp) => {
+      jucarii.forEach((j, i) => { j.position.y += Math.sin(timp * 1.1 + i) * 0.02; });
+      cub.rotation.set(timp * 0.3, timp * 0.4, 0);
+      urs.rotation.z = Math.sin(timp * 0.6) * 0.1;
     },
   };
 }
