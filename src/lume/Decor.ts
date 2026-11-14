@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -57,6 +57,7 @@ function decorTema(tema: Tema): Decor {
     case 'sah': return decorSah();
     case 'sera': return decorSera();
     case 'saturn': return decorSaturn();
+    case 'ceas': return decorCeas();
   }
 }
 
@@ -1103,6 +1104,67 @@ function decorSaturn(): Decor {
       inel.rotation.z = timp * 0.05;
       ghete.rotation.y = timp * 0.03;
       ghete.children.forEach((g, i) => { g.rotation.x = timp * 0.3 + i; g.rotation.y = timp * 0.2 + i; });
+    },
+  };
+}
+
+function decorCeas(): Decor {
+  // Cadrane de ceas uriașe cu limbi care se mișcă și roți dințate care se învârt
+  const grup = planetaCuPete(0x3a2f22, 0x5a4a32);
+  const limbi: { mica: THREE.Object3D; mare: THREE.Object3D }[] = [];
+  const pozCadrane: [number, number, number, number][] = [[-70, 30, -90, 28], [75, 20, -60, 20], [10, 55, -170, 40]];
+  for (const [x, y, z, r] of pozCadrane) {
+    const c = new THREE.Group();
+    const fata = new THREE.Mesh(new THREE.CircleGeometry(r, 40), new THREE.MeshBasicMaterial({ color: 0xf4ecd8 }));
+    const rama = new THREE.Mesh(new THREE.TorusGeometry(r, r * 0.06, 8, 40), new THREE.MeshLambertMaterial({ color: 0xc8a040 }));
+    c.add(fata, rama);
+    for (let k = 0; k < 12; k++) {
+      const u = (k / 12) * Math.PI * 2;
+      const semn = new THREE.Mesh(new THREE.BoxGeometry(r * 0.06, r * 0.16, 0.5), new THREE.MeshBasicMaterial({ color: 0x2a2a38 }));
+      semn.position.set(Math.sin(u) * r * 0.82, Math.cos(u) * r * 0.82, 0.3);
+      semn.rotation.z = -u;
+      c.add(semn);
+    }
+    const fa = (lung: number, gros: number) => {
+      const pivot = new THREE.Group();
+      const l = new THREE.Mesh(new THREE.BoxGeometry(gros, lung, 0.5), new THREE.MeshBasicMaterial({ color: 0x2a2a38 }));
+      l.position.set(0, lung / 2, 0.6);
+      pivot.add(l);
+      c.add(pivot);
+      return pivot;
+    };
+    limbi.push({ mica: fa(r * 0.5, r * 0.07), mare: fa(r * 0.75, r * 0.045) });
+    c.position.set(x, y, z);
+    c.lookAt(0, y * 0.5, -40);
+    grup.add(c);
+  }
+  // roți dințate
+  const roti: THREE.Group[] = [];
+  const mat = new THREE.MeshLambertMaterial({ color: 0xb86a3a });
+  for (let i = 0; i < 6; i++) {
+    const r = 6 + (i % 3) * 3;
+    const roata = new THREE.Group();
+    const disc = new THREE.Mesh(new THREE.CylinderGeometry(r, r, 1.5, 20), mat);
+    disc.rotation.x = Math.PI / 2;
+    roata.add(disc);
+    for (let k = 0; k < 12; k++) {
+      const u = (k / 12) * Math.PI * 2;
+      const dinte = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.8, 1.5), mat);
+      dinte.position.set(Math.cos(u) * (r + 0.8), Math.sin(u) * (r + 0.8), 0);
+      dinte.rotation.z = u;
+      roata.add(dinte);
+    }
+    const u = (i / 6) * Math.PI * 2 + 0.4;
+    roata.position.set(Math.cos(u) * 85, -25 + (i % 2) * 12, Math.sin(u) * 85 - 45);
+    roata.lookAt(0, roata.position.y, -45);
+    grup.add(roata);
+    roti.push(roata);
+  }
+  return {
+    obiect: grup, fundal: 0x14100c,
+    anima: (timp) => {
+      limbi.forEach(({ mica, mare }, i) => { mica.rotation.z = -timp * 0.1 - i; mare.rotation.z = -timp * 1.2 - i * 2; });
+      roti.forEach((r, i) => { r.rotateZ((i % 2 ? 1 : -1) * 0.01); });
     },
   };
 }
