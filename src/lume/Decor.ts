@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras' | 'mina';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras' | 'mina' | 'vreme';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -62,6 +62,7 @@ function decorTema(tema: Tema): Decor {
     case 'cascada': return decorCascada();
     case 'oras': return decorOras();
     case 'mina': return decorMina();
+    case 'vreme': return decorVreme();
   }
 }
 
@@ -1371,6 +1372,65 @@ function decorMina(): Decor {
     anima: (timp) => {
       cristale.forEach((m, i) => m.emissive.set(culori[i % 4]).multiplyScalar(0.35 + 0.25 * Math.sin(timp * 1.5 + i)));
       felinare.forEach((m, i) => m.color.setRGB(1, 0.75 + 0.1 * Math.sin(timp * 9 + i * 3), 0.35));
+    },
+  };
+}
+
+function decorVreme(): Decor {
+  // Un soare zâmbitor cu raze, un nor din care plouă, fulgi de zăpadă și un curcubeu
+  const grup = planetaCuPete(0x5a8ad8, 0x7aa8e8);
+  // soarele, cu raze care se învârt
+  const soare = new THREE.Group();
+  soare.add(new THREE.Mesh(new THREE.SphereGeometry(14, 20, 14), new THREE.MeshBasicMaterial({ color: 0xffd23f })));
+  const raze = new THREE.Group();
+  for (let k = 0; k < 12; k++) {
+    const raza = new THREE.Mesh(new THREE.ConeGeometry(2.2, 9, 6), new THREE.MeshBasicMaterial({ color: 0xffb020 }));
+    const u = (k / 12) * Math.PI * 2;
+    raza.position.set(Math.cos(u) * 19, Math.sin(u) * 19, 0);
+    raza.rotation.z = u - Math.PI / 2;
+    raze.add(raza);
+  }
+  soare.add(raze);
+  soare.position.set(70, 60, -150);
+  grup.add(soare);
+  // norul de ploaie (bile gri lipite) și picăturile
+  const nor = new THREE.Group();
+  const matNor = new THREE.MeshLambertMaterial({ color: 0xc8d0e0 });
+  for (const [x, y, r] of [[0, 0, 9], [10, -2, 7], [-10, -2, 7], [5, 5, 7], [-5, 4, 6]]) {
+    const b = new THREE.Mesh(new THREE.SphereGeometry(r, 12, 8), matNor);
+    b.position.set(x, y, 0);
+    nor.add(b);
+  }
+  nor.position.set(-55, 35, -70);
+  grup.add(nor);
+  const nrP = 80, pozP = new Float32Array(nrP * 3);
+  for (let i = 0; i < nrP; i++) { pozP[i * 3] = -55 + (Math.random() - 0.5) * 24; pozP[i * 3 + 1] = Math.random() * 40 - 10; pozP[i * 3 + 2] = -70 + (Math.random() - 0.5) * 10; }
+  const geoP = new THREE.BufferGeometry();
+  geoP.setAttribute('position', new THREE.BufferAttribute(pozP, 3));
+  const ploaie = new THREE.Points(geoP, new THREE.PointsMaterial({ color: 0x6ab0ff, size: 3, sizeAttenuation: false }));
+  grup.add(ploaie);
+  // fulgi de zăpadă peste tot drumul
+  const nrZ = 150, pozZ = new Float32Array(nrZ * 3);
+  for (let i = 0; i < nrZ; i++) { pozZ[i * 3] = (Math.random() - 0.5) * 60; pozZ[i * 3 + 1] = Math.random() * 25; pozZ[i * 3 + 2] = -Math.random() * 100 + 5; }
+  const geoZ = new THREE.BufferGeometry();
+  geoZ.setAttribute('position', new THREE.BufferAttribute(pozZ, 3));
+  const zapada = new THREE.Points(geoZ, new THREE.PointsMaterial({ color: 0xffffff, size: 3, sizeAttenuation: false, transparent: true, opacity: 0.85 }));
+  grup.add(zapada);
+  // curcubeul de deasupra finalului
+  [0xff5f5f, 0xff9a3c, 0xffd23f, 0x5acf5a, 0x2a6fd8, 0x8a6cff].forEach((c, i) => {
+    const arc = new THREE.Mesh(new THREE.TorusGeometry(22 - i * 1.2, 0.6, 6, 40, Math.PI), new THREE.MeshBasicMaterial({ color: c }));
+    arc.position.set(0, 5, -100);
+    grup.add(arc);
+  });
+  return {
+    obiect: grup, fundal: 0x1a2a4a,
+    anima: (timp) => {
+      raze.rotation.z = timp * 0.3;
+      const p = geoP.getAttribute('position') as THREE.BufferAttribute;
+      for (let k = 0; k < p.count; k++) { let y = p.getY(k) - 0.6; if (y < -10) y = 30; p.setY(k, y); }
+      p.needsUpdate = true;
+      zapada.position.y = -((timp * 1.5) % 10);
+      zapada.position.x = Math.sin(timp * 0.5) * 2;
     },
   };
 }
