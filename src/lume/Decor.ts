@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras' | 'mina' | 'vreme' | 'jungla';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras' | 'mina' | 'vreme' | 'jungla' | 'circ';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -64,6 +64,7 @@ function decorTema(tema: Tema): Decor {
     case 'mina': return decorMina();
     case 'vreme': return decorVreme();
     case 'jungla': return decorJungla();
+    case 'circ': return decorCirc();
   }
 }
 
@@ -1480,6 +1481,55 @@ function decorJungla(): Decor {
       coroane.forEach((c, i) => { c.rotation.z = Math.sin(timp * 0.8 + i) * 0.05; });
       aur.emissive.setRGB(0.35 + 0.15 * Math.sin(timp * 2), 0.25 + 0.1 * Math.sin(timp * 2), 0);
       statuie.rotation.y = timp * 0.3;
+    },
+  };
+}
+
+function decorCirc(): Decor {
+  // Cortul uriaș de circ cu dungi, ghirlande de stegulețe și reflectoare care se mișcă
+  const grup = planetaCuPete(0x4a2a5a, 0x6a3a7a);
+  // cortul: un con cu dungi roșii și albe, deasupra unui cilindru
+  const cort = new THREE.Group();
+  for (let k = 0; k < 16; k++) {
+    const felie = new THREE.Mesh(
+      new THREE.ConeGeometry(70, 45, 16, 1, true, (k / 16) * Math.PI * 2, Math.PI / 8),
+      new THREE.MeshLambertMaterial({ color: k % 2 ? 0xd8303a : 0xf4f4f8, side: THREE.DoubleSide }),
+    );
+    felie.position.y = 52;
+    cort.add(felie);
+  }
+  const steag = new THREE.Mesh(new THREE.BoxGeometry(6, 3.5, 0.3), new THREE.MeshBasicMaterial({ color: 0xffd23f }));
+  steag.position.set(3, 80, 0);
+  const catarg = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 10), new THREE.MeshLambertMaterial({ color: 0xc8a040 }));
+  catarg.position.y = 77;
+  cort.add(steag, catarg);
+  cort.position.set(0, -20, -50);
+  grup.add(cort);
+  // ghirlande de stegulețe colorate
+  const culori = [0xff5f5f, 0xffd23f, 0x2ee6d6, 0x8a6cff, 0x5acf5a];
+  for (let g = 0; g < 4; g++) {
+    for (let k = 0; k < 14; k++) {
+      const t = k / 13;
+      const s = new THREE.Mesh(new THREE.ConeGeometry(0.9, 1.8, 3), new THREE.MeshBasicMaterial({ color: culori[(k + g) % 5] }));
+      s.rotation.x = Math.PI;
+      const u = (g / 4) * Math.PI * 2 + t * (Math.PI / 2);
+      s.position.set(Math.cos(u) * 45, 22 - Math.sin(t * Math.PI) * 5, Math.sin(u) * 45 - 50);
+      grup.add(s);
+    }
+  }
+  // reflectoare: conuri de lumină transparente care se rotesc
+  const reflectoare: THREE.Mesh[] = [];
+  for (let i = 0; i < 3; i++) {
+    const r = new THREE.Mesh(new THREE.ConeGeometry(6, 40, 16, 1, true), new THREE.MeshBasicMaterial({ color: [0xfff0a0, 0xa0f0ff, 0xffa0e0][i], transparent: true, opacity: 0.15, depthWrite: false, side: THREE.DoubleSide }));
+    r.position.set(-30 + i * 30, 20, -60 - i * 15);
+    grup.add(r);
+    reflectoare.push(r);
+  }
+  return {
+    obiect: grup, fundal: 0x140a20,
+    anima: (timp) => {
+      reflectoare.forEach((r, i) => { r.rotation.z = Math.sin(timp * 0.7 + i * 2) * 0.5; r.rotation.x = Math.cos(timp * 0.5 + i) * 0.3; });
+      steag.rotation.y = Math.sin(timp * 3) * 0.4;
     },
   };
 }
