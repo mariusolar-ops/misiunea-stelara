@@ -8,6 +8,9 @@ import { t } from '../i18n';
 export interface Noutate { versiune: string; data: string; titlu: string; lucruri: string[] }
 
 export const NOUTATI: Noutate[] = [
+  { versiune: '2026-11-15b', data: '15 noiembrie', titlu: 'Nivel nou: Templul din junglă', lucruri: [
+    '🛕 Templul din junglă: pietre care se scufundă în lavă, trunchiuri care se leagănă, treptele piramidei, o frunză-trambulină și o statuie de aur',
+  ] },
   { versiune: '2026-11-15a', data: '15 noiembrie', titlu: 'Nivel nou: Fabrica de vreme', lucruri: [
     '⛈️ Fabrica de vreme: fulgere care clipesc, zăpadă alunecoasă, vânt, un nor de ploaie care te ridică și nori care se destramă',
   ] },

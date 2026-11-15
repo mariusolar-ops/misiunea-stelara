@@ -437,6 +437,8 @@ export const TRADUCERI: Record<string, [string, string, string, string]> = {
   "Ventilatorul suflă spre stânga – ține-te spre dreapta!": ["The fan blows to the left – keep to the right!", "Le ventilateur souffle vers la gauche – reste à droite !", "El ventilador sopla hacia la izquierda: ¡mantente a la derecha!", "Der Ventilator bläst nach links – halte dich rechts!"],
   "Parcul de distracții": ["Amusement Park", "Parc d’attractions", "Parque de atracciones", "Freizeitpark"],
   "Urcă în vagonul roșu – te duce peste gol!": ["Get on the red cart – it takes you over the gap!", "Monte dans le wagon rouge – il t’emmène au-dessus du vide !", "¡Súbete al vagón rojo: te lleva sobre el hueco!", "Steig in den roten Wagen – er bringt dich über die Lücke!"],
+  "Templul din junglă": ["The Jungle Temple", "Le temple de la jungle", "El templo de la selva", "Der Dschungeltempel"],
+  "Pietrele se scufundă în lavă – sari repede!": ["The stones sink into the lava – jump quickly!", "Les pierres s'enfoncent dans la lave – saute vite !", "¡Las piedras se hunden en la lava, salta rápido!", "Die Steine versinken in der Lava – spring schnell!"],
   "Fabrica de vreme": ["The Weather Factory", "L'usine à météo", "La fábrica del tiempo", "Die Wetterfabrik"],
   "Treci când fulgerul se stinge!": ["Go when the lightning goes out!", "Passe quand l'éclair s'éteint !", "¡Pasa cuando el rayo se apague!", "Geh, wenn der Blitz erlischt!"],
   "Intră sub norul de ploaie – te ridică!": ["Step under the rain cloud – it lifts you up!", "Passe sous le nuage de pluie – il te soulève !", "¡Ponte bajo la nube de lluvia, te eleva!", "Stell dich unter die Regenwolke – sie hebt dich hoch!"],

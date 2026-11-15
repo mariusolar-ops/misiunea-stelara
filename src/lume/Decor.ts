@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras' | 'mina' | 'vreme';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras' | 'mina' | 'vreme' | 'jungla';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -63,6 +63,7 @@ function decorTema(tema: Tema): Decor {
     case 'oras': return decorOras();
     case 'mina': return decorMina();
     case 'vreme': return decorVreme();
+    case 'jungla': return decorJungla();
   }
 }
 
@@ -1431,6 +1432,54 @@ function decorVreme(): Decor {
       p.needsUpdate = true;
       zapada.position.y = -((timp * 1.5) % 10);
       zapada.position.x = Math.sin(timp * 0.5) * 2;
+    },
+  };
+}
+
+function decorJungla(): Decor {
+  // Copaci uriași cu liane, o piramidă veche în depărtare și o statuie de aur care strălucește
+  const grup = planetaCuPete(0x2a6a2a, 0x3a8a3a);
+  const coroane: THREE.Mesh[] = [];
+  const trunchi = new THREE.MeshLambertMaterial({ color: 0x6a4a2a });
+  const frunze = [0x3aa04a, 0x4ac05a, 0x2a8a3a];
+  for (let i = 0; i < 14; i++) {
+    const h = 30 + (i % 4) * 8;
+    const t = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 2.6, h, 7), trunchi);
+    const parte = i % 2 ? 1 : -1;
+    const x = parte * (22 + (i % 5) * 7), z = 5 - i * 8;
+    t.position.set(x, -40 + h / 2, z);
+    const c = new THREE.Mesh(new THREE.SphereGeometry(9, 10, 8), new THREE.MeshLambertMaterial({ color: frunze[i % 3] }));
+    c.scale.y = 0.7;
+    c.position.set(x, -40 + h + 3, z);
+    grup.add(t, c);
+    coroane.push(c);
+    // o liană care atârnă
+    const liana = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 14, 4), new THREE.MeshLambertMaterial({ color: 0x2a7a2a }));
+    liana.position.set(x - parte * 6, -40 + h - 5, z);
+    grup.add(liana);
+  }
+  // piramida (trepte de piatră) în spatele finalului
+  const piatra = new THREE.MeshLambertMaterial({ color: 0x9a8a6a });
+  for (let k = 0; k < 6; k++) {
+    const treapta = new THREE.Mesh(new THREE.BoxGeometry(60 - k * 9, 7, 60 - k * 9), piatra);
+    treapta.position.set(0, -30 + k * 7, -150);
+    grup.add(treapta);
+  }
+  // statuia de aur în vârful piramidei
+  const aur = new THREE.MeshLambertMaterial({ color: 0xffc23f, emissive: 0x6a4a00 });
+  const statuie = new THREE.Group();
+  const corp = new THREE.Mesh(new THREE.BoxGeometry(5, 8, 4), aur);
+  const cap = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 4), aur);
+  cap.position.y = 6;
+  statuie.add(corp, cap);
+  statuie.position.set(0, 16, -150);
+  grup.add(statuie);
+  return {
+    obiect: grup, fundal: 0x0e2418,
+    anima: (timp) => {
+      coroane.forEach((c, i) => { c.rotation.z = Math.sin(timp * 0.8 + i) * 0.05; });
+      aur.emissive.setRGB(0.35 + 0.15 * Math.sin(timp * 2), 0.25 + 0.1 * Math.sin(timp * 2), 0);
+      statuie.rotation.y = timp * 0.3;
     },
   };
 }
