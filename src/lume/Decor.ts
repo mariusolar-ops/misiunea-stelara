@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras' | 'mina' | 'vreme' | 'jungla' | 'circ';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras' | 'mina' | 'vreme' | 'jungla' | 'circ' | 'finala';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -65,6 +65,7 @@ function decorTema(tema: Tema): Decor {
     case 'vreme': return decorVreme();
     case 'jungla': return decorJungla();
     case 'circ': return decorCirc();
+    case 'finala': return decorFinala();
   }
 }
 
@@ -1530,6 +1531,55 @@ function decorCirc(): Decor {
     anima: (timp) => {
       reflectoare.forEach((r, i) => { r.rotation.z = Math.sin(timp * 0.7 + i * 2) * 0.5; r.rotation.x = Math.cos(timp * 0.5 + i) * 0.3; });
       steag.rotation.y = Math.sin(timp * 3) * 0.4;
+    },
+  };
+}
+
+function decorFinala(): Decor {
+  // Artificii care explodează pe cer, în culori diferite, și planete colorate în jur
+  const grup = planetaCuPete(0x3a2a6a, 0x5a3a8a);
+  const culoriPlanete = [0xff5fa8, 0x2ee6d6, 0xffd23f, 0x5acf5a, 0xff9a3c];
+  culoriPlanete.forEach((c, i) => {
+    const p = new THREE.Mesh(new THREE.SphereGeometry(6 + (i % 3) * 3, 14, 10), new THREE.MeshLambertMaterial({ color: c }));
+    const u = (i / 5) * Math.PI * 2;
+    p.position.set(Math.cos(u) * 90, 30 + (i % 2) * 20, Math.sin(u) * 90 - 60);
+    grup.add(p);
+  });
+  // artificiile: fiecare e un nor de puncte care pornește dintr-un loc și se împrăștie
+  const NR = 60;
+  const artificii: { pct: THREE.Points; dir: Float32Array; centru: THREE.Vector3; t0: number }[] = [];
+  const culori = [0xff5f5f, 0xffd23f, 0x2ee6d6, 0xff5fa8, 0x8a6cff, 0x5acf5a];
+  for (let i = 0; i < 6; i++) {
+    const poz = new Float32Array(NR * 3), dir = new Float32Array(NR * 3);
+    for (let k = 0; k < NR; k++) {
+      const u = Math.random() * Math.PI * 2, v = Math.acos(2 * Math.random() - 1);
+      dir[k * 3] = Math.sin(v) * Math.cos(u); dir[k * 3 + 1] = Math.cos(v); dir[k * 3 + 2] = Math.sin(v) * Math.sin(u);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(poz, 3));
+    const pct = new THREE.Points(geo, new THREE.PointsMaterial({ color: culori[i], size: 4, sizeAttenuation: false, transparent: true }));
+    grup.add(pct);
+    artificii.push({ pct, dir, centru: new THREE.Vector3(), t0: -i * 0.6 });
+  }
+  return {
+    obiect: grup, fundal: 0x120a28,
+    anima: (timp) => {
+      for (const a of artificii) {
+        let t = timp - a.t0;
+        if (t > 2.4 || t < 0) {
+          // pornește o explozie nouă, într-un loc nou, deasupra drumului
+          a.t0 = timp;
+          t = 0;
+          a.centru.set((Math.random() - 0.5) * 70, 25 + Math.random() * 25, -20 - Math.random() * 100);
+        }
+        const r = 14 * (1 - Math.pow(1 - t / 2.4, 3));
+        const p = a.pct.geometry.getAttribute('position') as THREE.BufferAttribute;
+        for (let k = 0; k < NR; k++) {
+          p.setXYZ(k, a.centru.x + a.dir[k * 3] * r, a.centru.y + a.dir[k * 3 + 1] * r - t * t * 1.5, a.centru.z + a.dir[k * 3 + 2] * r);
+        }
+        p.needsUpdate = true;
+        (a.pct.material as THREE.PointsMaterial).opacity = Math.max(0, 1 - t / 2.4);
+      }
     },
   };
 }

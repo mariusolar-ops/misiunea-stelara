@@ -8,6 +8,9 @@ import { t } from '../i18n';
 export interface Noutate { versiune: string; data: string; titlu: string; lucruri: string[] }
 
 export const NOUTATI: Noutate[] = [
+  { versiune: '2026-11-15d', data: '15 noiembrie', titlu: 'Nivel nou: Parada finală 🎆', lucruri: [
+    '🎆 Parada finală: ultimul nivel din seria „un nivel la 5 ore” – câte puțin din toate, cu artificii la final!',
+  ] },
   { versiune: '2026-11-15c', data: '15 noiembrie', titlu: 'Nivel nou: Circul cosmic', lucruri: [
     '🎪 Circul cosmic: sârma funambulului, trambuline de circ, trapezul, bastonul jonglerului și tunul care te aruncă la final',
   ] },
