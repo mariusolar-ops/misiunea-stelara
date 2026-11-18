@@ -5,7 +5,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras' | 'mina' | 'vreme' | 'jungla' | 'circ' | 'finala' | 'cuburi' | 'insula';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras' | 'mina' | 'vreme' | 'jungla' | 'circ' | 'finala' | 'cuburi' | 'insula' | 'piese';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -69,6 +69,7 @@ function decorTema(tema: Tema): Decor {
     case 'finala': return decorFinala();
     case 'cuburi': return decorCuburi();
     case 'insula': return decorInsula();
+    case 'piese': return decorPiese();
   }
 }
 
@@ -1719,6 +1720,57 @@ function decorInsula(): Decor {
     anima: (timp) => {
       balon.position.y = 11 + Math.sin(timp * 1.2) * 0.3;
       aur.emissive.setRGB(0.5 + 0.2 * Math.sin(timp * 3), 0.35 + 0.15 * Math.sin(timp * 3), 0);
+    },
+  };
+}
+
+function decorPiese(): Decor {
+  // O grilă uriașă pe cer (ca o tablă de joc) și piese colorate din 4 cuburi care cad încet
+  // și apar iar sus. Pe margini, „linii complete” care clipesc.
+  const grup = new THREE.Group();
+  // grila: linii subțiri, verticale și orizontale, pe un perete departe în față
+  const linii: number[] = [];
+  const LAT = 120, INALT = 120, PAS = 8, Z = -170;
+  for (let x = -LAT / 2; x <= LAT / 2; x += PAS) linii.push(x, -40, Z, x, -40 + INALT, Z);
+  for (let y = -40; y <= -40 + INALT; y += PAS) linii.push(-LAT / 2, y, Z, LAT / 2, y, Z);
+  const geoGrila = new THREE.BufferGeometry();
+  geoGrila.setAttribute('position', new THREE.Float32BufferAttribute(linii, 3));
+  grup.add(new THREE.LineSegments(geoGrila, new THREE.LineBasicMaterial({ color: 0x3a4a8a })));
+  // piesele care cad: fiecare e un grup de 4 cuburi
+  const FORME: [number, number][][] = [
+    [[-1, 0], [0, 0], [1, 0], [0, 1]], [[0, 0], [0, 1], [0, 2], [0, 3]], [[0, 0], [1, 0], [0, 1], [1, 1]],
+    [[0, 0], [1, 0], [1, 1], [2, 1]], [[0, 0], [0, 1], [0, 2], [1, 2]], [[0, 0], [1, 0], [-1, 1], [0, 1]],
+  ];
+  const CULORI = [0xa86cff, 0x2ee6d6, 0xffd23f, 0xff5f6a, 0xff9a3c, 0x5acf5a, 0x3a7aff];
+  const cub = new THREE.BoxGeometry(PAS * 0.92, PAS * 0.92, PAS * 0.92);
+  const piese: { g: THREE.Group; viteza: number }[] = [];
+  for (let i = 0; i < 9; i++) {
+    const g = new THREE.Group();
+    const mat = new THREE.MeshLambertMaterial({ color: CULORI[i % CULORI.length], emissive: new THREE.Color(CULORI[i % CULORI.length]).multiplyScalar(0.25) });
+    for (const [c, r] of FORME[i % FORME.length]) {
+      const m = new THREE.Mesh(cub, mat);
+      m.position.set(c * PAS, r * PAS, 0);
+      g.add(m);
+    }
+    g.position.set(-48 + (i % 7) * 16, -30 + ((i * 37) % 100), Z + 6);
+    g.rotation.z = (i % 4) * (Math.PI / 2);
+    grup.add(g);
+    piese.push({ g, viteza: 4 + (i % 3) * 2 });
+  }
+  // liniile complete de jos, care clipesc
+  const linieMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  const linie = new THREE.Mesh(new THREE.BoxGeometry(LAT, PAS * 0.9, 2), linieMat);
+  linie.position.set(0, -36, Z + 4);
+  grup.add(linie);
+  // tavanul de stele colorate (mici pătrate)
+  return {
+    obiect: grup, fundal: 0x0c0e22,
+    anima: (timp) => {
+      for (const p of piese) {
+        p.g.position.y -= p.viteza * 0.016;
+        if (p.g.position.y < -30) { p.g.position.y = 80; p.g.rotation.z += Math.PI / 2; }
+      }
+      linieMat.color.setHSL((timp * 0.3) % 1, 0.8, 0.6 + 0.2 * Math.sin(timp * 6));
     },
   };
 }
