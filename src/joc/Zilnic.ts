@@ -2,7 +2,9 @@
 // iar în a 7-a zi un cufăr gratis. Dacă sari o zi, seria o ia de la capăt.
 // Totul după ceasul telefonului – fără internet.
 import { salveaza, type Progres } from './Salvare';
-import { deschideCufar, type Efect } from './Efecte';
+import type { Efect } from './Efecte';
+import type { Accesoriu } from './Accesorii';
+import { deschideCufarComplet } from './Cufere';
 
 /** Monedele pentru zilele 1–6 (ziua 7 = cufăr) */
 export const MONEDE_PE_ZI = [10, 15, 20, 25, 30, 40];
@@ -23,6 +25,7 @@ export interface PremiuZilnic {
   /** Doar în ziua 7: efectul din cufăr (null dacă le ai pe toate – atunci primești monede) */
   cufar: boolean;
   efect: Efect | null;
+  accesoriu?: Accesoriu;
 }
 
 function textZi(d: Date) {
@@ -44,8 +47,10 @@ export function verificaZiua(p: Progres, acum = new Date()): PremiuZilnic | null
   const zi = ((z.serie - 1) % 7) + 1;
   const premiu: PremiuZilnic = { zi, serie: z.serie, monede: 0, cufar: zi === 7, efect: null };
   if (zi === 7) {
-    premiu.efect = deschideCufar(p.efecte);
-    if (!premiu.efect) premiu.monede = MONEDE_IN_LOC_DE_CUFAR;
+    const c = deschideCufarComplet(p);
+    premiu.efect = c?.efect ?? null;
+    premiu.accesoriu = c?.accesoriu;
+    if (!c) premiu.monede = MONEDE_IN_LOC_DE_CUFAR;
   } else {
     premiu.monede = MONEDE_PE_ZI[zi - 1];
   }

@@ -62,6 +62,8 @@ export class Personaj {
   private piciorSt = new THREE.Group();
   private piciorDr = new THREE.Group();
   private faza = 0; // pentru animația de mers
+  /** Stilul de mers câștigat din cufăr (null = mersul obișnuit) */
+  stilMers: string | null = null;
   /** Locurile unde se prind accesoriile */
   private sloturi: Record<Slot, THREE.Group> = { cap: new THREE.Group(), fata: new THREE.Group(), spate: new THREE.Group(), umar: new THREE.Group(), corp: new THREE.Group(), mana: new THREE.Group() };
 
@@ -359,6 +361,7 @@ export class Personaj {
       this.piciorSt.rotation.x = lerp(this.piciorSt.rotation.x, zboara ? 0.2 : -0.5, 14);
       this.piciorDr.rotation.x = lerp(this.piciorDr.rotation.x, zboara ? 0.2 : 0.3, 14);
       this.corpGrup.rotation.x = lerp(this.corpGrup.rotation.x, zboara ? 0.25 : 0, 10);
+      this.corpGrup.rotation.z = lerp(this.corpGrup.rotation.z, 0, 10);
       return;
     }
 
@@ -368,14 +371,54 @@ export class Personaj {
       mana = picior;
       aplecare = 0.12 * viteza;
     }
-    this.piciorSt.rotation.x = lerp(this.piciorSt.rotation.x, picior, 20);
-    this.piciorDr.rotation.x = lerp(this.piciorDr.rotation.x, -picior, 20);
-    this.manaSt.rotation.x = lerp(this.manaSt.rotation.x, -mana, 20);
-    this.manaDr.rotation.x = lerp(this.manaDr.rotation.x, mana, 20);
-    this.manaSt.rotation.z = lerp(this.manaSt.rotation.z, 0, 14);
-    this.manaDr.rotation.z = lerp(this.manaDr.rotation.z, 0, 14);
-    this.corpGrup.rotation.x = lerp(this.corpGrup.rotation.x, aplecare, 10);
-    // un mic „țopăit” în timpul mersului
-    this.corpGrup.position.y = viteza > 0.05 ? Math.abs(Math.sin(this.faza)) * 0.06 * viteza : 0;
+    // ținta pentru fiecare parte a corpului (mersul obișnuit)
+    const v = viteza, f = this.faza, sin = Math.sin(f);
+    const tinta = {
+      pSt: picior, pDr: -picior,                 // picioarele (înainte/înapoi)
+      mStX: -mana, mDrX: mana,                   // mâinile (înainte/înapoi; minus = în față/sus)
+      mStZ: 0, mDrZ: 0,                          // mâinile în lateral
+      aplecare, inclinare: 0,                    // corpul: aplecat în față / înclinat într-o parte
+      sus: v > 0.05 ? Math.abs(sin) * 0.06 * v : 0,
+    };
+    // stilurile de mers din cufăr (doar când chiar mergi)
+    if (v > 0.05 && this.stilMers) {
+      switch (this.stilMers) {
+        case 'm-topait':    // sare cu picioarele lipite, ca un iepuraș
+          tinta.pSt = tinta.pDr = 0.15; tinta.mStX = tinta.mDrX = -0.5; tinta.sus = Math.abs(sin) * 0.38 * v; break;
+        case 'm-robot': {   // mișcări bruște, ca un robot
+          const pas = Math.sign(sin) * 0.55 * v;
+          tinta.pSt = pas; tinta.pDr = -pas; tinta.mStX = -pas; tinta.mDrX = pas; tinta.aplecare = 0; tinta.sus = 0; break;
+        }
+        case 'm-ninja':     // aplecat în față, cu mâinile pe spate
+          tinta.mStX = tinta.mDrX = 1.25; tinta.aplecare = 0.5 * v; tinta.pSt *= 1.2; tinta.pDr *= 1.2; break;
+        case 'm-somnambul': // cu mâinile întinse în față, pași mici
+          tinta.mStX = tinta.mDrX = -1.55; tinta.pSt *= 0.45; tinta.pDr *= 0.45; tinta.aplecare = 0; break;
+        case 'm-pinguin':   // se legănă dintr-o parte în alta, cu mâinile depărtate
+          tinta.pSt *= 0.25; tinta.pDr *= 0.25; tinta.mStX = tinta.mDrX = 0; tinta.mStZ = -0.55; tinta.mDrZ = 0.55; tinta.inclinare = sin * 0.28 * v; tinta.aplecare = 0; break;
+        case 'm-dans':      // mâinile sus, pe rând, și se mișcă în ritm
+          tinta.mStX = -2.4 - sin * 0.5; tinta.mDrX = -2.4 + sin * 0.5; tinta.inclinare = Math.sin(f * 0.5) * 0.2; tinta.aplecare = 0; break;
+        case 'm-erou':      // o mână întinsă în față, sus, ca un supererou
+          tinta.mDrX = -2.9; tinta.mStX = 0.6; tinta.aplecare = 0.3 * v; break;
+        case 'm-furis':     // pe vârfuri, cu pași mici și repezi, mâinile la piept
+          tinta.pSt *= 0.5; tinta.pDr *= 0.5; tinta.mStX = tinta.mDrX = -0.9; tinta.aplecare = 0.25; tinta.sus = 0.08 + Math.abs(sin) * 0.03; break;
+        case 'm-mandru':    // pieptul înainte și mâinile balansate larg
+          tinta.mStX *= 1.7; tinta.mDrX *= 1.7; tinta.aplecare = -0.12; break;
+        case 'm-avion':     // brațele întinse ca aripile, se înclină în viraje
+          tinta.mStX = tinta.mDrX = 0; tinta.mStZ = -1.5; tinta.mDrZ = 1.5; tinta.inclinare = Math.sin(f * 0.4) * 0.25; tinta.aplecare = 0.25 * v; break;
+        case 'm-crab':      // „clești” sus și se legănă
+          tinta.mStX = tinta.mDrX = -2.2; tinta.mStZ = -0.6 - Math.abs(sin) * 0.3; tinta.mDrZ = 0.6 + Math.abs(sin) * 0.3; tinta.inclinare = sin * 0.15; tinta.pSt *= 0.4; tinta.pDr *= 0.4; break;
+        case 'm-balerin':   // pe vârfuri, cu mâinile sus, unite deasupra capului
+          tinta.mStX = tinta.mDrX = -2.9; tinta.mStZ = 0.3; tinta.mDrZ = -0.3; tinta.sus = 0.1 + Math.abs(sin) * 0.05; tinta.aplecare = 0; tinta.inclinare = sin * 0.08; break;
+      }
+    }
+    this.piciorSt.rotation.x = lerp(this.piciorSt.rotation.x, tinta.pSt, 20);
+    this.piciorDr.rotation.x = lerp(this.piciorDr.rotation.x, tinta.pDr, 20);
+    this.manaSt.rotation.x = lerp(this.manaSt.rotation.x, tinta.mStX, 20);
+    this.manaDr.rotation.x = lerp(this.manaDr.rotation.x, tinta.mDrX, 20);
+    this.manaSt.rotation.z = lerp(this.manaSt.rotation.z, tinta.mStZ, 14);
+    this.manaDr.rotation.z = lerp(this.manaDr.rotation.z, tinta.mDrZ, 14);
+    this.corpGrup.rotation.x = lerp(this.corpGrup.rotation.x, tinta.aplecare, 10);
+    this.corpGrup.rotation.z = lerp(this.corpGrup.rotation.z, tinta.inclinare, 10);
+    this.corpGrup.position.y = lerp(this.corpGrup.position.y, tinta.sus, 30);
   }
 }

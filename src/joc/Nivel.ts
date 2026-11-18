@@ -7,6 +7,7 @@ import { Steag } from '../lume/Steag';
 import { Moneda } from '../lume/Moneda';
 import { Poarta } from '../lume/Poarta';
 import { SteaSecreta } from '../lume/SteaSecreta';
+import { CufarNivel } from '../lume/CufarNivel';
 import { creeazaObstacol, type Obstacol, type EfectObstacol } from '../lume/obstacole';
 import type { CorpObstacol } from '../lume/obstacole/Obstacol';
 import { creeazaDecor, type Decor } from '../lume/Decor';
@@ -23,6 +24,8 @@ export interface Evenimente {
   indiciu: string | null;
   monedeNoi: number;
   final: boolean;
+  /** Ce cufăr din nivel tocmai a fost atins (numărul lui), sau null */
+  cufar: number | null;
 }
 
 export class Nivel {
@@ -32,6 +35,7 @@ export class Nivel {
   monede: Moneda[];
   poarta: Poarta;
   steaSecreta: SteaSecreta | null = null;
+  cufere: CufarNivel[] = [];
   obstacole: Obstacol[];
   decor: Decor;
   /** Locul unde revii când cazi (start sau ultimul steag) */
@@ -40,7 +44,8 @@ export class Nivel {
   monedeLuate = 0;
 
   /** @param secretGasit dacă steaua secretă a acestui nivel a fost deja găsită */
-  constructor(public def: DefinitieNivel, secretGasit = false, culoareSecret = 0xd36bff) {
+  /** @param cufereDeschise numerele cuferelor din nivel deschise altă dată */
+  constructor(public def: DefinitieNivel, secretGasit = false, culoareSecret = 0xd36bff, cufereDeschise: number[] = []) {
     this.platforme = def.platforme.map((d) => creeazaPlatforma(d));
     this.steaguri = def.steaguri.map((s) => new Steag(new THREE.Vector3(...s.poz), s.directie));
     this.monede = def.monede.map((m) => new Moneda(new THREE.Vector3(...m)));
@@ -56,6 +61,12 @@ export class Nivel {
       this.steaSecreta = new SteaSecreta(new THREE.Vector3(...def.secret), secretGasit, culoareSecret);
       this.grup.add(this.steaSecreta.obiect);
     }
+    this.cufere = (def.cufere ?? []).map((c, i) => {
+      const cf = new CufarNivel(new THREE.Vector3(...c));
+      if (cufereDeschise.includes(i)) cf.arataDejaDeschis();
+      this.grup.add(cf.obiect);
+      return cf;
+    });
     this.decor = creeazaDecor(def.tema);
     this.grup.add(this.poarta.obiect, this.decor.obiect);
 
@@ -71,7 +82,7 @@ export class Nivel {
 
   /** Verifică ce a atins personajul în acest cadru */
   verifica(poz: THREE.Vector3, timp: number): Evenimente {
-    const ev: Evenimente = { steagNou: false, pozSteag: null, pozMonede: [], secretNou: false, indiciu: null, monedeNoi: 0, final: false };
+    const ev: Evenimente = { steagNou: false, pozSteag: null, pozMonede: [], secretNou: false, indiciu: null, monedeNoi: 0, final: false, cufar: null };
     for (const [i, ind] of (this.def.indicii ?? []).entries()) {
       if (this.indiciiAratate.has(i)) continue;
       const dx = poz.x - ind.poz[0], dz = poz.z - ind.poz[2];
@@ -81,6 +92,7 @@ export class Nivel {
       }
     }
     if (this.steaSecreta?.atinsa(poz)) { this.steaSecreta.ia(timp); ev.secretNou = true; }
+    for (const [i, c] of this.cufere.entries()) if (c.atins(poz)) { c.deschide(timp); ev.cufar = i; }
     // ai ales un drum la o răscruce? monedele de pe celălalt drum dispar
     for (const a of this.def.alegeri ?? []) {
       if (this.alegeriFacute.has(a.grup)) continue;
@@ -135,6 +147,7 @@ export class Nivel {
   /** Animațiile decorative (o dată pe cadru, nu în pașii de fizică) */
   anima(timp: number) {
     for (const s of this.steaguri) s.actualizeaza(timp);
+    for (const c of this.cufere) c.actualizeaza(timp);
     for (const m of this.monede) if (m.obiect.visible) m.actualizeaza(timp);
     for (const p of this.platforme) p.anima(timp);
     this.poarta.actualizeaza(timp);

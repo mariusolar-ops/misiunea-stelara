@@ -3,6 +3,7 @@
 // (NU cu bani adevărați).
 import * as THREE from 'three';
 import { ACCESORII_NOI } from './AccesoriiNoi';
+import { ACCESORII_CUFAR } from './AccesoriiCufar';
 
 /** Unde se pune un accesoriu: pe cap, pe față sau în spate */
 export type Slot = 'cap' | 'fata' | 'spate' | 'umar' | 'corp' | 'mana';
@@ -19,6 +20,8 @@ export interface Accesoriu {
   secret?: boolean;
   /** Dacă se poate recolora: culoarea (din model) care se înlocuiește cu cea aleasă */
   culoarePrincipala?: number;
+  /** Nu se vinde: se găsește doar în cufere */
+  dinCufar?: boolean;
 }
 
 /** Culorile din care alegi pentru accesoriile care se pot recolora */
@@ -256,7 +259,7 @@ export const CATALOG: Accesoriu[] = [
 ];
 
 // accesoriile noi stau în fișierul lor și se adaugă la sfârșitul catalogului
-CATALOG.push(...ACCESORII_NOI);
+CATALOG.push(...ACCESORII_NOI, ...ACCESORII_CUFAR);
 
 export function cautaAccesoriu(id: string | undefined) {
   return CATALOG.find((a) => a.id === id);

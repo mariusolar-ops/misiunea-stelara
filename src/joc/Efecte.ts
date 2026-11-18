@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import type { Particule } from '../lume/Particule';
 
-export type CategorieEfect = 'urma' | 'saritura' | 'aterizare' | 'pasi';
+export type CategorieEfect = 'urma' | 'saritura' | 'aterizare' | 'pasi' | 'mers';
 
 export interface Efect {
   id: string;
@@ -56,10 +56,23 @@ export const EFECTE: Efect[] = [
   { id: 'p-cal', categorie: 'pasi', nume: 'Copite de cal', emoji: '🐴' },
   { id: 'p-gelatina', categorie: 'pasi', nume: 'Gelatină', emoji: '🍮' },
   { id: 'p-zapada', categorie: 'pasi', nume: 'Zăpadă care scârțâie', emoji: '☃️' },
+  // --- stiluri de mers (ideea lui Mihai: „animații de mers în cufere”) ---
+  { id: 'm-topait', categorie: 'mers', nume: 'Țopăit de iepuraș', emoji: '🐰' },
+  { id: 'm-robot', categorie: 'mers', nume: 'Mers de robot', emoji: '🤖' },
+  { id: 'm-ninja', categorie: 'mers', nume: 'Fugă de ninja', emoji: '🥷' },
+  { id: 'm-somnambul', categorie: 'mers', nume: 'Somnambul', emoji: '😴' },
+  { id: 'm-pinguin', categorie: 'mers', nume: 'Pinguin', emoji: '🐧' },
+  { id: 'm-dans', categorie: 'mers', nume: 'Dansator', emoji: '🕺' },
+  { id: 'm-erou', categorie: 'mers', nume: 'Supererou', emoji: '🦸' },
+  { id: 'm-furis', categorie: 'mers', nume: 'Pe vârfuri', emoji: '🤫' },
+  { id: 'm-mandru', categorie: 'mers', nume: 'Mers mândru', emoji: '😎' },
+  { id: 'm-avion', categorie: 'mers', nume: 'Avion', emoji: '✈️' },
+  { id: 'm-crab', categorie: 'mers', nume: 'Crab', emoji: '🦀' },
+  { id: 'm-balerin', categorie: 'mers', nume: 'Balerin', emoji: '🩰' },
 ];
 
 export const NUME_CATEGORII: Record<CategorieEfect, string> = {
-  urma: 'Urmă', saritura: 'Săritură', aterizare: 'Aterizare', pasi: 'Pași',
+  urma: 'Urmă', saritura: 'Săritură', aterizare: 'Aterizare', pasi: 'Pași', mers: 'Mers',
 };
 
 /** Ce efecte are jucătorul și pe care le folosește acum */
@@ -69,9 +82,11 @@ export interface StareEfecte {
   saritura: string | null;
   aterizare: string | null;
   pasi: string | null;
+  /** Stilul de mers (animația) */
+  mers: string | null;
 }
 
-export const EFECTE_IMPLICITE: StareEfecte = { detinute: [], urma: null, saritura: null, aterizare: null, pasi: null };
+export const EFECTE_IMPLICITE: StareEfecte = { detinute: [], urma: null, saritura: null, aterizare: null, pasi: null, mers: null };
 
 /** Deschide un cufăr: alege la întâmplare un efect pe care nu-l ai. null = le ai pe toate */
 export function deschideCufar(stare: StareEfecte): Efect | null {

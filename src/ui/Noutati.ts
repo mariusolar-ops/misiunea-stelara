@@ -8,6 +8,11 @@ import { t } from '../i18n';
 export interface Noutate { versiune: string; data: string; titlu: string; lucruri: string[] }
 
 export const NOUTATI: Noutate[] = [
+  { versiune: '2026-11-18c', data: '18 noiembrie', titlu: 'Muuulte lucruri noi în cufere', lucruri: [
+    '🎁 24 de accesorii noi care se găsesc DOAR în cufere (bloc de iarbă pe cap, târnăcop de cristal, aripi de dragon, mini-robot…)',
+    '🕺 12 stiluri de mers din cufere: iepuraș, robot, ninja, pinguin, supererou, balerin…',
+    '🟫 4 cufere gratis ascunse în Lumea din cuburi',
+  ] },
   { versiune: '2026-11-18b', data: '18 noiembrie', titlu: 'Nivel nou: Insula furtunii', lucruri: [
     '🌪️ Insula furtunii (ideea lui Mihai): sari din autobuzul zburător, fugi de furtuna mov, urcă rampa de lemn, platforma de lansare și acoperișurile turnurilor',
   ] },

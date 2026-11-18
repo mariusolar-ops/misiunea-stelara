@@ -4,6 +4,8 @@ import * as THREE from 'three';
 import { creeazaScena } from '../lume/Scena';
 import { Jucator } from './Jucator';
 import { Animal, areToateAnimalele, type TipAnimal } from './Animal';
+import { deschideCufarComplet } from './Cufere';
+import { arataCufar } from '../ui/AnimatieCufar';
 import { CameraUrmarire } from './CameraUrmarire';
 import { Nivel } from './Nivel';
 import { incarca, inregistreazaFinal, salveaza, type Progres } from './Salvare';
@@ -252,6 +254,7 @@ export class Joc {
     this.animal.schimba(p.animal, p.culoareAnimal);
     this.animal.teleporteaza(this.jucator.poz, this.jucator.directie);
     this.jucator.puteri = puteriDin(p.puteriActive);
+    this.jucator.personaj.stilMers = p.efecte.mers ?? null;
     // transformarea în animal
     if (this.avatar) { this.grafica.scena.remove(this.avatar.obiect); this.avatar = null; }
     const tr = p.transformare && areToateAnimalele(p.cumparate) ? p.transformare as TipAnimal : null;
@@ -312,7 +315,8 @@ export class Joc {
     if (this.nivel) this.grafica.scena.remove(this.nivel.grup);
     this.indexNivel = index;
     const def = index === -1 ? this.defPropriu! : NIVELE[index];
-    this.nivel = new Nivel(def, this.progres.secrete.includes(index), grupaSecret(index)?.culoare);
+    const cufereDeschise = this.progres.cufereGasite.filter((k) => k.startsWith(index + ':')).map((k) => Number(k.split(':')[1]));
+    this.nivel = new Nivel(def, this.progres.secrete.includes(index), grupaSecret(index)?.culoare, cufereDeschise);
     this.grafica.scena.add(this.nivel.grup);
     this.jucator.gravitatie = def.gravitatie ?? 1;
     this.greseliPortale = 0;
@@ -336,6 +340,22 @@ export class Joc {
     this.camera.unghi = dir + Math.PI;
     this.camera.sari(this.jucator.poz);
     this.nivel.reseteazaObstacole(this.jucator.poz, dir);
+  }
+
+  /** Ai atins un cufăr din nivel: se deschide gratis (o singură dată) */
+  private deschideCufarDinNivel(nr: number) {
+    const p = this.progres;
+    if (this.indexNivel >= 0) p.cufereGasite.push(this.indexNivel + ':' + nr);
+    const castig = deschideCufarComplet(p);
+    if (!castig) p.portofel += 50;      // dacă ai deja tot, primești monede
+    salveaza(p);
+    this.stare = 'pauza';               // jocul stă cât deschizi cufărul
+    arataCufar(castig ?? { monede: 50 }, () => {
+      this.aplicaAspect();
+      this.stare = 'joaca';
+      this.ceas.getDelta();
+      this.verificaTitluri();
+    });
   }
 
   /** Mihai a găsit steaua secretă din nivelul ăsta */
@@ -586,6 +606,7 @@ export class Joc {
       if (ev.monedeNoi) { this.hud.seteazaMonede(nivel.monedeLuate, nivel.tintaMonede, true); sunete.moneda(); }
       if (ev.steagNou) { this.hud.arataMesaj(t('Steag atins!')); sunete.steag(); }
       if (ev.secretNou) this.gasesteSecret();
+      if (ev.cufar !== null) this.deschideCufarDinNivel(ev.cufar);
       if (ev.indiciu) this.hud.arataMesaj(t(ev.indiciu), 3);
       if (ev.final) { this.terminaNivel(); sunete.final(); }
 

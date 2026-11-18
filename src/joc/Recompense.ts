@@ -4,17 +4,25 @@ import type { Progres } from './Salvare';
 import { CATALOG } from './Accesorii';
 import { EFECTE } from './Efecte';
 
-/** Are tot ce se poate cumpăra și tot ce iese din cufere? */
+// Ce se numără pentru recompensă: accesoriile din magazin și efectele (urme, sărituri, aterizări, pași).
+// Accesoriile care se găsesc doar în cufere și stilurile de mers sunt „bonus”: nu se numără.
+const deNumarat = () => ({
+  accesorii: CATALOG.filter((a) => !a.secret && !a.dinCufar),
+  efecte: EFECTE.filter((e) => e.categorie !== 'mers'),
+});
+
+/** Are tot ce se poate cumpăra și tot ce iese din cufere? (odată câștigată, recompensa rămâne) */
 export function areTotul(p: Progres) {
-  const toateAccesoriile = CATALOG.filter((a) => !a.secret).every((a) => p.cumparate.includes(a.id));
-  const toateEfectele = EFECTE.every((e) => p.efecte.detinute.includes(e.id));
-  return toateAccesoriile && toateEfectele;
+  if (p.titluri.includes('bogat')) return true;
+  const { accesorii, efecte } = deNumarat();
+  return accesorii.every((a) => p.cumparate.includes(a.id)) && efecte.every((e) => p.efecte.detinute.includes(e.id));
 }
 
 /** Cât mai are de adunat (pentru indiciu) */
 export function catMaiLipseste(p: Progres) {
+  const { accesorii, efecte } = deNumarat();
   return {
-    accesorii: CATALOG.filter((a) => !a.secret && !p.cumparate.includes(a.id)).length,
-    efecte: EFECTE.filter((e) => !p.efecte.detinute.includes(e.id)).length,
+    accesorii: accesorii.filter((a) => !p.cumparate.includes(a.id)).length,
+    efecte: efecte.filter((e) => !p.efecte.detinute.includes(e.id)).length,
   };
 }

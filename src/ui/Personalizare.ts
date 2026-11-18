@@ -8,7 +8,8 @@ import { CATALOG, CULORI_ACCESORII } from '../joc/Accesorii';
 import { ANIMALE, ANIMALE_CU_PRET, areToateAnimalele, type TipAnimal } from '../joc/Animal';
 import { PUTERI } from '../joc/Puteri';
 import { sunete } from '../audio/Sunete';
-import { EFECTE, PRET_CUFAR, NUME_CATEGORII, deschideCufar, type CategorieEfect } from '../joc/Efecte';
+import { EFECTE, PRET_CUFAR, NUME_CATEGORII, type CategorieEfect } from '../joc/Efecte';
+import { deschideCufarComplet, ramaseInCufere } from '../joc/Cufere';
 import { arataCufar } from './AnimatieCufar';
 import { areTotul, catMaiLipseste } from '../joc/Recompense';
 import { t } from '../i18n';
@@ -207,6 +208,13 @@ export class Personalizare {
         grila.append(card);
         continue;
       }
+      if (a.dinCufar && !cumparat) {
+        // accesoriu din cufăr: nu se vinde, îl găsești deschizând cufere
+        card.classList.add('din-cufar');
+        card.innerHTML = `<span class="emoji">🎁</span><span class="nume">${t('Din cufăr')}</span><span class="indiciu">${t('Se găsește doar în cufere')}</span>`;
+        grila.append(card);
+        continue;
+      }
       card.innerHTML = `<span class="emoji">${a.emoji}</span><span class="nume">${t(a.nume)}</span>`;
       const b = document.createElement('button');
       if (!cumparat) {
@@ -297,34 +305,34 @@ export class Personalizare {
   private cufar(el: HTMLElement) {
     const p = this.progres;
     const ef = p.efecte;
-    const ramase = EFECTE.length - ef.detinute.length;
+    const ramase = ramaseInCufere(p);
     // cufărul
     const zona = document.createElement('div');
     zona.className = 'zona-cufar';
     zona.innerHTML = `<span class="cufar-mic">🎁</span>
-      <div class="text-cufar"><b>${t('Cufăr surpriză')}</b><span>${ramase > 0 ? t('Mai ai {n} efecte de descoperit', { n: ramase }) : t('Le ai pe toate!') + ' 🏆'}</span></div>`;
+      <div class="text-cufar"><b>${t('Cufăr surpriză')}</b><span>${ramase > 0 ? t('Mai ai {n} lucruri de descoperit (efecte, stiluri de mers și accesorii)', { n: ramase }) : t('Le ai pe toate!') + ' 🏆'}</span></div>`;
     const b = document.createElement('button');
     b.className = 'cumpara';
     b.innerHTML = ramase > 0 ? `${t('Deschide')} <span class="moneda-mica"></span> ${PRET_CUFAR}` : t('Gata!');
     b.disabled = ramase === 0 || p.portofel < PRET_CUFAR;
     b.addEventListener('click', () => {
       if (p.portofel < PRET_CUFAR) return;
-      const castigat = deschideCufar(ef);
+      const castigat = deschideCufarComplet(p);
       if (!castigat) return;
       p.portofel -= PRET_CUFAR;
       salveaza(p);
-      arataCufar({ efect: castigat }, () => this.salveazaSiAplica());
+      arataCufar(castigat, () => this.salveazaSiAplica());
     });
     zona.append(b);
     el.append(zona);
 
     // ce ai și ce folosești, pe categorii
-    for (const cat of ['urma', 'saritura', 'pasi', 'aterizare'] as CategorieEfect[]) {
+    for (const cat of ['mers', 'urma', 'saritura', 'pasi', 'aterizare'] as CategorieEfect[]) {
       const ale = EFECTE.filter((e) => e.categorie === cat);
       const optiuni: HTMLElement[] = [];
       const fara = document.createElement('button');
       fara.className = 'optiune' + (ef[cat] === null ? ' aleasa' : '');
-      fara.textContent = cat === 'saritura' || cat === 'pasi' ? t('Obișnuit') : t('Fără');
+      fara.textContent = cat === 'saritura' || cat === 'pasi' || cat === 'mers' ? t('Obișnuit') : t('Fără');
       fara.addEventListener('click', () => { ef[cat] = null; sunete.click(); this.salveazaSiAplica(); });
       optiuni.push(fara);
       for (const e of ale) {

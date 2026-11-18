@@ -51,7 +51,16 @@ export const nivel40: DefinitieNivel = {
     cub(0, 9, -95, 8, 8, 'cristal', 0x2ee6d6),            // vârful copacului, cu portalul
   ],
 
+  // cuferele din lumea din cuburi: le atingi și se deschid gratis (fiecare o singură dată)
+  cufere: [
+    [3, 0, -1.5],          // lângă start
+    [2, 2, -28.5],         // la steagul 1
+    [2, 5, -75.5],         // la steagul 2
+    [-3, 9, -93],          // sus, în vârful copacului
+  ],
+
   indicii: [
+    { poz: [0, 0, 1], raza: 1.5, text: 'Atinge cufărul – se deschide gratis!' },
     { poz: [0, 0, -2], raza: 2.5, text: 'Sari din bloc în bloc!' },
     { poz: [0, 2, -34], raza: 2, text: 'Blocurile de nisip cad – fugi repede!' },
     { poz: [0, 5, -59.5], raza: 2, text: 'Apa curge spre tine – fugi contra ei!' },

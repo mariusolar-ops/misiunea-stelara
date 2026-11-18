@@ -2,11 +2,12 @@
 // și iese încă o rază de lumină. La a treia atingere se deschide și apare premiul.
 // O folosesc atât magazinul de cufere, cât și cufărul gratis din ziua a 7-a a seriei zilnice.
 import { NUME_CATEGORII, type Efect } from '../joc/Efecte';
+import type { Accesoriu } from '../joc/Accesorii';
 import { sunete } from '../audio/Sunete';
 import { t } from '../i18n';
 
-/** Premiul: un efect nou, sau (dacă le ai pe toate) monede */
-export interface PremiuCufar { efect?: Efect | null; monede?: number }
+/** Premiul: un efect nou, un accesoriu nou sau (dacă le ai pe toate) monede */
+export interface PremiuCufar { efect?: Efect | null; accesoriu?: Accesoriu; monede?: number }
 
 // crăpăturile (linii în zig-zag), una nouă la fiecare atingere
 const CRAPATURI = [
@@ -55,7 +56,15 @@ export function arataCufar(premiu: PremiuCufar, laInchidere: () => void) {
     strat.querySelector('.cufar-3-atingeri')!.classList.add('explodeaza');
     setTimeout(() => {
       const e = premiu.efect;
-      strat.innerHTML = e
+      const a = premiu.accesoriu;
+      strat.innerHTML = a
+        ? `<div class="premiu">
+            <div class="emoji-premiu">${a.emoji}</div>
+            <div class="categorie-premiu">${t('Accesoriu nou!')}</div>
+            <div class="nume-premiu">${t(a.nume)}</div>
+            <button class="mare">${t('Super!')}</button>
+          </div>`
+        : e
         ? `<div class="premiu">
             <div class="emoji-premiu">${e.emoji}</div>
             <div class="categorie-premiu">${t(NUME_CATEGORII[e.categorie])}: ${t('nou!')}</div>
@@ -64,7 +73,7 @@ export function arataCufar(premiu: PremiuCufar, laInchidere: () => void) {
           </div>`
         : `<div class="premiu">
             <div class="emoji-premiu">🪙</div>
-            <div class="categorie-premiu">${t('Ai deja toate efectele!')}</div>
+            <div class="categorie-premiu">${t('Ai deja tot ce e în cufere!')}</div>
             <div class="nume-premiu">${t('+{n} monede', { n: premiu.monede ?? 0 })}</div>
             <button class="mare">${t('Super!')}</button>
           </div>`;

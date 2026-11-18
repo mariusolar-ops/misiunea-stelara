@@ -39,6 +39,8 @@ export interface DefinitieNivel {
   gravitatie?: number;
   /** Steaua secretă ascunsă în nivel (opțional) */
   secret?: Punct;
+  /** Cufere de deschis gratis în nivel (fiecare o singură dată) */
+  cufere?: Punct[];
   /** True pentru nivelul secret (apare doar după ce strângi toate stelele secrete) */
   esteSecret?: boolean;
 }

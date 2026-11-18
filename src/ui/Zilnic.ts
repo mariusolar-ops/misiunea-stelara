@@ -25,7 +25,7 @@ export function arataPremiuZilnic(p: PremiuZilnic, laInchidere: () => void) {
   document.body.append(strat);
   strat.querySelector('button')!.addEventListener('click', () => {
     strat.remove();
-    if (p.cufar) arataCufar({ efect: p.efect, monede: p.monede }, laInchidere);
+    if (p.cufar) arataCufar({ efect: p.efect, accesoriu: p.accesoriu, monede: p.monede }, laInchidere);
     else { sunete.moneda(); laInchidere(); }
   });
 }

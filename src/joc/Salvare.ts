@@ -58,6 +58,8 @@ export interface Progres {
   culoriAccesorii: Record<string, number>;
   /** Animalul în care te-ai transformat (null = tu) */
   transformare: string | null;
+  /** Cuferele din niveluri deja deschise (ex. „42:0” = nivelul 42, primul cufăr) */
+  cufereGasite: string[];
   /** Ultima versiune din „Noutăți” pe care ai văzut-o */
   ultimaVersiune: string | null;
   /** Modul developer (deschis cu codul secret) */
@@ -100,7 +102,7 @@ function progresNou(): Progres {
     efecte: { ...EFECTE_IMPLICITE, detinute: [] }, setari: { ...SETARI_IMPLICITE },
     zilnic: { ultimaZi: null, serie: 0 }, titluri: [], titluAles: null, realizari: [],
     dev: { activ: false, zborInfinit: false, invincibil: false, fps: false },
-    culoriAccesorii: {}, transformare: null, ultimaVersiune: null,
+    culoriAccesorii: {}, transformare: null, ultimaVersiune: null, cufereGasite: [],
   };
 }
 
