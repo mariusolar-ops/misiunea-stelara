@@ -544,7 +544,7 @@ export class Joc {
       // fizica în pași mici și egali
       this.rezervaFizica += dt;
       let peLava = false;
-      let atinsDe: 'laser' | 'cristal' | 'prins' | null = null;
+      let atinsDe: 'laser' | 'cristal' | 'prins' | 'furtuna' | null = null;
       let portal: 'portal-bun' | 'portal-gresit' | null = null;
       while (this.rezervaFizica >= PAS_FIZICA) {
         nivel.actualizeaza(PAS_FIZICA, this.timp);
@@ -552,7 +552,7 @@ export class Joc {
         if (efect === 'lava') peLava = true;
         // obstacolele (lasere, pendule, curenți, cristale)
         const ob = nivel.actualizeazaObstacole(this.jucator, this.timp, PAS_FIZICA);
-        if ((ob === 'laser' || ob === 'cristal' || ob === 'prins') && !this.devInvincibil()) atinsDe = ob;
+        if ((ob === 'laser' || ob === 'cristal' || ob === 'prins' || ob === 'furtuna') && !this.devInvincibil()) atinsDe = ob;
         else if (ob === 'portal-bun' || ob === 'portal-gresit') portal = ob;
         else if (ob === 'lovitura') sunete.lovitura();
         else if (ob === 'vant') sunete.vant();
@@ -610,6 +610,10 @@ export class Joc {
         else { this.greseliPortale++; this.hud.arataMesaj(t('Portal greșit! Mai încearcă.')); sunete.cadere(); }
       } else if (atinsDe === 'prins') {
         this.hud.arataMesaj(t(laSteag ? 'Te-a prins extraterestrul! Înapoi la steag.' : 'Te-a prins extraterestrul! Înapoi la start.'));
+        sunete.cadere();
+        this.revino();
+      } else if (atinsDe === 'furtuna') {
+        this.hud.arataMesaj(t(laSteag ? 'Te-a prins furtuna! Înapoi la steag.' : 'Te-a prins furtuna! Înapoi la start.'));
         sunete.cadere();
         this.revino();
       } else if (atinsDe === 'cristal') {

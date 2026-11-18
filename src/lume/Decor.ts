@@ -5,7 +5,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras' | 'mina' | 'vreme' | 'jungla' | 'circ' | 'finala' | 'cuburi';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras' | 'mina' | 'vreme' | 'jungla' | 'circ' | 'finala' | 'cuburi' | 'insula';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -68,6 +68,7 @@ function decorTema(tema: Tema): Decor {
     case 'circ': return decorCirc();
     case 'finala': return decorFinala();
     case 'cuburi': return decorCuburi();
+    case 'insula': return decorInsula();
   }
 }
 
@@ -1645,6 +1646,79 @@ function decorCuburi(): Decor {
     obiect: grup, fundal: 0x7ab8f0,
     anima: (timp) => {
       nori.forEach((n, i) => { n.position.x = ((-60 + i * 17 + timp * 1.5) % 140) - 10; });
+    },
+  };
+}
+
+function decorInsula(): Decor {
+  // O insulă verde, cu căsuțe colorate, tufișuri rotunde, cufere aurii care strălucesc
+  // și autobuzul zburător ținut de un balon mare, sus pe cer.
+  const grup = new THREE.Group();
+  const lam = (c: number, extra: THREE.MeshLambertMaterialParameters = {}) => new THREE.MeshLambertMaterial({ color: c, ...extra });
+  // insula și marea din jur
+  const mare = new THREE.Mesh(new THREE.CircleGeometry(260, 40), lam(0x2a8ad8));
+  mare.rotation.x = -Math.PI / 2;
+  mare.position.set(0, -14, -50);
+  const insula = new THREE.Mesh(new THREE.CylinderGeometry(110, 125, 10, 32), lam(0x5ab84a));
+  insula.position.set(0, -18, -50);
+  const plaja = new THREE.Mesh(new THREE.CylinderGeometry(126, 132, 4, 32), lam(0xf0dca0));
+  plaja.position.set(0, -18.5, -50);
+  grup.add(mare, plaja, insula);
+  // căsuțe cu acoperiș în pantă, de o parte și de alta
+  const culoriCase = [0xff5f5f, 0xffd23f, 0x8a6cff, 0x2ee6d6, 0xff9a3c];
+  for (let i = 0; i < 10; i++) {
+    const parte = i % 2 ? 1 : -1;
+    const x = parte * (26 + (i % 3) * 14), z = 5 - i * 12;
+    const casa = new THREE.Mesh(new THREE.BoxGeometry(9, 8, 9), lam(culoriCase[i % 5]));
+    casa.position.set(x, -9, z);
+    const acoperis = new THREE.Mesh(new THREE.ConeGeometry(8, 6, 4), lam(0x6a3a2a));
+    acoperis.position.set(x, -2, z);
+    acoperis.rotation.y = Math.PI / 4;
+    grup.add(casa, acoperis);
+  }
+  // tufișuri rotunde
+  const tufa = lam(0x3a9a3a);
+  for (let i = 0; i < 18; i++) {
+    const t = new THREE.Mesh(new THREE.SphereGeometry(2 + (i % 3), 8, 6), tufa);
+    const parte = i % 2 ? 1 : -1;
+    t.position.set(parte * (14 + (i % 5) * 5), -12, 8 - i * 6);
+    grup.add(t);
+  }
+  // cufere aurii care strălucesc (lângă locul de aterizare)
+  const aur = lam(0xffc23f, { emissive: 0x805a00 });
+  for (const [x, z] of [[-6, -12], [6, -16]]) {
+    const cufar = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1, 1.1), aur);
+    cufar.position.set(x, 0.5, z);
+    const capac = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.4, 1.2), lam(0xd89a2a, { emissive: 0x603a00 }));
+    capac.position.set(x, 1.15, z);
+    grup.add(cufar, capac);
+  }
+  // autobuzul zburător cu balonul (deasupra startului)
+  const autobuz = new THREE.Group();
+  autobuz.add(new THREE.Mesh(new THREE.BoxGeometry(4.4, 2.6, 8.4), lam(0x2a8ad8)));
+  for (let k = 0; k < 4; k++) {
+    for (const x of [-2.25, 2.25]) {
+      const geam = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.9, 1.3), new THREE.MeshBasicMaterial({ color: 0xbfeaff }));
+      geam.position.set(x, 0.5, -3 + k * 2);
+      autobuz.add(geam);
+    }
+  }
+  const balon = new THREE.Mesh(new THREE.SphereGeometry(5, 16, 12), lam(0xff5fa8));
+  balon.scale.y = 1.2;
+  balon.position.y = 11;
+  autobuz.add(balon);
+  for (const [x, z] of [[-1.8, -3.5], [1.8, -3.5], [-1.8, 3.5], [1.8, 3.5]]) {
+    const funie = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 6), lam(0x4a3a2a));
+    funie.position.set(x * 0.8, 4.3, z * 0.6);
+    autobuz.add(funie);
+  }
+  autobuz.position.set(0, 18.7, 0);
+  grup.add(autobuz);
+  return {
+    obiect: grup, fundal: 0x6ab4f0,
+    anima: (timp) => {
+      balon.position.y = 11 + Math.sin(timp * 1.2) * 0.3;
+      aur.emissive.setRGB(0.5 + 0.2 * Math.sin(timp * 3), 0.35 + 0.15 * Math.sin(timp * 3), 0);
     },
   };
 }

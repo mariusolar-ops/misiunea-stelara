@@ -8,6 +8,9 @@ import { t } from '../i18n';
 export interface Noutate { versiune: string; data: string; titlu: string; lucruri: string[] }
 
 export const NOUTATI: Noutate[] = [
+  { versiune: '2026-11-18b', data: '18 noiembrie', titlu: 'Nivel nou: Insula furtunii', lucruri: [
+    '🌪️ Insula furtunii (ideea lui Mihai): sari din autobuzul zburător, fugi de furtuna mov, urcă rampa de lemn, platforma de lansare și acoperișurile turnurilor',
+  ] },
   { versiune: '2026-11-18a', data: '18 noiembrie', titlu: 'Nivel nou: Lumea din cuburi', lucruri: [
     '🟫 Lumea din cuburi (ideea lui Mihai): blocuri pixelate de iarbă, piatră, lemn și frunze, pod peste lavă, nisip care cade, bloc săltăreț, apă care curge și un copac uriaș',
   ] },
