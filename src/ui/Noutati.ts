@@ -8,6 +8,9 @@ import { t } from '../i18n';
 export interface Noutate { versiune: string; data: string; titlu: string; lucruri: string[] }
 
 export const NOUTATI: Noutate[] = [
+  { versiune: '2026-11-18e', data: '18 noiembrie', titlu: 'Nivel nou: Simulatorul de univers', lucruri: [
+    '🪐 Simulatorul de univers (ideea lui Mihai): planete care se învârt pe orbite în jurul soarelui, comete, o gaură neagră care te trage și luni în jurul unei planete de foc',
+  ] },
   { versiune: '2026-11-18d', data: '18 noiembrie', titlu: 'Nivel nou: Piesele care cad', lucruri: [
     '🧩 Piesele care cad (ideea lui Mihai): drum din piese de 4 cuburi, piese care cad din cer, linii complete care se sparg și un turn din piese',
   ] },

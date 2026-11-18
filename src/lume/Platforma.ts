@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import { materialePixeli, type Pixeli } from './TexturiPixeli';
 
-export type TipPlatforma = 'normal' | 'miscare' | 'dispare' | 'lava' | 'trambulina' | 'banda' | 'gheata' | 'perete';
+export type TipPlatforma = 'normal' | 'miscare' | 'dispare' | 'lava' | 'trambulina' | 'banda' | 'gheata' | 'perete' | 'orbita';
 
 export interface DefinitiePlatforma {
   /** Centrul platformei [x, y, z] */
@@ -16,6 +16,8 @@ export interface DefinitiePlatforma {
   tip?: TipPlatforma;
   /** Doar pentru „miscare”: cât se deplasează, în câte secunde face drumul dus-întors, și decalajul */
   miscare?: { cat: [number, number, number]; perioada: number; faza?: number };
+  /** Doar pentru „orbita”: centrul cercului [x, z], raza, în câte secunde face o tură (minus = invers), decalajul (0..1) */
+  orbita?: { centru: [number, number]; raza: number; perioada: number; faza?: number };
   /** Doar pentru „trambulina”: cât de tare aruncă în sus */
   forta?: number;
   /** Doar pentru „banda”: viteza benzii pe x și pe z */

@@ -99,3 +99,12 @@ export function perete(x: number, jos: number, z: number, l: number, h: number, 
 export function lavaCareUrca(x: number, sus: number, z: number, l: number, a: number, cat: number, perioada: number): DefinitiePlatforma {
   return { ...bloc(x, sus, z, l, a, 0xff7a2f, 12), tip: 'lava', miscare: { cat: [0, cat, 0], perioada } };
 }
+
+/**
+ * Platformă-planetă care se învârte în cerc în jurul punctului (cx, cz).
+ * @param perioada în câte secunde face o tură (minus = în sens invers)
+ * @param faza unde pornește pe cerc (0..1)
+ */
+export function planeta(cx: number, sus: number, cz: number, raza: number, perioada: number, faza: number, l: number, culoare: number): DefinitiePlatforma {
+  return { ...bloc(cx, sus, cz + raza, l, l, culoare), tip: 'orbita', orbita: { centru: [cx, cz], raza, perioada, faza } };
+}

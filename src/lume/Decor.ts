@@ -5,7 +5,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras' | 'mina' | 'vreme' | 'jungla' | 'circ' | 'finala' | 'cuburi' | 'insula' | 'piese';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras' | 'mina' | 'vreme' | 'jungla' | 'circ' | 'finala' | 'cuburi' | 'insula' | 'piese' | 'univers';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -70,6 +70,7 @@ function decorTema(tema: Tema): Decor {
     case 'cuburi': return decorCuburi();
     case 'insula': return decorInsula();
     case 'piese': return decorPiese();
+    case 'univers': return decorUnivers();
   }
 }
 
@@ -1771,6 +1772,79 @@ function decorPiese(): Decor {
         if (p.g.position.y < -30) { p.g.position.y = 80; p.g.rotation.z += Math.PI / 2; }
       }
       linieMat.color.setHSL((timp * 0.3) % 1, 0.8, 0.6 + 0.2 * Math.sin(timp * 6));
+    },
+  };
+}
+
+function decorUnivers(): Decor {
+  // Universul-jucărie: soarele și planeta de foc (peste blocurile de lavă), urmele orbitelor,
+  // o gaură neagră cu un disc care se învârte și o galaxie spirală în depărtare.
+  const grup = new THREE.Group();
+  // soarele, cu un halou
+  const soare = new THREE.Mesh(new THREE.SphereGeometry(2.4, 24, 16), new THREE.MeshBasicMaterial({ color: 0xffd23f }));
+  soare.position.set(0, 0.6, -18);
+  const halou = new THREE.Mesh(new THREE.SphereGeometry(3.4, 24, 16), new THREE.MeshBasicMaterial({ color: 0xff9a3c, transparent: true, opacity: 0.25, depthWrite: false }));
+  halou.position.copy(soare.position);
+  // planeta de foc (cu dungi)
+  const foc = new THREE.Group();
+  foc.add(new THREE.Mesh(new THREE.SphereGeometry(2.4, 24, 16), new THREE.MeshBasicMaterial({ color: 0xff7a2f })));
+  for (const y of [-1, 0, 1]) {
+    const d = new THREE.Mesh(new THREE.TorusGeometry(2.4 * Math.cos(y * 0.45), 0.15, 6, 32), new THREE.MeshBasicMaterial({ color: 0xffc23f }));
+    d.rotation.x = Math.PI / 2; d.position.y = 2.4 * Math.sin(y * 0.45); foc.add(d);
+  }
+  foc.position.set(0, 3.6, -82);
+  grup.add(soare, halou, foc);
+  // urmele orbitelor (ca în simulator)
+  for (const [z, y, r] of [[-18, -0.45, 7], [-82, 2.55, 6.5]]) {
+    const urma = new THREE.Mesh(new THREE.TorusGeometry(r, 0.05, 4, 64), new THREE.MeshBasicMaterial({ color: 0x9ffcf3, transparent: true, opacity: 0.5 }));
+    urma.rotation.x = Math.PI / 2; urma.position.set(0, y, z);
+    grup.add(urma);
+  }
+  // gaura neagră, în stânga podului
+  const gaura = new THREE.Group();
+  gaura.add(new THREE.Mesh(new THREE.SphereGeometry(3, 20, 14), new THREE.MeshBasicMaterial({ color: 0x000000 })));
+  const disc = new THREE.Mesh(new THREE.RingGeometry(3.6, 8, 48), new THREE.MeshBasicMaterial({ color: 0xff9a3c, side: THREE.DoubleSide, transparent: true, opacity: 0.75 }));
+  disc.rotation.x = Math.PI / 2 - 0.3;
+  const disc2 = new THREE.Mesh(new THREE.RingGeometry(8, 10, 48), new THREE.MeshBasicMaterial({ color: 0xffd23f, side: THREE.DoubleSide, transparent: true, opacity: 0.35 }));
+  disc2.rotation.copy(disc.rotation);
+  gaura.add(disc, disc2);
+  gaura.position.set(-24, 3, -58);
+  grup.add(gaura);
+  // galaxia spirală din depărtare (puncte pe două brațe)
+  const nr = 900, poz = new Float32Array(nr * 3), col = new Float32Array(nr * 3);
+  const c = new THREE.Color();
+  for (let i = 0; i < nr; i++) {
+    const brat = i % 2, t = Math.random();
+    const u = t * 7 + brat * Math.PI, r = 4 + t * 55;
+    poz[i * 3] = Math.cos(u) * r + (Math.random() - 0.5) * 6;
+    poz[i * 3 + 1] = (Math.random() - 0.5) * 3;
+    poz[i * 3 + 2] = Math.sin(u) * r + (Math.random() - 0.5) * 6;
+    c.setHSL(0.6 + t * 0.3, 0.8, 0.75 - t * 0.3);
+    col.set([c.r, c.g, c.b], i * 3);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(poz, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  const galaxie = new THREE.Points(geo, new THREE.PointsMaterial({ size: 2, sizeAttenuation: false, vertexColors: true }));
+  galaxie.position.set(30, 45, -190);
+  galaxie.rotation.x = 1.1;
+  grup.add(galaxie);
+  // câteva planete mari, departe, cu inele
+  for (const [x, y, z, r, cul] of [[-80, 30, -120, 10, 0x8a6cff], [85, 10, -60, 7, 0x2ee6d6], [60, 55, -150, 5, 0xff5fa8]] as [number, number, number, number, number][]) {
+    const pl = new THREE.Mesh(new THREE.SphereGeometry(r, 18, 12), new THREE.MeshLambertMaterial({ color: cul }));
+    const inel = new THREE.Mesh(new THREE.RingGeometry(r * 1.4, r * 1.9, 40), new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.35 }));
+    inel.rotation.x = 1.2;
+    pl.add(inel); pl.position.set(x, y, z);
+    grup.add(pl);
+  }
+  return {
+    obiect: grup, fundal: 0x05030f,
+    anima: (timp) => {
+      halou.scale.setScalar(1 + Math.sin(timp * 2) * 0.06);
+      soare.rotation.y = timp * 0.3;
+      foc.rotation.y = -timp * 0.5;
+      disc.rotation.z = timp * 1.2; disc2.rotation.z = -timp * 0.6;
+      galaxie.rotation.z = timp * 0.03;
     },
   };
 }

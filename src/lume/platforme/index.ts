@@ -7,6 +7,7 @@ import { Trambulina } from './Trambulina';
 import { BandaRulanta } from './BandaRulanta';
 import { Gheata } from './Gheata';
 import { PereteMagnetic } from './PereteMagnetic';
+import { PlatformaOrbita } from './PlatformaOrbita';
 
 export function creeazaPlatforma(def: DefinitiePlatforma): Platforma {
   switch (def.tip) {
@@ -17,6 +18,7 @@ export function creeazaPlatforma(def: DefinitiePlatforma): Platforma {
     case 'banda': return new BandaRulanta(def);
     case 'gheata': return new Gheata(def);
     case 'perete': return new PereteMagnetic(def);
+    case 'orbita': return new PlatformaOrbita(def);
     default: return new Platforma(def);
   }
 }
