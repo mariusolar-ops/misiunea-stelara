@@ -1,10 +1,11 @@
 // Decorul fiecărei teme (doar de privit, nu se atinge).
 // Fiecare decor e făcut din puține obiecte, ca să nu încetinească telefonul.
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras' | 'mina' | 'vreme' | 'jungla' | 'circ' | 'finala';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras' | 'mina' | 'vreme' | 'jungla' | 'circ' | 'finala' | 'cuburi';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -66,6 +67,7 @@ function decorTema(tema: Tema): Decor {
     case 'jungla': return decorJungla();
     case 'circ': return decorCirc();
     case 'finala': return decorFinala();
+    case 'cuburi': return decorCuburi();
   }
 }
 
@@ -1580,6 +1582,69 @@ function decorFinala(): Decor {
         p.needsUpdate = true;
         (a.pct.material as THREE.PointsMaterial).opacity = Math.max(0, 1 - t / 2.4);
       }
+    },
+  };
+}
+
+function decorCuburi(): Decor {
+  // O lume întreagă din cuburi: dealuri din blocuri de iarbă, copaci pătrați,
+  // nori pătrați care plutesc și un soare pătrat.
+  const grup = new THREE.Group();
+  // cuburi mari (6 unități), ca să fie puține și să meargă repede pe telefon
+  const L = 6;
+  const inaltime = (x: number, z: number) =>
+    Math.round(1.5 + 1.5 * Math.sin(x * 0.06) + 1.5 * Math.cos(z * 0.05) + (Math.abs(x) > 50 ? 2 : 0));
+  // dealurile: toate cuburile lipite într-o singură formă (cu iarbă sus și pământ dedesubt),
+  // desenată dintr-o dată – așa merge repede chiar și pe telefoane mai slabe
+  const bucati: THREE.BufferGeometry[] = [];
+  const verde = new THREE.Color(0x5aa83a), maro = new THREE.Color(0x7a5232);
+  const coloreaza = (g: THREE.BufferGeometry, c: THREE.Color) => {
+    const n = g.getAttribute('position').count, col = new Float32Array(n * 3);
+    for (let k = 0; k < n; k++) { col[k * 3] = c.r; col[k * 3 + 1] = c.g; col[k * 3 + 2] = c.b; }
+    g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    return g;
+  };
+  for (let gx = -11; gx <= 11; gx++) for (let gz = -26; gz <= 3; gz++) {
+    const x = gx * L, z = gz * L;
+    if (Math.abs(x) < 24) continue;                            // lasă loc pentru drum
+    const y = -36 + inaltime(x, z) * L;
+    bucati.push(coloreaza(new THREE.BoxGeometry(L, L, L).translate(x, y, z), verde));
+    bucati.push(coloreaza(new THREE.BoxGeometry(L, L * 1.5, L).translate(x, y - L * 1.25, z), maro));
+  }
+  const dealuri = new THREE.Mesh(mergeGeometries(bucati), new THREE.MeshLambertMaterial({ vertexColors: true }));
+  bucati.forEach((b) => b.dispose());
+  grup.add(dealuri);
+  // copaci pătrați: trunchi de lemn și o coroană de frunze
+  const lemn = new THREE.MeshLambertMaterial({ color: 0x6a4a2a });
+  const frunze = new THREE.MeshLambertMaterial({ color: 0x3a8a2a });
+  for (let i = 0; i < 12; i++) {
+    const parte = i % 2 ? 1 : -1;
+    const x = Math.round(parte * (24 + (i % 4) * 9) / L) * L, z = Math.round((4 - i * 9) / L) * L;
+    const xs = Math.round(x / L) * L, zs = Math.round(z / L) * L;
+    const baza = -36 + inaltime(xs, zs) * L + L / 2;
+    const trunchi = new THREE.Mesh(new THREE.BoxGeometry(2, 10, 2), lemn);
+    trunchi.position.set(x, baza + 5, z);
+    const coroana = new THREE.Mesh(new THREE.BoxGeometry(9, 6, 9), frunze);
+    coroana.position.set(x, baza + 12, z);
+    grup.add(trunchi, coroana);
+  }
+  // nori pătrați
+  const nori: THREE.Mesh[] = [];
+  const alb = new THREE.MeshLambertMaterial({ color: 0xf4f8ff });
+  for (let i = 0; i < 8; i++) {
+    const n = new THREE.Mesh(new THREE.BoxGeometry(14 + (i % 3) * 6, 3, 8 + (i % 2) * 4), alb);
+    n.position.set(-60 + i * 17, 40 + (i % 3) * 5, -20 - (i % 4) * 30);
+    grup.add(n);
+    nori.push(n);
+  }
+  // soarele pătrat
+  const soare = new THREE.Mesh(new THREE.BoxGeometry(16, 16, 1), new THREE.MeshBasicMaterial({ color: 0xffe066 }));
+  soare.position.set(50, 70, -170);
+  grup.add(soare);
+  return {
+    obiect: grup, fundal: 0x7ab8f0,
+    anima: (timp) => {
+      nori.forEach((n, i) => { n.position.x = ((-60 + i * 17 + timp * 1.5) % 140) - 10; });
     },
   };
 }

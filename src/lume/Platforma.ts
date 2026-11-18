@@ -2,6 +2,7 @@
 // Ține minte și „cutia de coliziune” (Box3), folosită de fizică.
 // Platformele speciale (care se mișcă, dispar, lavă, trambulină, bandă) sunt în folderul „platforme”.
 import * as THREE from 'three';
+import { materialePixeli, type Pixeli } from './TexturiPixeli';
 
 export type TipPlatforma = 'normal' | 'miscare' | 'dispare' | 'lava' | 'trambulina' | 'banda' | 'gheata' | 'perete';
 
@@ -19,6 +20,8 @@ export interface DefinitiePlatforma {
   forta?: number;
   /** Doar pentru „banda”: viteza benzii pe x și pe z */
   viteza?: [number, number];
+  /** Bloc „pixelat” (iarbă, piatră, lemn…) – pentru lumea din cuburi */
+  pixeli?: Pixeli;
 }
 
 /** Ce are nevoie o platformă să „știe” despre jucător când acesta stă pe ea */
@@ -69,7 +72,7 @@ export class Platforma {
   constructor(def: DefinitiePlatforma, material?: THREE.Material) {
     const culoare = def.culoare ?? 0x2ee6d6;
     const grup = new THREE.Group();
-    this.corp = new THREE.Mesh(CUB, material ?? materialCuloare(culoare));
+    this.corp = new THREE.Mesh(CUB, material ?? (def.pixeli ? materialePixeli(def.pixeli, def.dim) : materialCuloare(culoare)));
     const margini = new THREE.LineSegments(MARGINI, materialMargine(culoare));
     grup.add(this.corp, margini);
     grup.scale.set(...def.dim);
