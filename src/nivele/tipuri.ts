@@ -39,6 +39,10 @@ export interface DefinitieNivel {
   gravitatie?: number;
   /** Steaua secretă ascunsă în nivel (opțional) */
   secret?: Punct;
+  /** Butoanele pe care trebuie să calci (nivel-puzzle) */
+  butoane?: Punct[];
+  /** Ușa care se deschide când sunt apăsate toate butoanele: [x, jos, z] și mărimea [lățime, înălțime, grosime] */
+  usa?: { poz: Punct; dim: Punct };
   /** Cufere de deschis gratis în nivel (fiecare o singură dată) */
   cufere?: Punct[];
   /** True pentru nivelul secret (apare doar după ce strângi toate stelele secrete) */

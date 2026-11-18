@@ -8,6 +8,9 @@ import { t } from '../i18n';
 export interface Noutate { versiune: string; data: string; titlu: string; lucruri: string[] }
 
 export const NOUTATI: Noutate[] = [
+  { versiune: '2026-11-18f', data: '18 noiembrie', titlu: 'Nivel nou: Ușa cu trei butoane', lucruri: [
+    '🔴 Ușa cu trei butoane (ideea lui Mihai): un nivel-puzzle – calcă pe 3 butoane, pe 3 drumuri diferite, ca să se deschidă ușa spre final',
+  ] },
   { versiune: '2026-11-18e', data: '18 noiembrie', titlu: 'Nivel nou: Simulatorul de univers', lucruri: [
     '🪐 Simulatorul de univers (ideea lui Mihai): planete care se învârt pe orbite în jurul soarelui, comete, o gaură neagră care te trage și luni în jurul unei planete de foc',
   ] },

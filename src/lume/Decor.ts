@@ -5,7 +5,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { creeazaDetaliiCer } from './DetaliiCer';
 
 export type Tema = 'luna' | 'asteroizi' | 'statie' | 'vulcan' | 'gaura' | 'nebuloasa' | 'laborator' | 'gheata' | 'fortareata' | 'cometa' | 'gravitatie' | 'turn' | 'aur'
-  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras' | 'mina' | 'vreme' | 'jungla' | 'circ' | 'finala' | 'cuburi' | 'insula' | 'piese' | 'univers';
+  | 'magnetic' | 'portale' | 'labirint' | 'meteori' | 'nori' | 'ocean' | 'curcubeu' | 'ozn' | 'bomboane' | 'disco' | 'biblioteca' | 'parc' | 'ciuperci' | 'atelier' | 'muzica' | 'marte' | 'sah' | 'sera' | 'saturn' | 'ceas' | 'jucarii' | 'cascada' | 'oras' | 'mina' | 'vreme' | 'jungla' | 'circ' | 'finala' | 'cuburi' | 'insula' | 'piese' | 'univers' | 'puzzle';
 
 export interface Decor {
   obiect: THREE.Object3D;
@@ -71,6 +71,7 @@ function decorTema(tema: Tema): Decor {
     case 'insula': return decorInsula();
     case 'piese': return decorPiese();
     case 'univers': return decorUnivers();
+    case 'puzzle': return decorPuzzle();
   }
 }
 
@@ -1845,6 +1846,51 @@ function decorUnivers(): Decor {
       foc.rotation.y = -timp * 0.5;
       disc.rotation.z = timp * 1.2; disc2.rotation.z = -timp * 0.6;
       galaxie.rotation.z = timp * 0.03;
+    },
+  };
+}
+
+function decorPuzzle(): Decor {
+  // Lumea ghicitorilor: chei uriașe care plutesc și se învârt, roți dințate, semne de întrebare
+  // din cuburi și un templu de piatră în spatele ușii.
+  const grup = planetaCuPete(0x3a3a5a, 0x4a4a6a);
+  const lam = (c: number, e = 0) => new THREE.MeshLambertMaterial({ color: c, emissive: e });
+  const cub = (l: number, h: number, a: number, m: THREE.Material, x: number, y: number, z: number) => {
+    const o = new THREE.Mesh(new THREE.BoxGeometry(l, h, a), m); o.position.set(x, y, z); return o;
+  };
+  const obiecte: THREE.Object3D[] = [];
+  // chei de aur
+  const aur = lam(0xffd23f, 0x5a4000);
+  for (const [x, y, z] of [[-30, 14, -30], [32, 18, -40], [-20, 22, -70]]) {
+    const cheie = new THREE.Group();
+    const inel = new THREE.Mesh(new THREE.TorusGeometry(2, 0.6, 8, 20), aur);
+    cheie.add(inel, cub(1, 7, 1, aur, 0, -5.5, 0), cub(1.8, 0.8, 1, aur, 0.9, -7.5, 0), cub(1.2, 0.8, 1, aur, 0.6, -6, 0));
+    cheie.position.set(x, y, z);
+    grup.add(cheie); obiecte.push(cheie);
+  }
+  // semne de întrebare din cuburi
+  const mov = lam(0xa86cff, 0x2a1a5a);
+  const SEMN = [[0, 4], [1, 5], [2, 5], [3, 4], [3, 3], [2, 2], [1, 1], [1, 0], [1, -2]];
+  for (const [x, y, z] of [[24, 6, -12], [-26, 4, -50], [20, 10, -75]]) {
+    const s = new THREE.Group();
+    for (const [c, r] of SEMN) s.add(cub(1.4, 1.4, 1.4, mov, c * 1.5, r * 1.5, 0));
+    s.position.set(x, y, z);
+    grup.add(s); obiecte.push(s);
+  }
+  // templul de piatră din spatele ușii (cu coloane)
+  const piatra = lam(0x8a8aa8);
+  const templu = new THREE.Group();
+  templu.add(cub(30, 3, 14, piatra, 0, 0, 0), cub(32, 3, 16, piatra, 0, 16, 0));
+  for (const x of [-12, -6, 6, 12]) templu.add(cub(2.5, 13, 2.5, piatra, x, 8, 6));
+  const acoperis = new THREE.Mesh(new THREE.ConeGeometry(20, 8, 4), piatra);
+  acoperis.position.y = 21.5; acoperis.rotation.y = Math.PI / 4;
+  templu.add(acoperis);
+  templu.position.set(0, -12, -62);
+  grup.add(templu);
+  return {
+    obiect: grup, fundal: 0x141428,
+    anima: (timp) => {
+      obiecte.forEach((o, i) => { o.rotation.y = timp * 0.4 + i; o.position.y += Math.sin(timp * 1.2 + i) * 0.01; });
     },
   };
 }

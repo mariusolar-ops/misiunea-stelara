@@ -607,6 +607,8 @@ export class Joc {
       if (ev.steagNou) { this.hud.arataMesaj(t('Steag atins!')); sunete.steag(); }
       if (ev.secretNou) this.gasesteSecret();
       if (ev.cufar !== null) this.deschideCufarDinNivel(ev.cufar);
+      if (ev.usaDeschisa) { this.hud.arataMesaj('🔓 ' + t('Ușa s-a deschis! Fugi la final!'), 3); sunete.secret(); }
+      else if (ev.butonApasat !== null) { this.hud.arataMesaj('🔴 ' + t('Buton apăsat! {n} din {total}', { n: ev.butonApasat, total: nivel.butoane.length }), 2.5); sunete.steag(); }
       if (ev.indiciu) this.hud.arataMesaj(t(ev.indiciu), 3);
       if (ev.final) { this.terminaNivel(); sunete.final(); }
 
